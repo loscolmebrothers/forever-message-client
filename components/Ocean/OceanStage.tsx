@@ -7,6 +7,9 @@ import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { OceanBackground } from "./OceanBackground";
 import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
+import { LoadingState } from "./LoadingState";
+import { EmptyState } from "./EmptyState";
+import { ErrorState } from "./ErrorState";
 import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/mock-data";
 import { OCEAN } from "@/lib/constants";
@@ -17,7 +20,7 @@ import { OCEAN } from "@/lib/constants";
  */
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const bottles = useBottles();
+  const { bottles, isLoading, error, isEmpty } = useBottles();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
 
   // Generate random initial positions for each bottle (stable across renders)
@@ -28,6 +31,21 @@ export function OceanStage() {
       getRandomBottlePosition(width, height, OCEAN.EDGE_PADDING),
     );
   }, [bottles, width, height]);
+
+  // Show loading state
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  // Show error state
+  if (error) {
+    return <ErrorState error={error} />;
+  }
+
+  // Show empty state
+  if (isEmpty) {
+    return <EmptyState />;
+  }
 
   // Don't render until we have valid dimensions
   if (width === 0 || height === 0) {

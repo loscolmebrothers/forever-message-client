@@ -1,19 +1,44 @@
-import { useMemo } from 'react';
-import type { Bottle } from '@loscolmebrothers/forever-message-types';
-import { mockBottles } from '@/lib/mock-data';
+import useSWR from "swr";
+import type { Bottle } from "@loscolmebrothers/forever-message-types";
+
+/**
+ * Fetcher function for SWR
+ */
+async function fetchBottles(): Promise<Bottle[]> {
+  const response = await fetch("/api/bottles");
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch bottles: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.bottles || [];
+}
 
 /**
  * Hook to fetch bottles data
  *
- * Phase 1: Returns mock data
- * Phase 2: Will fetch from blockchain + IPFS via API routes
+ * Phase 2: Fetches real data from blockchain + IPFS via API route
+ * Uses SWR for caching and automatic revalidation
  *
- * @returns Array of bottles to display
+ * @returns Object with bottles array, loading state, and error
  */
-export function useBottles(): Bottle[] {
-  // Phase 1: Simple mock data return
-  // Future: useSWR or React Query for real data fetching
-  const bottles = useMemo(() => mockBottles, []);
+export function useBottles() {
+  const { data, error, isLoading } = useSWR<Bottle[]>(
+    "bottles", // Cache key
+    fetchBottles,
+    {
+      refreshInterval: 30000, // Refresh every 30 seconds
+      revalidateOnFocus: false, // Don't refetch when window regains focus
+      revalidateOnReconnect: true, // Refetch when reconnecting
+      dedupingInterval: 5000, // Dedupe requests within 5 seconds
+    },
+  );
 
-  return bottles;
+  return {
+    bottles: data ?? [],
+    isLoading,
+    error,
+    isEmpty: !isLoading && !error && (data?.length ?? 0) === 0,
+  };
 }
