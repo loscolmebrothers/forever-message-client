@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@loscolmebrothers/forever-message-ipfs": "^3.0.0",
     "@loscolmebrothers/forever-message-types": "^3.0.0",
     "@react-spring/konva": "^9.7.3",
     "ethers": "^6.15.0",
