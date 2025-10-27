@@ -12,7 +12,13 @@ async function fetchBottles(): Promise<Bottle[]> {
   }
 
   const data = await response.json();
-  return data.bottles || [];
+  const bottles = data.bottles || [];
+
+  return bottles.map((bottle: any) => ({
+    ...bottle,
+    createdAt: new Date(bottle.createdAt),
+    expiresAt: new Date(bottle.expiresAt),
+  }));
 }
 
 /**
