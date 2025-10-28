@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { UI_COLORS } from "@/lib/constants";
+import { CommentsList } from "./CommentsList";
+import { AddCommentForm } from "./AddCommentForm";
+import { useComments } from "@/hooks/useComments";
 
 interface BottleModalProps {
   bottle: Bottle | null;
@@ -10,6 +13,8 @@ interface BottleModalProps {
 }
 
 export function BottleModal({ bottle, onClose }: BottleModalProps) {
+  const { mutate } = useComments(bottle?.id ?? 0);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -31,6 +36,10 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
   if (!bottle) {
     return null;
   }
+
+  const handleCommentSuccess = () => {
+    mutate();
+  };
 
   const daysUntilExpiration = bottle.isForever
     ? Infinity
@@ -226,23 +235,28 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
 
         <div
           style={{
-            padding: "16px 24px",
+            padding: "24px",
             borderTop: "1px solid #E5E7EB",
-            backgroundColor: "#F9FAFB",
-            borderBottomLeftRadius: "16px",
-            borderBottomRightRadius: "16px",
+            backgroundColor: "#ffffff",
           }}
         >
-          <p
+          <h3
             style={{
-              margin: 0,
-              fontSize: "12px",
-              color: UI_COLORS.TEXT_SECONDARY,
-              textAlign: "center",
+              margin: "0 0 16px 0",
+              fontSize: "18px",
+              fontWeight: "600",
+              color: UI_COLORS.TEXT_PRIMARY,
             }}
           >
-            Phase 1 MVP - Like and comment features coming soon!
-          </p>
+            Comments
+          </h3>
+
+          <CommentsList bottleId={bottle.id} />
+
+          <AddCommentForm
+            bottleId={bottle.id}
+            onSuccess={handleCommentSuccess}
+          />
         </div>
       </div>
 
