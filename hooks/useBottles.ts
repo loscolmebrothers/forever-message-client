@@ -30,7 +30,7 @@ async function fetchBottles(): Promise<Bottle[]> {
  * @returns Object with bottles array, loading state, and error
  */
 export function useBottles() {
-  const { data, error, isLoading } = useSWR<Bottle[]>(
+  const { data, error, isLoading, mutate } = useSWR<Bottle[]>(
     "bottles", // Cache key
     fetchBottles,
     {
@@ -46,5 +46,6 @@ export function useBottles() {
     isLoading,
     error,
     isEmpty: !isLoading && !error && (data?.length ?? 0) === 0,
+    mutate,
   };
 }
