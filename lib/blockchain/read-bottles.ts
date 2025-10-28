@@ -29,28 +29,17 @@ export async function getAllBottles(): Promise<ContractBottle[]> {
   try {
     const contract = getContract();
 
-    // Get total bottle count
-    // Note: The contract doesn't have a nextBottleId public variable,
-    // so we'll need to estimate or use events
-    // For now, let's try to fetch bottles sequentially until we hit a non-existent one
-    const bottles: ContractBottle[] = [];
-    let currentId = 1;
-    let consecutiveNulls = 0;
-    const maxConsecutiveNulls = 5;
+    const nextBottleId = await contract.nextBottleId();
+    const totalBottles = Number(nextBottleId) - 1;
 
-    while (consecutiveNulls < maxConsecutiveNulls) {
+    const bottles: ContractBottle[] = [];
+
+    for (let currentId = 1; currentId <= totalBottles; currentId++) {
       const bottle = await getBottle(currentId);
 
       if (bottle) {
         bottles.push(bottle);
-        consecutiveNulls = 0;
-      } else {
-        consecutiveNulls++;
       }
-
-      currentId++;
-
-      if (currentId > 1000) break;
     }
 
     return bottles;

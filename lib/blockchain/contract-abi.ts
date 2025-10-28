@@ -3,4 +3,324 @@
  * Auto-generated from contract compilation
  */
 
-export const FOREVER_MESSAGE_ABI = [{"type":"constructor","inputs":[],"stateMutability":"nonpayable"},{"type":"function","name":"DEPLOYER","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},{"type":"function","name":"EXPIRATION_DAYS","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"FOREVER_COMMENTS_THRESHOLD","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"FOREVER_LIKES_THRESHOLD","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"SECONDS_PER_DAY","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"addComment","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"},{"name":"_ipfsHash","type":"string","internalType":"string"},{"name":"_commenter","type":"address","internalType":"address"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"nonpayable"},{"type":"function","name":"bottleComments","inputs":[{"name":"","type":"uint256","internalType":"uint256"},{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"type":"function","name":"bottles","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"id","type":"uint256","internalType":"uint256"},{"name":"creator","type":"address","internalType":"address"},{"name":"ipfsHash","type":"string","internalType":"string"},{"name":"createdAt","type":"uint256","internalType":"uint256"},{"name":"expiresAt","type":"uint256","internalType":"uint256"},{"name":"isForever","type":"bool","internalType":"bool"},{"name":"exists","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"type":"function","name":"checkIsForever","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"},{"name":"_likeCount","type":"uint256","internalType":"uint256"},{"name":"_commentCount","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"},{"type":"function","name":"comments","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"id","type":"uint256","internalType":"uint256"},{"name":"bottleId","type":"uint256","internalType":"uint256"},{"name":"commenter","type":"address","internalType":"address"},{"name":"ipfsHash","type":"string","internalType":"string"},{"name":"createdAt","type":"uint256","internalType":"uint256"},{"name":"exists","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"type":"function","name":"createBottle","inputs":[{"name":"_ipfsHash","type":"string","internalType":"string"},{"name":"_creator","type":"address","internalType":"address"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"nonpayable"},{"type":"function","name":"getBottle","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"tuple","internalType":"struct ForeverMessage.Bottle","components":[{"name":"id","type":"uint256","internalType":"uint256"},{"name":"creator","type":"address","internalType":"address"},{"name":"ipfsHash","type":"string","internalType":"string"},{"name":"createdAt","type":"uint256","internalType":"uint256"},{"name":"expiresAt","type":"uint256","internalType":"uint256"},{"name":"isForever","type":"bool","internalType":"bool"},{"name":"exists","type":"bool","internalType":"bool"}]}],"stateMutability":"view"},{"type":"function","name":"getBottleComments","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256[]","internalType":"uint256[]"}],"stateMutability":"view"},{"type":"function","name":"isBottleExpired","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"type":"function","name":"likeBottle","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"},{"name":"_liker","type":"address","internalType":"address"}],"outputs":[],"stateMutability":"nonpayable"},{"type":"function","name":"unlikeBottle","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"},{"name":"_unliker","type":"address","internalType":"address"}],"outputs":[],"stateMutability":"nonpayable"},{"type":"function","name":"updateBottleIPFS","inputs":[{"name":"_bottleId","type":"uint256","internalType":"uint256"},{"name":"_newIpfsHash","type":"string","internalType":"string"}],"outputs":[],"stateMutability":"nonpayable"},{"type":"event","name":"BottleCreated","inputs":[{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"creator","type":"address","indexed":true,"internalType":"address"},{"name":"ipfsHash","type":"string","indexed":false,"internalType":"string"},{"name":"expiresAt","type":"uint256","indexed":false,"internalType":"uint256"}],"anonymous":false},{"type":"event","name":"BottleIPFSUpdated","inputs":[{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"newIpfsHash","type":"string","indexed":false,"internalType":"string"}],"anonymous":false},{"type":"event","name":"BottleLiked","inputs":[{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"liker","type":"address","indexed":true,"internalType":"address"}],"anonymous":false},{"type":"event","name":"BottleMarkedForever","inputs":[{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"}],"anonymous":false},{"type":"event","name":"BottleUnliked","inputs":[{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"unliker","type":"address","indexed":true,"internalType":"address"}],"anonymous":false},{"type":"event","name":"CommentAdded","inputs":[{"name":"commentId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"bottleId","type":"uint256","indexed":true,"internalType":"uint256"},{"name":"commenter","type":"address","indexed":true,"internalType":"address"},{"name":"ipfsHash","type":"string","indexed":false,"internalType":"string"}],"anonymous":false}] as const;
+export const FOREVER_MESSAGE_ABI = [
+  { type: "constructor", inputs: [], stateMutability: "nonpayable" },
+  {
+    type: "function",
+    name: "DEPLOYER",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "EXPIRATION_DAYS",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "FOREVER_COMMENTS_THRESHOLD",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "FOREVER_LIKES_THRESHOLD",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "SECONDS_PER_DAY",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "addComment",
+    inputs: [
+      { name: "_bottleId", type: "uint256", internalType: "uint256" },
+      { name: "_ipfsHash", type: "string", internalType: "string" },
+      { name: "_commenter", type: "address", internalType: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "bottleComments",
+    inputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "bottles",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "id", type: "uint256", internalType: "uint256" },
+      { name: "creator", type: "address", internalType: "address" },
+      { name: "ipfsHash", type: "string", internalType: "string" },
+      { name: "createdAt", type: "uint256", internalType: "uint256" },
+      { name: "expiresAt", type: "uint256", internalType: "uint256" },
+      { name: "isForever", type: "bool", internalType: "bool" },
+      { name: "exists", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "checkIsForever",
+    inputs: [
+      { name: "_bottleId", type: "uint256", internalType: "uint256" },
+      { name: "_likeCount", type: "uint256", internalType: "uint256" },
+      { name: "_commentCount", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "comments",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "id", type: "uint256", internalType: "uint256" },
+      { name: "bottleId", type: "uint256", internalType: "uint256" },
+      { name: "commenter", type: "address", internalType: "address" },
+      { name: "ipfsHash", type: "string", internalType: "string" },
+      { name: "createdAt", type: "uint256", internalType: "uint256" },
+      { name: "exists", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "createBottle",
+    inputs: [
+      { name: "_ipfsHash", type: "string", internalType: "string" },
+      { name: "_creator", type: "address", internalType: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "getBottle",
+    inputs: [{ name: "_bottleId", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        internalType: "struct ForeverMessage.Bottle",
+        components: [
+          { name: "id", type: "uint256", internalType: "uint256" },
+          { name: "creator", type: "address", internalType: "address" },
+          { name: "ipfsHash", type: "string", internalType: "string" },
+          { name: "createdAt", type: "uint256", internalType: "uint256" },
+          { name: "expiresAt", type: "uint256", internalType: "uint256" },
+          { name: "isForever", type: "bool", internalType: "bool" },
+          { name: "exists", type: "bool", internalType: "bool" },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getBottleComments",
+    inputs: [{ name: "_bottleId", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isBottleExpired",
+    inputs: [{ name: "_bottleId", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "likeBottle",
+    inputs: [
+      { name: "_bottleId", type: "uint256", internalType: "uint256" },
+      { name: "_liker", type: "address", internalType: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "nextBottleId",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "nextCommentId",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "unlikeBottle",
+    inputs: [
+      { name: "_bottleId", type: "uint256", internalType: "uint256" },
+      { name: "_unliker", type: "address", internalType: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateBottleIPFS",
+    inputs: [
+      { name: "_bottleId", type: "uint256", internalType: "uint256" },
+      { name: "_newIpfsHash", type: "string", internalType: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "BottleCreated",
+    inputs: [
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "creator",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "ipfsHash",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "expiresAt",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "BottleIPFSUpdated",
+    inputs: [
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "newIpfsHash",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "BottleLiked",
+    inputs: [
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "liker",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "BottleMarkedForever",
+    inputs: [
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "BottleUnliked",
+    inputs: [
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "unliker",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "CommentAdded",
+    inputs: [
+      {
+        name: "commentId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "bottleId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "commenter",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "ipfsHash",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+    ],
+    anonymous: false,
+  },
+] as const;
