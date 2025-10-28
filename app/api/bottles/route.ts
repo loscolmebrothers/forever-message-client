@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getActiveBottles } from "@/lib/blockchain/read-bottles";
 import { combineAllBottles } from "@/lib/data/combine-bottle";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
@@ -20,6 +21,23 @@ export async function GET() {
     console.log(
       `[API] Successfully combined ${bottles.length} bottles with IPFS data`,
     );
+
+    console.log("[API] Fetching real like counts from Supabase...");
+    for (const bottle of bottles) {
+      const { count, error } = await supabaseAdmin
+        .from("likes")
+        .select("*", { count: "exact", head: true })
+        .eq("bottle_id", bottle.id);
+
+      if (error) {
+        console.error(
+          `[API] Error fetching likes for bottle ${bottle.id}:`,
+          error,
+        );
+      } else {
+        bottle.likeCount = count || 0;
+      }
+    }
 
     return NextResponse.json({
       bottles,
@@ -42,5 +60,5 @@ export async function GET() {
  * Configure route to run on server only (not edge)
  * This is needed for ethers.js compatibility
  */
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic'; // Don't cache, always fetch fresh
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic"; // Don't cache, always fetch fresh

@@ -5,6 +5,7 @@ import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { UI_COLORS } from "@/lib/constants";
 import { CommentsList } from "./CommentsList";
 import { AddCommentForm } from "./AddCommentForm";
+import { LikeButton } from "./LikeButton";
 import { useComments } from "@/hooks/useComments";
 
 interface BottleModalProps {
@@ -206,29 +207,25 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
                 gap: "16px",
                 paddingTop: "8px",
                 borderTop: "1px solid #E5E7EB",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                <span style={{ fontSize: "16px" }}>❤️</span>
-                <span
-                  style={{ fontSize: "14px", color: UI_COLORS.TEXT_PRIMARY }}
+              <div style={{ display: "flex", gap: "16px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
                 >
-                  {bottle.likeCount} {bottle.likeCount === 1 ? "like" : "likes"}
-                </span>
+                  <span style={{ fontSize: "16px" }}>💬</span>
+                  <span
+                    style={{ fontSize: "14px", color: UI_COLORS.TEXT_PRIMARY }}
+                  >
+                    {bottle.commentCount}{" "}
+                    {bottle.commentCount === 1 ? "comment" : "comments"}
+                  </span>
+                </div>
               </div>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                <span style={{ fontSize: "16px" }}>💬</span>
-                <span
-                  style={{ fontSize: "14px", color: UI_COLORS.TEXT_PRIMARY }}
-                >
-                  {bottle.commentCount}{" "}
-                  {bottle.commentCount === 1 ? "comment" : "comments"}
-                </span>
-              </div>
+
+              <LikeButton bottleId={bottle.id} />
             </div>
           </div>
         </div>
