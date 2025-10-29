@@ -1,6 +1,7 @@
 "use client";
 
-import { Group, Rect, Circle, Text } from "react-konva";
+import { Group, Image, Circle, Text } from "react-konva";
+import { useImage } from "react-konva-utils";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { BOTTLE_VISUAL } from "@/lib/constants";
 import { useBottlePhysics } from "@/hooks/useBottlePhysics";
@@ -17,6 +18,7 @@ interface FloatingBottleProps {
 /**
  * FloatingBottle Component
  * Renders an individual bottle with autonomous physics-based movement
+ * Uses sprite 1 for regular bottles, sprite 2 for forever bottles
  */
 export function FloatingBottle({
   bottle,
@@ -26,77 +28,77 @@ export function FloatingBottle({
   oceanHeight,
   onClick,
 }: FloatingBottleProps) {
-  // Get physics animation values
+  const isForever = bottle.isForever || bottle.id === 1;
+
+  const spriteNumber = isForever ? 2 : 1;
+  const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.png`);
+
+  const SCALE = 1.5;
+
+  const imageWidth = bottleImage?.width || BOTTLE_VISUAL.WIDTH;
+  const imageHeight = bottleImage?.height || BOTTLE_VISUAL.HEIGHT;
+
+  const scaledWidth = imageWidth * SCALE;
+  const scaledHeight = imageHeight * SCALE;
+
   const { x, y, rotation } = useBottlePhysics({
     initialX,
     initialY,
     oceanWidth,
     oceanHeight,
-    bottleWidth: BOTTLE_VISUAL.WIDTH,
+    bottleWidth: scaledWidth,
   });
 
   const handleClick = () => {
     onClick(bottle);
   };
 
-  // Visual indicator for "forever" bottles
-  const isForever = bottle.isForever;
-  const bodyColor = isForever
-    ? "rgba(255, 215, 0, 0.8)" // Golden for forever bottles
-    : BOTTLE_VISUAL.BODY_COLOR;
+  const handleMouseEnter = (e: any) => {
+    const container = e.target.getStage()?.container();
+    if (container) {
+      container.style.cursor = "pointer";
+    }
+  };
 
-  const outlineColor = isForever
-    ? "#FFD700" // Gold outline
-    : BOTTLE_VISUAL.OUTLINE_COLOR;
+  const handleMouseLeave = (e: any) => {
+    const container = e.target.getStage()?.container();
+    if (container) {
+      container.style.cursor = "default";
+    }
+  };
 
   return (
     <Group
       x={x}
       y={y}
       rotation={rotation}
-      offsetX={BOTTLE_VISUAL.WIDTH / 2}
-      offsetY={BOTTLE_VISUAL.HEIGHT / 2}
+      offsetX={scaledWidth / 2}
+      offsetY={scaledHeight / 2}
       onClick={handleClick}
       onTap={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      scaleX={SCALE}
+      scaleY={SCALE}
     >
-      {/* Bottle Body */}
-      <Rect
-        x={0}
-        y={0}
-        width={BOTTLE_VISUAL.WIDTH}
-        height={BOTTLE_VISUAL.HEIGHT}
-        fill={bodyColor}
-        cornerRadius={BOTTLE_VISUAL.CORNER_RADIUS}
-        stroke={outlineColor}
-        strokeWidth={BOTTLE_VISUAL.OUTLINE_WIDTH}
-      />
+      {/* Glow effect for forever bottles */}
+      {isForever && bottleImage && (
+        <Circle
+          x={imageWidth / 2}
+          y={imageHeight / 2}
+          radius={imageWidth}
+          fill="rgba(255, 215, 0, 0.3)"
+          shadowColor="#FFD700"
+          shadowBlur={20}
+          shadowOpacity={0.8}
+        />
+      )}
 
-      {/* Bottle Cap/Cork */}
-      <Circle
-        x={BOTTLE_VISUAL.WIDTH / 2}
-        y={BOTTLE_VISUAL.CAP_OFFSET_Y}
-        radius={BOTTLE_VISUAL.CAP_RADIUS}
-        fill={BOTTLE_VISUAL.CAP_COLOR}
-        stroke={BOTTLE_VISUAL.OUTLINE_COLOR}
-        strokeWidth={BOTTLE_VISUAL.OUTLINE_WIDTH}
-      />
-
-      {/* Bottle ID Label (for debugging/MVP) */}
-      <Text
-        x={0}
-        y={BOTTLE_VISUAL.HEIGHT / 2 - BOTTLE_VISUAL.LABEL_FONT_SIZE / 2}
-        width={BOTTLE_VISUAL.WIDTH}
-        text={`#${bottle.id}`}
-        fontSize={BOTTLE_VISUAL.LABEL_FONT_SIZE}
-        fill={BOTTLE_VISUAL.LABEL_COLOR}
-        align="center"
-        fontStyle="bold"
-      />
+      {/* Bottle Sprite (natural aspect ratio, scaled via Group) */}
+      {bottleImage && <Image image={bottleImage} x={0} y={0} />}
 
       {/* Forever indicator (sparkle/star) */}
-      {isForever && (
-        <Text x={BOTTLE_VISUAL.WIDTH - 15} y={-5} text="✨" fontSize={16} />
-      )}
+      {isForever && <Text x={imageWidth - 15} y={-5} text="✨" fontSize={16} />}
     </Group>
   );
 }
