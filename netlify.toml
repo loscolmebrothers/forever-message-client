@@ -1,0 +1,33 @@
+[build]
+  command = "yarn build"
+  publish = ".next"
+
+# Enable Next.js Runtime (automatic with @netlify/plugin-nextjs)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Environment variables (set these in Netlify dashboard)
+# DEPLOYER_PRIVATE_KEY
+# BASE_SEPOLIA_RPC_URL
+# CONTRACT_ADDRESS
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# NEXT_PUBLIC_IPFS_GATEWAY
+# SUPABASE_SERVICE_ROLE_KEY
+
+# Redirect rules (optional - for client-side routing)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = ["client"]}
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
