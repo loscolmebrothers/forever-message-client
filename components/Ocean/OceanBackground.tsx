@@ -8,8 +8,7 @@ interface OceanBackgroundProps {
 }
 
 /**
- * Blue gradient ocean background
- * Fills the entire canvas with a peaceful ocean gradient
+ * Simple ocean background with gradient
  */
 export function OceanBackground({ width, height }: OceanBackgroundProps) {
   return (
@@ -23,8 +22,12 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
       fillLinearGradientColorStops={[
         0,
         '#87CEEB', // Sky Blue (top)
+        0.3,
+        '#5fa3d0', // Light ocean blue
+        0.7,
+        '#3d7ba8', // Medium ocean blue
         1,
-        '#4682B4', // Steel Blue (bottom/deep)
+        '#1e4d7a', // Deep ocean blue (bottom)
       ]}
     />
   )
