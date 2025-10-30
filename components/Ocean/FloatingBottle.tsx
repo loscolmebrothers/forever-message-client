@@ -33,19 +33,20 @@ export function FloatingBottle({
   animationDelay = 0,
 }: FloatingBottleProps) {
   const [opacity, setOpacity] = useState(0);
-  const [scale, setScale] = useState(0.8);
+  const [entranceScale, setEntranceScale] = useState(0.8);
+  const [isHovered, setIsHovered] = useState(false);
   const isForever = bottle.isForever || bottle.id === 1;
 
   const spriteNumber = isForever ? 2 : 1;
   const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.png`);
 
-  const SCALE = 1.5;
+  const SPRITE_BASE_SCALE = 1.5; // Base scale for bottle sprite size
 
   const imageWidth = bottleImage?.width || BOTTLE_VISUAL.WIDTH;
   const imageHeight = bottleImage?.height || BOTTLE_VISUAL.HEIGHT;
 
-  const scaledWidth = imageWidth * SCALE;
-  const scaledHeight = imageHeight * SCALE;
+  const scaledWidth = imageWidth * SPRITE_BASE_SCALE;
+  const scaledHeight = imageHeight * SPRITE_BASE_SCALE;
 
   const { x, y, rotation } = useBottlePhysics({
     initialX,
@@ -55,29 +56,29 @@ export function FloatingBottle({
     bottleWidth: scaledWidth,
   });
 
-  // Smooth fade-in animation on mount
+  // Smooth fade-in animation on mount (faster entrance)
   useEffect(() => {
     const timer = setTimeout(() => {
       // Animate opacity from 0 to 1
       let currentOpacity = 0;
-      let currentScale = 0.8;
-      const duration = 500; // 500ms animation
-      const steps = 30;
+      let currentEntranceScale = 0.8;
+      const duration = 300; // 300ms animation (faster)
+      const steps = 20; // Fewer steps for faster animation
       const opacityStep = 1 / steps;
       const scaleStep = 0.2 / steps; // From 0.8 to 1.0
       const interval = duration / steps;
 
       const animationInterval = setInterval(() => {
         currentOpacity += opacityStep;
-        currentScale += scaleStep;
+        currentEntranceScale += scaleStep;
 
         if (currentOpacity >= 1) {
           setOpacity(1);
-          setScale(1);
+          setEntranceScale(1);
           clearInterval(animationInterval);
         } else {
           setOpacity(currentOpacity);
-          setScale(currentScale);
+          setEntranceScale(currentEntranceScale);
         }
       }, interval);
 
@@ -96,14 +97,19 @@ export function FloatingBottle({
     if (container) {
       container.style.cursor = "pointer";
     }
+    setIsHovered(true);
   };
 
   const handleMouseLeave = (e: any) => {
     const container = e.target.getStage()?.container();
     if (container) {
-      container.style.cursor = "default";
+      container.style.cursor = "grab";
     }
+    setIsHovered(false);
   };
+
+  // Calculate hover scale (like CreateBottleButton)
+  const hoverScale = isHovered ? 1.1 : 1;
 
   return (
     <Group
@@ -116,8 +122,8 @@ export function FloatingBottle({
       onTap={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      scaleX={SCALE * scale}
-      scaleY={SCALE * scale}
+      scaleX={SPRITE_BASE_SCALE * entranceScale * hoverScale}
+      scaleY={SPRITE_BASE_SCALE * entranceScale * hoverScale}
       opacity={opacity}
     >
       {/* Glow effect for forever bottles */}
