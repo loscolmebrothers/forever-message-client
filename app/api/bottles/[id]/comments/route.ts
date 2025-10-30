@@ -6,7 +6,7 @@ import {
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { combineCommentsForBottle } from "@/lib/data/combine-comment";
-import { getBottle } from "@/lib/blockchain/read-bottles";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
@@ -22,8 +22,15 @@ export async function GET(
       );
     }
 
-    const bottle = await getBottle(bottleId);
-    if (!bottle) {
+    // Check if bottle exists in Supabase
+    const { data: bottle, error: bottleError } = await supabaseAdmin
+      .from("bottles")
+      .select("id")
+      .eq("id", bottleId)
+      .eq("blockchain_status", "confirmed")
+      .single();
+
+    if (bottleError || !bottle) {
       return NextResponse.json({ error: "Bottle not found" }, { status: 404 });
     }
 
@@ -66,12 +73,20 @@ export async function POST(
       );
     }
 
-    const bottle = await getBottle(bottleId);
-    if (!bottle) {
+    // Check if bottle exists and get its expiration info
+    const { data: bottle, error: bottleError } = await supabaseAdmin
+      .from("bottles")
+      .select("id, is_forever, expires_at")
+      .eq("id", bottleId)
+      .eq("blockchain_status", "confirmed")
+      .single();
+
+    if (bottleError || !bottle) {
       return NextResponse.json({ error: "Bottle not found" }, { status: 404 });
     }
 
-    if (!bottle.isForever && bottle.expiresAt.getTime() < Date.now()) {
+    const expiresAt = new Date(bottle.expires_at);
+    if (!bottle.is_forever && expiresAt.getTime() < Date.now()) {
       return NextResponse.json(
         { error: "Cannot comment on expired bottle" },
         { status: 400 },

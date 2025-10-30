@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { UI_COLORS } from "@/lib/constants";
 import { CommentsList } from "./CommentsList";
 import { AddCommentForm } from "./AddCommentForm";
 import { LikeButton } from "./LikeButton";
 import { useComments } from "@/hooks/useComments";
+import { fetchBottleContent } from "@/lib/ipfs/fetch-content";
 
 interface BottleModalProps {
   bottle: Bottle | null;
@@ -15,6 +16,35 @@ interface BottleModalProps {
 
 export function BottleModal({ bottle, onClose }: BottleModalProps) {
   const { mutate } = useComments(bottle?.id ?? 0);
+  const [message, setMessage] = useState<string>("");
+  const [isLoadingMessage, setIsLoadingMessage] = useState(false);
+
+  // Fetch message from IPFS when bottle changes
+  useEffect(() => {
+    if (!bottle) {
+      setMessage("");
+      return;
+    }
+
+    const loadMessage = async () => {
+      setIsLoadingMessage(true);
+      try {
+        const ipfsContent = await fetchBottleContent(bottle.ipfsHash);
+        if (ipfsContent?.message) {
+          setMessage(ipfsContent.message);
+        } else {
+          setMessage("Failed to load message from IPFS");
+        }
+      } catch (error) {
+        console.error("Error loading message from IPFS:", error);
+        setMessage("Failed to load message");
+      } finally {
+        setIsLoadingMessage(false);
+      }
+    };
+
+    loadMessage();
+  }, [bottle]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -121,17 +151,43 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
         </div>
 
         <div style={{ padding: "24px" }}>
-          <p
-            style={{
-              fontSize: "18px",
-              lineHeight: "1.6",
-              color: UI_COLORS.TEXT_PRIMARY,
-              margin: "0 0 24px 0",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {bottle.message}
-          </p>
+          {isLoadingMessage ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "40px 0",
+                gap: "12px",
+              }}
+            >
+              <div
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  border: "3px solid #E5E7EB",
+                  borderTop: "3px solid #3B82F6",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+              <span style={{ color: UI_COLORS.TEXT_SECONDARY }}>
+                Loading message from IPFS...
+              </span>
+            </div>
+          ) : (
+            <p
+              style={{
+                fontSize: "18px",
+                lineHeight: "1.6",
+                color: UI_COLORS.TEXT_PRIMARY,
+                margin: "0 0 24px 0",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {message}
+            </p>
+          )}
 
           <div
             style={{
@@ -275,6 +331,15 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
           to {
             transform: translateY(0);
             opacity: 1;
+          }
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
           }
         }
       `}</style>

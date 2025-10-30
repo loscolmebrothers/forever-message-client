@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Group, Image, Circle, Text } from "react-konva";
 import { useImage } from "react-konva-utils";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
@@ -13,12 +14,14 @@ interface FloatingBottleProps {
   oceanWidth: number;
   oceanHeight: number;
   onClick: (bottle: Bottle) => void;
+  animationDelay?: number;
 }
 
 /**
  * FloatingBottle Component
  * Renders an individual bottle with autonomous physics-based movement
  * Uses sprite 1 for regular bottles, sprite 2 for forever bottles
+ * Fades in smoothly on first appearance
  */
 export function FloatingBottle({
   bottle,
@@ -27,7 +30,10 @@ export function FloatingBottle({
   oceanWidth,
   oceanHeight,
   onClick,
+  animationDelay = 0,
 }: FloatingBottleProps) {
+  const [opacity, setOpacity] = useState(0);
+  const [scale, setScale] = useState(0.8);
   const isForever = bottle.isForever || bottle.id === 1;
 
   const spriteNumber = isForever ? 2 : 1;
@@ -48,6 +54,38 @@ export function FloatingBottle({
     oceanHeight,
     bottleWidth: scaledWidth,
   });
+
+  // Smooth fade-in animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Animate opacity from 0 to 1
+      let currentOpacity = 0;
+      let currentScale = 0.8;
+      const duration = 500; // 500ms animation
+      const steps = 30;
+      const opacityStep = 1 / steps;
+      const scaleStep = 0.2 / steps; // From 0.8 to 1.0
+      const interval = duration / steps;
+
+      const animationInterval = setInterval(() => {
+        currentOpacity += opacityStep;
+        currentScale += scaleStep;
+
+        if (currentOpacity >= 1) {
+          setOpacity(1);
+          setScale(1);
+          clearInterval(animationInterval);
+        } else {
+          setOpacity(currentOpacity);
+          setScale(currentScale);
+        }
+      }, interval);
+
+      return () => clearInterval(animationInterval);
+    }, animationDelay);
+
+    return () => clearTimeout(timer);
+  }, [animationDelay]);
 
   const handleClick = () => {
     onClick(bottle);
@@ -78,8 +116,9 @@ export function FloatingBottle({
       onTap={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      scaleX={SCALE}
-      scaleY={SCALE}
+      scaleX={SCALE * scale}
+      scaleY={SCALE * scale}
+      opacity={opacity}
     >
       {/* Glow effect for forever bottles */}
       {isForever && bottleImage && (
