@@ -101,12 +101,16 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
     return points
   }
 
-  // Generate light ray polygon points
+  // Generate light ray polygon points with dynamic length
   const generateLightRayPoints = (ray: LightRay) => {
     const startX = ray.x
     const startY = 0
     const endX = startX + Math.sin(time * ray.speed + ray.offset) * 100
-    const endY = height
+
+    // Animate length of rays (breathing effect)
+    const lengthMultiplier = 0.85 + Math.sin(time * 0.3 + ray.offset) * 0.15
+    const endY = height * lengthMultiplier
+
     const halfWidth = ray.width / 2
 
     return [
@@ -143,20 +147,40 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         ]}
       />
 
-      {/* Light rays (god rays / caustics) */}
-      {lightRaysRef.current.map((ray, i) => (
-        <Line
-          key={`ray-${i}`}
-          points={generateLightRayPoints(ray)}
-          fill={`rgba(255, 255, 255, ${0.03 + Math.sin(time * 0.5 + ray.offset) * 0.02})`}
-          closed
-        />
-      ))}
+      {/* Soft volumetric light - subtle and professional */}
+      {lightRaysRef.current.map((ray, i) => {
+        // Very subtle opacity with slow pulsing
+        const opacity = 0.015 + Math.sin(time * 0.4 + ray.offset) * 0.01
+        return (
+          <Line
+            key={`ray-${i}`}
+            points={generateLightRayPoints(ray)}
+            fillLinearGradientStartPoint={{ x: ray.x, y: 0 }}
+            fillLinearGradientEndPoint={{ x: ray.x, y: height }}
+            fillLinearGradientColorStops={[
+              0,
+              `rgba(255, 255, 255, ${opacity * 1.5})`,
+              0.3,
+              `rgba(240, 250, 255, ${opacity})`,
+              0.7,
+              `rgba(220, 240, 255, ${opacity * 0.5})`,
+              1,
+              'rgba(200, 230, 255, 0)',
+            ]}
+            closed
+          />
+        )
+      })}
 
-      {/* Wave layer 3 (deepest, slowest) */}
+      {/* Wave layer 3 (deepest, slowest) with breathing */}
       <Line
         points={[
-          ...generateWavePoints(time * 15, 40, 0.3, height * 0.7),
+          ...generateWavePoints(
+            time * 15,
+            40 + Math.sin(time * 0.2) * 10, // Breathing amplitude
+            0.3,
+            height * 0.7 + Math.sin(time * 0.25) * 15 // Breathing vertical position
+          ),
           width, height,
           0, height,
         ]}
@@ -164,10 +188,15 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         closed
       />
 
-      {/* Wave layer 2 (middle) */}
+      {/* Wave layer 2 (middle) with breathing */}
       <Line
         points={[
-          ...generateWavePoints(time * 25, 30, 0.5, height * 0.5),
+          ...generateWavePoints(
+            time * 25,
+            30 + Math.sin(time * 0.3 + 1) * 8, // Breathing amplitude (offset phase)
+            0.5,
+            height * 0.5 + Math.sin(time * 0.35 + 1) * 12 // Breathing vertical position
+          ),
           width, height,
           0, height,
         ]}
@@ -175,10 +204,15 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         closed
       />
 
-      {/* Wave layer 1 (surface, fastest) */}
+      {/* Wave layer 1 (surface, fastest) with breathing */}
       <Line
         points={[
-          ...generateWavePoints(time * 40, 25, 0.8, height * 0.15),
+          ...generateWavePoints(
+            time * 40,
+            25 + Math.sin(time * 0.4 + 2) * 6, // Breathing amplitude (offset phase)
+            0.8,
+            height * 0.15 + Math.sin(time * 0.45 + 2) * 10 // Breathing vertical position
+          ),
           width, height,
           0, height,
         ]}
@@ -186,7 +220,7 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         closed
       />
 
-      {/* Bubbles */}
+      {/* Bubbles - subtle and refined */}
       {bubblesRef.current.map((bubble, i) => {
         const wobbleX = Math.sin(bubble.wobble) * 15
         return (
@@ -195,9 +229,18 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
             x={bubble.x + wobbleX}
             y={bubble.y}
             radius={bubble.radius}
-            fill={`rgba(255, 255, 255, ${bubble.opacity})`}
-            stroke={`rgba(255, 255, 255, ${bubble.opacity * 0.5})`}
-            strokeWidth={0.5}
+            fillRadialGradientStartPoint={{ x: 0, y: 0 }}
+            fillRadialGradientStartRadius={0}
+            fillRadialGradientEndPoint={{ x: 0, y: 0 }}
+            fillRadialGradientEndRadius={bubble.radius}
+            fillRadialGradientColorStops={[
+              0,
+              `rgba(255, 255, 255, ${bubble.opacity * 0.9})`,
+              0.6,
+              `rgba(220, 240, 255, ${bubble.opacity * 0.3})`,
+              1,
+              `rgba(200, 230, 255, 0)`,
+            ]}
           />
         )
       })}
