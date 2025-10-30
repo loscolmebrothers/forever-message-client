@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Stage, Layer } from "react-konva";
+import { Stage, Layer, Rect } from "react-konva";
 import { useWindowSize } from "usehooks-ts";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { OceanBackground } from "./OceanBackground";
@@ -112,6 +112,28 @@ export function OceanStage() {
               onClick={handleBottleClick}
             />
           ))}
+        </Layer>
+
+        {/* Atmospheric depth overlay - vignette effect */}
+        <Layer listening={false}>
+          <Rect
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fillRadialGradientStartPoint={{ x: width / 2, y: height / 2 }}
+            fillRadialGradientStartRadius={0}
+            fillRadialGradientEndPoint={{ x: width / 2, y: height / 2 }}
+            fillRadialGradientEndRadius={Math.max(width, height) * 0.8}
+            fillRadialGradientColorStops={[
+              0,
+              'rgba(0, 0, 0, 0)',
+              0.7,
+              'rgba(0, 30, 50, 0.15)',
+              1,
+              'rgba(0, 20, 40, 0.35)',
+            ]}
+          />
         </Layer>
       </Stage>
 
