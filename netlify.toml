@@ -1,6 +1,5 @@
 [build]
   command = "yarn build"
-  publish = ".next"
 
 # Enable Next.js Runtime (automatic with @netlify/plugin-nextjs)
 [[plugins]]
@@ -14,14 +13,6 @@
 # NEXT_PUBLIC_SUPABASE_ANON_KEY
 # NEXT_PUBLIC_IPFS_GATEWAY
 # SUPABASE_SERVICE_ROLE_KEY
-
-# Redirect rules (optional - for client-side routing)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
-  conditions = {Role = ["client"]}
 
 # Headers for security
 [[headers]]
