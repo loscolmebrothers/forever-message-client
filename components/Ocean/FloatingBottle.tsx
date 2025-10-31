@@ -38,7 +38,7 @@ export function FloatingBottle({
   const isForever = bottle.isForever || bottle.id === 1;
 
   const spriteNumber = isForever ? 2 : 1;
-  const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.png`);
+  const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.webp`);
 
   const SPRITE_BASE_SCALE = 1.5; // Base scale for bottle sprite size
 

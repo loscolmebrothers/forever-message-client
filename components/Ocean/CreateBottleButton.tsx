@@ -50,7 +50,7 @@ export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
         }}
       >
         <img
-          src="/assets/bottle-sprites/1.png"
+          src="/assets/bottle-sprites/1.webp"
           alt="Bottle"
           style={{
             width: "48px",
