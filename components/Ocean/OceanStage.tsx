@@ -17,12 +17,13 @@ import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
+import { BottleWithQueue } from "@/types/bottle-extensions";
 
 const OCEAN_SCALE = 5;
 
 const CULLING_PADDING = 500;
 
-interface BottleWithPosition extends Bottle {
+interface BottleWithPosition extends BottleWithQueue {
   position: { x: number; y: number };
   animationDelay: number;
 }

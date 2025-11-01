@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { useBottleQueue } from "./useBottleQueue";
+import { BottleWithQueue } from "@/types/bottle-extensions";
 
 const PROGRESSIVE_LOADING = {
   BATCH_SIZE: 20,
@@ -131,8 +132,7 @@ export function useBottles(userId: string = "danicolms") {
     }
   }, []);
 
-  // Create pending bottles from queue items
-  const pendingBottles: Bottle[] = queueItems.map((item) => ({
+  const pendingBottles: BottleWithQueue[] = queueItems.map((item) => ({
     id: -1, // Temporary ID (negative to distinguish from real bottles)
     creator: userId,
     ipfsHash: item.ipfs_cid || "",
@@ -140,11 +140,17 @@ export function useBottles(userId: string = "danicolms") {
     createdAt: new Date(item.created_at),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     isForever: false,
-    blockchainStatus: "pending" as any, // Custom status for pending bottles
-    queueId: item.id, // Include queue ID for tracking
+    blockchainStatus: "pending",
+    queueId: item.id,
     queueStatus: item.status,
     queueProgress: item.progress,
     queueError: item.error,
+    message: item.message || "",
+    type: "bottle",
+    likeCount: 0,
+    commentCount: 0,
+    timestamp: 0,
+    exists: true,
   }));
 
   // Combine pending bottles with confirmed bottles

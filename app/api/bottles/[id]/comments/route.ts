@@ -16,10 +16,7 @@ export async function GET(
     const bottleId = parseInt(params.id, 10);
 
     if (isNaN(bottleId) || bottleId < 1) {
-      return NextResponse.json(
-        { error: "Invalid bottle ID" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
     }
 
     // Check if bottle exists in Supabase
@@ -67,10 +64,7 @@ export async function POST(
     const bottleId = parseInt(params.id, 10);
 
     if (isNaN(bottleId) || bottleId < 1) {
-      return NextResponse.json(
-        { error: "Invalid bottle ID" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
     }
 
     // Check if bottle exists and get its expiration info
