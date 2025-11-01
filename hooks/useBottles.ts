@@ -106,19 +106,26 @@ export function useBottles() {
   }, [bottles.length, isLoading, hasMore, isFetchingMore, fetchBatch]);
 
   const mutate = useCallback(async () => {
-    setBottles([]);
-    setIsLoading(true);
+    // Refresh data in background without clearing existing bottles
+    // This prevents the loading screen flash and keeps the ocean visible
     setError(null);
-    setHasMore(true);
 
     try {
-      await fetchBatch(0);
+      const {
+        bottles: refreshedBottles,
+        total: totalCount,
+        hasMore: moreAvailable,
+      } = await fetchBottlesBatch(PROGRESSIVE_LOADING.BATCH_SIZE, 0);
+
+      // Replace bottles with fresh data from server
+      setBottles(refreshedBottles);
+      setTotal(totalCount);
+      setHasMore(moreAvailable);
     } catch (err) {
       console.error("[useBottles] Error refreshing bottles:", err);
-    } finally {
-      setIsLoading(false);
+      setError(err instanceof Error ? err : new Error("Unknown error"));
     }
-  }, [fetchBatch]);
+  }, []);
 
   return {
     bottles,

@@ -76,9 +76,8 @@ export function CreateBottleModal({
     >
       <div
         style={{
-          backgroundImage: "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          position: "relative",
+          backgroundColor: "#f5f5dc",
           padding: "48px 40px",
           maxWidth: "500px",
           width: "100%",
@@ -87,6 +86,20 @@ export function CreateBottleModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: 0.5,
+            pointerEvents: "none",
+          }}
+        />
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -100,9 +113,12 @@ export function CreateBottleModal({
             resize: "none",
             outline: "none",
             fontFamily: "'Andrea Script', cursive",
-            fontSize: "24px",
-            color: "#3d2817",
+            fontSize: "28px",
+            color: "#2c1810",
             lineHeight: "1.6",
+            position: "relative",
+            zIndex: 1,
+            textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
           }}
           disabled={loading}
           autoFocus
@@ -113,36 +129,40 @@ export function CreateBottleModal({
             style={{
               marginTop: "12px",
               color: "#8b4513",
-              fontSize: "16px",
+              fontSize: "18px",
               fontFamily: "'Andrea Script', cursive",
+              position: "relative",
+              zIndex: 1,
+              textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
             }}
           >
             {error}
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "24px" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "24px", position: "relative", zIndex: 1 }}>
           <button
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
             style={{
               padding: "12px 32px",
               border: "2px solid #5d4037",
-              background: "rgba(139, 69, 19, 0.2)",
-              color: "#3d2817",
+              background: "rgba(139, 69, 19, 0.3)",
+              color: "#2c1810",
               cursor: loading || !message.trim() ? "not-allowed" : "pointer",
               opacity: loading || !message.trim() ? 0.5 : 1,
               fontFamily: "'Andrea Script', cursive",
-              fontSize: "22px",
+              fontSize: "24px",
               transition: "all 0.3s",
+              textShadow: "0 1px 2px rgba(255, 255, 255, 0.3)",
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.4)";
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.5)";
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
+              e.currentTarget.style.background = "rgba(139, 69, 19, 0.3)";
             }}
           >
             {loading ? "Casting..." : "Cast"}

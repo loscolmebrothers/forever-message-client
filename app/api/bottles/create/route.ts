@@ -5,6 +5,7 @@ import {
 } from "@loscolmebrothers/forever-message-ipfs";
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,6 +60,28 @@ export async function POST(request: NextRequest) {
     console.log("[API] Creating bottle on blockchain...");
     const bottleId = await contract.createBottle(uploadResult.cid, userAddress);
     console.log("[API] Bottle created with ID:", bottleId);
+
+    // Sync bottle to Supabase for instant availability
+    console.log("[API] Syncing bottle to Supabase...");
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+    const { error: insertError } = await supabaseAdmin.from("bottles").insert({
+      id: bottleId,
+      creator: userAddress,
+      ipfs_hash: uploadResult.cid,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+      is_forever: false,
+      blockchain_status: "confirmed",
+    });
+
+    if (insertError) {
+      console.error("[API] Error syncing to Supabase:", insertError);
+      // Don't fail the request - bottle is on blockchain, sync can be retried
+    } else {
+      console.log("[API] Bottle synced to Supabase successfully");
+    }
 
     return NextResponse.json({
       success: true,

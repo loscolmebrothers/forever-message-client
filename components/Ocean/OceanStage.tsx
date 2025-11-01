@@ -97,7 +97,11 @@ export function OceanStage() {
   };
 
   const handleBottleCreated = () => {
-    mutate();
+    // Give Supabase a moment to sync, then refresh bottles in background
+    // The mutate() no longer clears bottles or shows loading screen
+    setTimeout(() => {
+      mutate();
+    }, 1000);
   };
 
   // Handle stage drag for panning
