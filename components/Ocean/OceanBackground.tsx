@@ -1,66 +1,86 @@
-'use client'
+"use client";
 
-import { useEffect, useRef } from 'react'
-import { Rect, Circle, Group } from 'react-konva'
-import { useFrame } from '@/hooks/useFrame'
+import { useEffect, useRef } from "react";
+import { Rect, Circle, Group } from "react-konva";
+import { useFrame } from "@/hooks/useFrame";
+import Konva from "konva";
 
 interface OceanBackgroundProps {
-  width: number
-  height: number
+  width: number;
+  height: number;
 }
 
 interface Bubble {
-  x: number
-  y: number
-  radius: number
-  speed: number
-  opacity: number
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  opacity: number;
 }
 
 /**
  * Ultra-simple ocean background - just gradient and basic bubbles for performance
  */
 export function OceanBackground({ width, height }: OceanBackgroundProps) {
-  const bubblesRef = useRef<Bubble[]>([])
+  const bubblesRef = useRef<Bubble[]>([]);
+  const groupRef = useRef<Konva.Group>(null);
+  const circleRefsRef = useRef<(Konva.Circle | null)[]>([]);
 
-  // Initialize bubbles - fewer for performance
   useEffect(() => {
-    const area = width * height
-    const bubbleCount = Math.floor(area / 80000) // Reduced from 50k - fewer bubbles
+    const area = width * height;
+    const bubbleCount = Math.floor(area / 80000);
 
     bubblesRef.current = Array.from({ length: bubbleCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
       radius: 2 + Math.random() * 3, // Smaller
-      speed: 0.5 + Math.random() * 0.5,
+      speed: 0.3 + Math.random() * 1.2,
       opacity: 0.3 + Math.random() * 0.3,
-    }))
-  }, [width, height])
+    }));
+  }, [width, height]);
 
-  // Simple animation loop - just move bubbles
   useFrame(() => {
-    bubblesRef.current = bubblesRef.current.map((bubble) => {
-      const newY = bubble.y - bubble.speed
+    bubblesRef.current = bubblesRef.current.map((bubble, i) => {
+      const newY = bubble.y - bubble.speed;
 
-      // Reset bubble when it goes off screen
       if (newY < -50) {
-        return {
+        const resetBubble = {
           ...bubble,
           y: height + 50,
           x: Math.random() * width,
+        };
+
+        const circleNode = circleRefsRef.current[i];
+        if (circleNode) {
+          circleNode.position({ x: resetBubble.x, y: resetBubble.y });
         }
+
+        return resetBubble;
       }
 
-      return {
+      const updatedBubble = {
         ...bubble,
         y: newY,
+      };
+
+      const circleNode = circleRefsRef.current[i];
+      if (circleNode) {
+        circleNode.position({ x: updatedBubble.x, y: updatedBubble.y });
       }
-    })
-  })
+
+      return updatedBubble;
+    });
+
+    if (groupRef.current) {
+      const layer = groupRef.current.getLayer();
+      if (layer) {
+        layer.batchDraw();
+      }
+    }
+  });
 
   return (
-    <Group>
-      {/* Static gradient background - no animation for performance */}
+    <Group ref={groupRef}>
       <Rect
         x={0}
         y={0}
@@ -70,30 +90,33 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         fillLinearGradientEndPoint={{ x: 0, y: height }}
         fillLinearGradientColorStops={[
           0,
-          '#87CEEB',
+          "#87CEEB",
           0.15,
-          '#6bb3e0',
+          "#6bb3e0",
           0.35,
-          '#4a9fd6',
+          "#4a9fd6",
           0.55,
-          '#3d7ba8',
+          "#3d7ba8",
           0.75,
-          '#2a5a7f',
+          "#2a5a7f",
           1,
-          '#1a3d5c',
+          "#1a3d5c",
         ]}
       />
 
-      {/* Simple bubbles - no gradients, just solid for performance */}
       {bubblesRef.current.map((bubble, i) => (
         <Circle
           key={`bubble-${i}`}
+          ref={(node) => {
+            circleRefsRef.current[i] = node;
+          }}
           x={bubble.x}
           y={bubble.y}
           radius={bubble.radius}
           fill={`rgba(255, 255, 255, ${bubble.opacity})`}
+          listening={false}
         />
       ))}
     </Group>
-  )
+  );
 }
