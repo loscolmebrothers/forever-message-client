@@ -76,101 +76,76 @@ export function CreateBottleModal({
     >
       <div
         style={{
-          backgroundColor: "white",
-          padding: "24px",
-          borderRadius: "8px",
-          maxWidth: "448px",
+          backgroundImage: "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          padding: "48px 40px",
+          maxWidth: "500px",
           width: "100%",
           margin: "0 16px",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}
-        >
-          Cast a Bottle
-        </h2>
-
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Write your message..."
           style={{
             width: "100%",
-            height: "128px",
-            padding: "12px",
-            border: "1px solid #d1d5db",
-            borderRadius: "4px",
+            height: "200px",
+            padding: "16px",
+            border: "none",
+            background: "transparent",
             resize: "none",
             outline: "none",
-            fontFamily: "inherit",
+            fontFamily: "'Andrea Script', cursive",
+            fontSize: "24px",
+            color: "#3d2817",
+            lineHeight: "1.6",
           }}
           disabled={loading}
           autoFocus
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = "#3b82f6";
-            e.currentTarget.style.boxShadow =
-              "0 0 0 2px rgba(59, 130, 246, 0.5)";
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = "#d1d5db";
-            e.currentTarget.style.boxShadow = "none";
-          }}
         />
 
         {error && (
-          <div style={{ marginTop: "8px", color: "#dc2626", fontSize: "14px" }}>
+          <div
+            style={{
+              marginTop: "12px",
+              color: "#8b4513",
+              fontSize: "16px",
+              fontFamily: "'Andrea Script', cursive",
+            }}
+          >
             {error}
           </div>
         )}
 
-        <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            style={{
-              flex: 1,
-              padding: "8px 16px",
-              border: "1px solid #d1d5db",
-              borderRadius: "4px",
-              backgroundColor: "white",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.5 : 1,
-              transition: "background-color 0.3s",
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = "#f9fafb";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "white";
-            }}
-          >
-            Cancel
-          </button>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "24px" }}>
           <button
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
             style={{
-              flex: 1,
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-              backgroundColor: "#3b82f6",
-              color: "white",
+              padding: "12px 32px",
+              border: "2px solid #5d4037",
+              background: "rgba(139, 69, 19, 0.2)",
+              color: "#3d2817",
               cursor: loading || !message.trim() ? "not-allowed" : "pointer",
               opacity: loading || !message.trim() ? 0.5 : 1,
-              transition: "background-color 0.3s",
+              fontFamily: "'Andrea Script', cursive",
+              fontSize: "22px",
+              transition: "all 0.3s",
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.backgroundColor = "#2563eb";
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.4)";
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#3b82f6";
+              e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
             }}
           >
-            {loading ? "Creating..." : "Cast Bottle"}
+            {loading ? "Casting..." : "Cast"}
           </button>
         </div>
       </div>

@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Andrea Script';
+    src: url('https://assets.loscolmebrothers.com/fonts/AndreaScript.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
     padding: 0;
