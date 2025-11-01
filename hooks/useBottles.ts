@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
+import { useBottleQueue } from "./useBottleQueue";
 
 const PROGRESSIVE_LOADING = {
   BATCH_SIZE: 20,
@@ -35,13 +36,16 @@ async function fetchBottlesBatch(
   };
 }
 
-export function useBottles() {
+export function useBottles(userId: string = "danicolms") {
   const [bottles, setBottles] = useState<Bottle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  // Get pending bottles from queue
+  const { queueItems, pendingCount } = useBottleQueue(userId);
 
   const fetchBatch = useCallback(async (offset: number) => {
     try {
@@ -127,11 +131,33 @@ export function useBottles() {
     }
   }, []);
 
+  // Create pending bottles from queue items
+  const pendingBottles: Bottle[] = queueItems.map((item) => ({
+    id: -1, // Temporary ID (negative to distinguish from real bottles)
+    creator: userId,
+    ipfsHash: item.ipfs_cid || "",
+    userId: item.user_id,
+    createdAt: new Date(item.created_at),
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    isForever: false,
+    blockchainStatus: "pending" as any, // Custom status for pending bottles
+    queueId: item.id, // Include queue ID for tracking
+    queueStatus: item.status,
+    queueProgress: item.progress,
+    queueError: item.error,
+  }));
+
+  // Combine pending bottles with confirmed bottles
+  const allBottles = [...pendingBottles, ...bottles];
+
   return {
-    bottles,
+    bottles: allBottles,
+    confirmedBottles: bottles, // Also expose confirmed-only bottles
+    pendingBottles,
+    pendingCount,
     isLoading,
     error,
-    isEmpty: !isLoading && !error && bottles.length === 0,
+    isEmpty: !isLoading && !error && allBottles.length === 0,
     mutate,
     loadingProgress: {
       loaded: bottles.length,

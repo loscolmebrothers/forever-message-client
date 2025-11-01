@@ -1,0 +1,26 @@
+# TODO: Should we move this to the root .gitignore?
+
+# Supabase local files
+.branches
+.temp
+.env
+
+# Supabase local state
+.migration-history
+
+# Supabase CLI generated files
+functions/**/node_modules
+functions/**/.vercel
+
+# Backups
+*.sql.backup
+backup-*.sql
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local

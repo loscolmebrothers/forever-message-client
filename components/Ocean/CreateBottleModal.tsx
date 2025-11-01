@@ -16,6 +16,21 @@ export function CreateBottleModal({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [textureLoaded, setTextureLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = "https://assets.loscolmebrothers.com/textures/parchment.jpg";
+    img.onload = () => setTextureLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setMessage("");
+      setLoading(false);
+      setError(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -46,17 +61,61 @@ export function CreateBottleModal({
         throw new Error(data.details || "Failed to create bottle");
       }
 
-      setMessage("");
+      const data = await response.json();
+
       onSuccess();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create bottle");
-    } finally {
       setLoading(false);
     }
   };
 
   if (!isOpen) return null;
+
+  if (!textureLoaded) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 50,
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#f5f5dc",
+            padding: "48px 40px",
+            maxWidth: "500px",
+            width: "100%",
+            margin: "0 16px",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "300px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'AndreaScript', cursive",
+              fontSize: "24px",
+              color: "#2c1810",
+            }}
+          >
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -93,13 +152,20 @@ export function CreateBottleModal({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
+            backgroundImage:
+              "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            opacity: 0.5,
+            opacity: 0.3,
             pointerEvents: "none",
           }}
         />
+        <style jsx>{`
+          textarea::placeholder {
+            color: rgba(44, 24, 16, 0.4);
+            opacity: 1;
+          }
+        `}</style>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -112,7 +178,7 @@ export function CreateBottleModal({
             background: "transparent",
             resize: "none",
             outline: "none",
-            fontFamily: "'Andrea Script', cursive",
+            fontFamily: "'AndreaScript', cursive",
             fontSize: "28px",
             color: "#2c1810",
             lineHeight: "1.6",
@@ -130,7 +196,7 @@ export function CreateBottleModal({
               marginTop: "12px",
               color: "#8b4513",
               fontSize: "18px",
-              fontFamily: "'Andrea Script', cursive",
+              fontFamily: "'AndreaScript', cursive",
               position: "relative",
               zIndex: 1,
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
@@ -140,7 +206,15 @@ export function CreateBottleModal({
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "24px", position: "relative", zIndex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "24px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <button
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
@@ -151,7 +225,7 @@ export function CreateBottleModal({
               color: "#2c1810",
               cursor: loading || !message.trim() ? "not-allowed" : "pointer",
               opacity: loading || !message.trim() ? 0.5 : 1,
-              fontFamily: "'Andrea Script', cursive",
+              fontFamily: "'AndreaScript', cursive",
               fontSize: "24px",
               transition: "all 0.3s",
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.3)",

@@ -37,6 +37,10 @@ export function FloatingBottle({
   const [isHovered, setIsHovered] = useState(false);
   const isForever = bottle.isForever || bottle.id === 1;
 
+  const isPending = (bottle as any).blockchainStatus === "pending";
+  const queueStatus = (bottle as any).queueStatus;
+  const queueProgress = (bottle as any).queueProgress || 0;
+
   const spriteNumber = isForever ? 2 : 1;
   const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.webp`);
 
@@ -111,6 +115,30 @@ export function FloatingBottle({
   // Calculate hover scale (like CreateBottleButton)
   const hoverScale = isHovered ? 1.1 : 1;
 
+  const [pulseOpacity, setPulseOpacity] = useState(1);
+
+  // TODO: I'm sure we can do something better with konva-spring.
+  useEffect(() => {
+    if (!isPending) return;
+
+    let pulseValue = 1;
+    let increasing = false;
+    const pulseInterval = setInterval(() => {
+      if (increasing) {
+        pulseValue += 0.02;
+        if (pulseValue >= 1) increasing = false;
+      } else {
+        pulseValue -= 0.02;
+        if (pulseValue <= 0.6) increasing = true;
+      }
+      setPulseOpacity(pulseValue);
+    }, 50);
+
+    return () => clearInterval(pulseInterval);
+  }, [isPending]);
+
+  const finalOpacity = isPending ? opacity * pulseOpacity * 0.7 : opacity;
+
   return (
     <Group
       x={x}
@@ -124,10 +152,21 @@ export function FloatingBottle({
       onMouseLeave={handleMouseLeave}
       scaleX={SPRITE_BASE_SCALE * entranceScale * hoverScale}
       scaleY={SPRITE_BASE_SCALE * entranceScale * hoverScale}
-      opacity={opacity}
+      opacity={finalOpacity}
     >
-      {/* Glow effect for forever bottles */}
-      {isForever && bottleImage && (
+      {isPending && bottleImage && (
+        <Circle
+          x={imageWidth / 2}
+          y={imageHeight / 2}
+          radius={imageWidth * 1.2}
+          fill="rgba(100, 150, 255, 0.2)"
+          shadowColor="#6495FF"
+          shadowBlur={15}
+          shadowOpacity={0.6 * pulseOpacity}
+        />
+      )}
+
+      {isForever && !isPending && bottleImage && (
         <Circle
           x={imageWidth / 2}
           y={imageHeight / 2}
@@ -139,11 +178,9 @@ export function FloatingBottle({
         />
       )}
 
-      {/* Bottle Sprite (natural aspect ratio, scaled via Group) */}
-      {bottleImage && <Image image={bottleImage} x={0} y={0} />}
-
-      {/* Forever indicator (sparkle/star) */}
-      {isForever && <Text x={imageWidth - 15} y={-5} text="✨" fontSize={16} />}
+      {bottleImage && (
+        <Image alt="Bottle sprite image" image={bottleImage} x={0} y={0} />
+      )}
     </Group>
   );
 }

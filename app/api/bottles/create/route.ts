@@ -7,36 +7,34 @@ import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { supabaseAdmin } from "@/lib/supabase/server";
 
-export async function POST(request: NextRequest) {
+async function processBottleCreation(
+  queueId: string,
+  message: string,
+  userId: string,
+) {
   try {
-    const body = await request.json();
-    const { message, userId = "danicolms" } = body;
+    await supabaseAdmin
+      .from("bottles_queue")
+      .update({
+        status: "uploading",
+        started_at: new Date().toISOString(),
+        progress: 10,
+      })
+      .eq("id", queueId);
 
-    if (!message || typeof message !== "string") {
-      return NextResponse.json(
-        { error: "Message is required and must be a string" },
-        { status: 400 },
-      );
-    }
-
-    if (message.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Message cannot be empty" },
-        { status: 400 },
-      );
-    }
-
-    console.log("[API] Creating bottle for user:", userId);
-    console.log("[API] Message length:", message.length);
-
-    console.log("[API] Uploading to IPFS...");
+    console.log(`[Queue ${queueId}] Uploading to IPFS...`);
     const ipfs = await createIPFSService({
       gatewayUrl:
         process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
     });
 
     const uploadResult = await ipfs.uploadBottle(message, userId);
-    console.log("[API] IPFS upload successful:", uploadResult.cid);
+    console.log(`[Queue ${queueId}] IPFS upload successful:`, uploadResult.cid);
+
+    await supabaseAdmin
+      .from("bottles_queue")
+      .update({ status: "minting", ipfs_cid: uploadResult.cid, progress: 40 })
+      .eq("id", queueId);
 
     const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
     const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
@@ -57,12 +55,17 @@ export async function POST(request: NextRequest) {
 
     const userAddress = "0xFC3F3646f5e6AA13991E74250224D82301b618a7";
 
-    console.log("[API] Creating bottle on blockchain...");
+    console.log(`[Queue ${queueId}] Creating bottle on blockchain...`);
     const bottleId = await contract.createBottle(uploadResult.cid, userAddress);
-    console.log("[API] Bottle created with ID:", bottleId);
+    console.log(`[Queue ${queueId}] Bottle created with ID:`, bottleId);
 
-    // Sync bottle to Supabase for instant availability
-    console.log("[API] Syncing bottle to Supabase...");
+    // Update status: confirming
+    await supabaseAdmin
+      .from("bottles_queue")
+      .update({ status: "confirming", blockchain_id: bottleId, progress: 80 })
+      .eq("id", queueId);
+
+    console.log(`[Queue ${queueId}] Syncing bottle to Supabase...`);
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
     const { error: insertError } = await supabaseAdmin.from("bottles").insert({
@@ -77,29 +80,118 @@ export async function POST(request: NextRequest) {
     });
 
     if (insertError) {
-      console.error("[API] Error syncing to Supabase:", insertError);
-      // Don't fail the request - bottle is on blockchain, sync can be retried
-    } else {
-      console.log("[API] Bottle synced to Supabase successfully");
+      console.error(
+        `[Queue ${queueId}] Error syncing to Supabase:`,
+        insertError,
+      );
+      throw insertError;
     }
+
+    await supabaseAdmin
+      .from("bottles_queue")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        progress: 100,
+      })
+      .eq("id", queueId);
+
+    console.log(`[Queue ${queueId}] Bottle creation completed successfully`);
+  } catch (error) {
+    console.error(`[Queue ${queueId}] Error processing bottle:`, error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
+    const { data: queueItem } = await supabaseAdmin
+      .from("bottles_queue")
+      .select("attempts, max_attempts")
+      .eq("id", queueId)
+      .single();
+
+    const currentAttempts = (queueItem?.attempts || 0) + 1;
+    const maxAttempts = queueItem?.max_attempts || 3;
+
+    await supabaseAdmin
+      .from("bottles_queue")
+      .update({
+        status: currentAttempts >= maxAttempts ? "failed" : "queued",
+        error: errorMessage,
+        attempts: currentAttempts,
+      })
+      .eq("id", queueId);
+
+    // If we can retry, schedule another attempt
+    if (currentAttempts < maxAttempts) {
+      console.log(
+        `[Queue ${queueId}] Retrying (attempt ${currentAttempts}/${maxAttempts})...`,
+      );
+      // Re-trigger processing after a delay
+      setTimeout(() => processBottleCreation(queueId, message, userId), 5000);
+    }
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { message, userId = "danicolms" } = body;
+
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { error: "Message is required and must be a string" },
+        { status: 400 },
+      );
+    }
+
+    if (message.trim().length === 0) {
+      return NextResponse.json(
+        { error: "Message cannot be empty" },
+        { status: 400 },
+      );
+    }
+
+    console.log("[API] Queueing bottle for user:", userId);
+    console.log("[API] Message length:", message.length);
+
+    // Insert into queue and return immediately
+    const { data: queueItem, error: queueError } = await supabaseAdmin
+      .from("bottles_queue")
+      .insert({
+        message,
+        user_id: userId,
+        status: "queued",
+        progress: 0,
+      })
+      .select()
+      .single();
+
+    if (queueError || !queueItem) {
+      throw new Error(`Failed to queue bottle: ${queueError?.message}`);
+    }
+
+    console.log("[API] Bottle queued with ID:", queueItem.id);
+
+    processBottleCreation(queueItem.id, message, userId).catch((error) => {
+      console.error("[API] Background processing failed:", error);
+    });
 
     return NextResponse.json({
       success: true,
-      bottleId,
-      cid: uploadResult.cid,
-      url: uploadResult.url,
+      queueId: queueItem.id,
+      status: "queued",
       message:
-        "Bottle created successfully. Refetch bottles to see it in the ocean.",
+        "Bottle creation started. You'll see it appear in the ocean shortly.",
     });
   } catch (error) {
-    console.error("[API] Error creating bottle:", error);
+    console.error("[API] Error queueing bottle:", error);
 
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
 
     return NextResponse.json(
       {
-        error: "Failed to create bottle",
+        error: "Failed to queue bottle",
         details: errorMessage,
         ...(process.env.NODE_ENV === "development" && {
           stack: error instanceof Error ? error.stack : undefined,

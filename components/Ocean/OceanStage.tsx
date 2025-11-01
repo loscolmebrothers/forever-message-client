@@ -9,6 +9,7 @@ import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
+import { BottleQueueToast } from "./BottleQueueToast";
 import { LoadingState } from "./LoadingState";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
@@ -17,10 +18,8 @@ import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
 
-// Ocean is 5x the viewport size (like Google Maps)
 const OCEAN_SCALE = 5;
 
-// Viewport culling padding - render bottles slightly outside viewport for smooth transitions
 const CULLING_PADDING = 500;
 
 interface BottleWithPosition extends Bottle {
@@ -30,30 +29,27 @@ interface BottleWithPosition extends Bottle {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const { bottles, isLoading, error, isEmpty, mutate } = useBottles();
+  const userId = "danicolms";
+  const { bottles, isLoading, error, isEmpty, mutate } = useBottles(userId);
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
 
-  // Store bottle positions persistently to prevent flickering
-  const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
+    new Map(),
+  );
 
-  // Calculate actual ocean dimensions (5x viewport)
   const oceanWidth = width * OCEAN_SCALE;
   const oceanHeight = height * OCEAN_SCALE;
 
-  // Generate stable positions for each bottle (doesn't regenerate on re-render)
-  // Position bottles across the full 5x ocean, not just viewport
   const bottlesWithPositions = useMemo<BottleWithPosition[]>(() => {
     if (width === 0 || height === 0) return [];
 
     return bottles.map((bottle, index) => {
-      // Check if we already have a position for this bottle ID
       let position = bottlePositionsRef.current.get(bottle.id);
 
-      // If not, generate a new position and store it
       if (!position) {
         position = getRandomBottlePosition(
           oceanWidth,
@@ -66,12 +62,11 @@ export function OceanStage() {
       return {
         ...bottle,
         position,
-        animationDelay: index * 50, // Stagger animations by 50ms
+        animationDelay: index * 50,
       };
     });
-  }, [bottles, oceanWidth, oceanHeight]);
+  }, [bottles, oceanWidth, oceanHeight, height, width]);
 
-  // Viewport culling - only render bottles visible in current viewport
   const visibleBottles = useMemo(() => {
     const viewportX = -stagePos.x;
     const viewportY = -stagePos.y;
@@ -97,14 +92,11 @@ export function OceanStage() {
   };
 
   const handleBottleCreated = () => {
-    // Give Supabase a moment to sync, then refresh bottles in background
-    // The mutate() no longer clears bottles or shows loading screen
     setTimeout(() => {
       mutate();
-    }, 1000);
+    }, 2000);
   };
 
-  // Handle stage drag for panning
   const handleDragStart = useCallback(() => {
     setIsDragging(true);
   }, []);
@@ -114,7 +106,6 @@ export function OceanStage() {
       const stage = e.target as Konva.Stage;
       const newPos = stage.position();
 
-      // Constrain panning to ocean bounds
       const maxX = 0;
       const minX = -(oceanWidth - width);
       const maxY = 0;
@@ -126,7 +117,7 @@ export function OceanStage() {
       };
 
       stage.position(constrainedPos);
-      setStagePos(constrainedPos); // Update during drag, not just at end
+      setStagePos(constrainedPos);
     },
     [oceanWidth, oceanHeight, width, height],
   );
@@ -135,7 +126,6 @@ export function OceanStage() {
     setIsDragging(false);
   }, []);
 
-  // Handle mouse wheel for scrolling
   const handleWheel = useCallback(
     (e: Konva.KonvaEventObject<WheelEvent>) => {
       e.evt.preventDefault();
@@ -169,7 +159,6 @@ export function OceanStage() {
     [stagePos, oceanWidth, oceanHeight, width, height],
   );
 
-  // Show loading state
   if (isLoading) {
     return (
       <>
@@ -184,7 +173,6 @@ export function OceanStage() {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <>
@@ -199,7 +187,6 @@ export function OceanStage() {
     );
   }
 
-  // Show empty state
   if (isEmpty) {
     return (
       <>
@@ -214,7 +201,6 @@ export function OceanStage() {
     );
   }
 
-  // Don't render until we have valid dimensions
   if (width === 0 || height === 0) {
     return null;
   }
@@ -227,7 +213,7 @@ export function OceanStage() {
           width: "100%",
           height: "100vh",
           overflow: "hidden",
-          backgroundColor: "#1a3d5c", // Match the deepest ocean gradient
+          backgroundColor: "#1a3d5c",
         }}
       >
         <Stage
@@ -251,7 +237,7 @@ export function OceanStage() {
           <Layer>
             {visibleBottles.map((bottleData) => (
               <FloatingBottle
-                key={bottleData.id}
+                key={bottleData.queueId || bottleData.id}
                 bottle={bottleData}
                 initialX={bottleData.position.x}
                 initialY={bottleData.position.y}
@@ -295,6 +281,8 @@ export function OceanStage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleBottleCreated}
       />
+
+      <BottleQueueToast userId={userId} />
     </>
   );
 }
