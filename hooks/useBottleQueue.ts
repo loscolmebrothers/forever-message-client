@@ -38,17 +38,27 @@ export interface QueueItem {
   completed_at: string | null;
 }
 
+export interface TechnicalDetails {
+  bottleId: number | null;
+  ipfsCid: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
 interface UseBottleQueueResult {
   queueItems: QueueItem[];
   pendingCount: number;
   isLoading: boolean;
   error: Error | null;
+  technicalDetails: TechnicalDetails | null;
+  setTechnicalDetails: (details: TechnicalDetails | null) => void;
 }
 
 export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [technicalDetails, setTechnicalDetails] = useState<TechnicalDetails | null>(null);
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -87,8 +97,6 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log("[useBottleQueue] Realtime update:", payload);
-
           if (payload.eventType === "INSERT") {
             const newItem = payload.new as QueueItem;
             setQueueItems((prev) => [newItem, ...prev]);
@@ -101,25 +109,56 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
             );
 
             if (updatedItem.status === "completed") {
-              toast.success("Bottle cast successfully!");
+              toast.success("Your bottle is floating in the ocean!", {
+                id: updatedItem.id,
+                duration: 4000,
+                dismissible: true,
+                closeButton: true,
+                action: {
+                  label: "ⓘ",
+                  onClick: () => {
+                    setTechnicalDetails({
+                      bottleId: updatedItem.blockchain_id,
+                      ipfsCid: updatedItem.ipfs_cid,
+                      createdAt: updatedItem.created_at,
+                      completedAt: updatedItem.completed_at,
+                    });
+                  },
+                },
+              });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id),
                 );
               }, 2000);
             } else if (updatedItem.status === "failed") {
-              toast.error(`Failed to create bottle: ${updatedItem.error || "Unknown error"}`);
+              toast.error("Couldn't cast your bottle. Please try again.", {
+                id: updatedItem.id,
+                duration: 5000,
+                dismissible: true,
+                closeButton: true,
+                description: updatedItem.error || undefined,
+              });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id),
                 );
               }, 2000);
             } else if (updatedItem.status === "uploading") {
-              toast.loading("Uploading your message to IPFS...", { id: updatedItem.id });
+              toast.loading("Sealing your message...", {
+                id: updatedItem.id,
+                dismissible: true,
+              });
             } else if (updatedItem.status === "minting") {
-              toast.loading("Minting bottle on blockchain...", { id: updatedItem.id });
+              toast.loading("Casting your bottle into the ocean...", {
+                id: updatedItem.id,
+                dismissible: true,
+              });
             } else if (updatedItem.status === "confirming") {
-              toast.loading("Almost there! Confirming on-chain...", { id: updatedItem.id });
+              toast.loading("Almost there...", {
+                id: updatedItem.id,
+                dismissible: true,
+              });
             }
           } else if (payload.eventType === "DELETE") {
             const deletedItem = payload.old as QueueItem;
@@ -145,5 +184,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     pendingCount,
     isLoading,
     error,
+    technicalDetails,
+    setTechnicalDetails,
   };
 }

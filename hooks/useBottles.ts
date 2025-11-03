@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
-import { useBottleQueue } from "./useBottleQueue";
-import { BottleWithQueue } from "@/types/bottle-extensions";
+import { useBottleQueue, BottleWithQueue } from "./useBottleQueue";
 
 const PROGRESSIVE_LOADING = {
   BATCH_SIZE: 20,
@@ -46,7 +45,7 @@ export function useBottles(userId: string = "danicolms") {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   // Get pending bottles from queue
-  const { queueItems, pendingCount } = useBottleQueue(userId);
+  const { queueItems, pendingCount, technicalDetails, setTechnicalDetails } = useBottleQueue(userId);
 
   const fetchBatch = useCallback(async (offset: number) => {
     try {
@@ -171,5 +170,7 @@ export function useBottles(userId: string = "danicolms") {
       isFullyLoaded: !hasMore,
       isFetchingMore,
     },
+    technicalDetails,
+    setTechnicalDetails,
   };
 }
