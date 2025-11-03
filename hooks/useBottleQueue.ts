@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
+import type { Bottle } from "@loscolmebrothers/forever-message-types";
 
 export type QueueStatus =
   | "queued"
@@ -8,6 +10,17 @@ export type QueueStatus =
   | "confirming"
   | "completed"
   | "failed";
+
+export interface BottleWithQueue extends Bottle {
+  queueId?: string;
+  queueStatus?: QueueStatus;
+  queueProgress?: number;
+  queueError?: string | null;
+}
+
+export function isPendingBottle(bottle: Bottle): bottle is BottleWithQueue {
+  return (bottle as any).blockchainStatus === "pending";
+}
 
 export interface QueueItem {
   id: string;
@@ -87,15 +100,26 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
               ),
             );
 
-            if (
-              updatedItem.status === "completed" ||
-              updatedItem.status === "failed"
-            ) {
+            if (updatedItem.status === "completed") {
+              toast.success("Bottle cast successfully!");
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id),
                 );
               }, 2000);
+            } else if (updatedItem.status === "failed") {
+              toast.error(`Failed to create bottle: ${updatedItem.error || "Unknown error"}`);
+              setTimeout(() => {
+                setQueueItems((prev) =>
+                  prev.filter((item) => item.id !== updatedItem.id),
+                );
+              }, 2000);
+            } else if (updatedItem.status === "uploading") {
+              toast.loading("Uploading your message to IPFS...", { id: updatedItem.id });
+            } else if (updatedItem.status === "minting") {
+              toast.loading("Minting bottle on blockchain...", { id: updatedItem.id });
+            } else if (updatedItem.status === "confirming") {
+              toast.loading("Almost there! Confirming on-chain...", { id: updatedItem.id });
             }
           } else if (payload.eventType === "DELETE") {
             const deletedItem = payload.old as QueueItem;

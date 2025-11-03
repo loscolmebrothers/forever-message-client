@@ -9,7 +9,6 @@ import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
-import { BottleQueueToast } from "./BottleQueueToast";
 import { LoadingState } from "./LoadingState";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
@@ -17,7 +16,7 @@ import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
-import { BottleWithQueue } from "@/types/bottle-extensions";
+import { BottleWithQueue } from "@/hooks/useBottleQueue";
 
 const OCEAN_SCALE = 5;
 
@@ -282,8 +281,6 @@ export function OceanStage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleBottleCreated}
       />
-
-      <BottleQueueToast userId={userId} />
     </>
   );
 }
