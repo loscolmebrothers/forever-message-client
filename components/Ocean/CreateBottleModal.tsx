@@ -92,6 +92,7 @@ export function CreateBottleModal({
         <div
           style={{
             backgroundColor: "#f5f5dc",
+            borderRadius: "4px",
             padding: "48px 40px",
             maxWidth: "500px",
             width: "100%",
@@ -137,6 +138,7 @@ export function CreateBottleModal({
         style={{
           position: "relative",
           backgroundColor: "#f5f5dc",
+          borderRadius: "4px",
           padding: "48px 40px",
           maxWidth: "500px",
           width: "100%",
@@ -179,7 +181,7 @@ export function CreateBottleModal({
             resize: "none",
             outline: "none",
             fontFamily: "'AndreaScript', cursive",
-            fontSize: "28px",
+            fontSize: "20px",
             color: "#2c1810",
             lineHeight: "1.6",
             position: "relative",
