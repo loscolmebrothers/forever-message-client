@@ -19,7 +19,6 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
   const [message, setMessage] = useState<string>("");
   const [isLoadingMessage, setIsLoadingMessage] = useState(false);
 
-  // Fetch message from IPFS when bottle changes
   useEffect(() => {
     if (!bottle) {
       setMessage("");
@@ -100,57 +99,35 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
     >
       <div
         style={{
-          backgroundColor: UI_COLORS.MODAL_BACKGROUND,
-          borderRadius: "16px",
+          position: "relative",
+          backgroundColor: "#f5f5dc",
+          borderRadius: "4px",
           maxWidth: "500px",
           width: "100%",
           maxHeight: "80vh",
           overflow: "auto",
-          boxShadow: `0 8px 32px ${UI_COLORS.SHADOW}`,
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
           animation: "slideUp 0.3s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
           style={{
-            padding: "24px",
-            borderBottom: `1px solid #E5E7EB`,
-            position: "relative",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage:
+              "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: 0.3,
+            pointerEvents: "none",
           }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "24px",
-              fontWeight: "bold",
-              color: UI_COLORS.TEXT_PRIMARY,
-              paddingRight: "40px",
-            }}
-          >
-            Message in a Bottle {bottle.isForever && "✨"}
-          </h2>
+        />
 
-          <button
-            onClick={onClose}
-            style={{
-              position: "absolute",
-              top: "24px",
-              right: "24px",
-              background: "transparent",
-              border: "none",
-              fontSize: "24px",
-              cursor: "pointer",
-              color: UI_COLORS.TEXT_SECONDARY,
-              padding: "4px 8px",
-              lineHeight: 1,
-            }}
-            aria-label="Close modal"
-          >
-            ×
-          </button>
-        </div>
-
-        <div style={{ padding: "24px" }}>
+        <div style={{ padding: "24px", position: "relative", zIndex: 1 }}>
           {isLoadingMessage ? (
             <div
               style={{
@@ -166,7 +143,7 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
                   width: "20px",
                   height: "20px",
                   border: "3px solid #E5E7EB",
-                  borderTop: "3px solid #3B82F6",
+                  borderTop: "3px solid #5d4037",
                   borderRadius: "50%",
                   animation: "spin 1s linear infinite",
                 }}
@@ -178,11 +155,15 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
           ) : (
             <p
               style={{
-                fontSize: "18px",
+                fontFamily: "'AndreaScript', cursive",
+                fontSize: "20px",
                 lineHeight: "1.6",
-                color: UI_COLORS.TEXT_PRIMARY,
+                color: "#2c1810",
                 margin: "0 0 24px 0",
                 whiteSpace: "pre-wrap",
+                textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
+                position: "relative",
+                zIndex: 1,
               }}
             >
               {message}
@@ -291,6 +272,8 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
             padding: "24px",
             borderTop: "1px solid #E5E7EB",
             backgroundColor: "#ffffff",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <h3

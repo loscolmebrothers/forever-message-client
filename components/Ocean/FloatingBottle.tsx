@@ -117,7 +117,6 @@ export function FloatingBottle({
 
   const [pulseOpacity, setPulseOpacity] = useState(1);
 
-  // TODO: I'm sure we can do something better with konva-spring.
   useEffect(() => {
     if (!isPending) return;
 
