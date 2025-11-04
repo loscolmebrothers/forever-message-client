@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { UI_COLORS } from "@/lib/constants";
 import { CommentsList } from "./CommentsList";
-import { AddCommentForm } from "./AddCommentForm";
+import { AddCommentForm, type LoadingComment } from "./AddCommentForm";
 import { LikeButton } from "./LikeButton";
 import { useComments } from "@/hooks/useComments";
 import { fetchBottleContent } from "@/lib/ipfs/fetch-content";
@@ -18,6 +18,7 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
   const { mutate } = useComments(bottle?.id ?? 0);
   const [message, setMessage] = useState<string>("");
   const [isLoadingMessage, setIsLoadingMessage] = useState(false);
+  const [loadingComments, setLoadingComments] = useState<LoadingComment[]>([]);
 
   useEffect(() => {
     if (!bottle) {
@@ -287,11 +288,22 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
             Comments
           </h3>
 
-          <CommentsList bottleId={bottle.id} />
+          <CommentsList
+            bottleId={bottle.id}
+            loadingComments={loadingComments}
+          />
 
           <AddCommentForm
             bottleId={bottle.id}
             onSuccess={handleCommentSuccess}
+            onLoadingCommentAdd={(comment) => {
+              setLoadingComments((prev) => [...prev, comment]);
+            }}
+            onLoadingCommentRemove={(id) => {
+              setLoadingComments((prev) =>
+                prev.filter((comment) => comment.id !== id),
+              );
+            }}
           />
         </div>
       </div>

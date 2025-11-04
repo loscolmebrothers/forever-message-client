@@ -34,7 +34,7 @@ export function TechnicalDetailsModal({
     };
   }, [onClose]);
 
-  const CONTRACT_ADDRESS = "0x6170fDfF6BD5d8EA24Cf4a0D9335a61eb7FA41a9";
+  const CONTRACT_ADDRESS = "0x401F06DC3593B3c0cBC977F30c4936588401a4dE";
 
   const ipfsGatewayUrl = ipfsCid
     ? `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${ipfsCid}`
