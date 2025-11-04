@@ -59,7 +59,7 @@ export async function POST(
       try {
         const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
         const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-        const contractAddress = process.env.CONTRACT_ADDRESS;
+        const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
         if (rpcUrl && privateKey && contractAddress) {
           const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -118,7 +118,7 @@ export async function POST(
       try {
         const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
         const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-        const contractAddress = process.env.CONTRACT_ADDRESS;
+        const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
         if (rpcUrl && privateKey && contractAddress) {
           const provider = new ethers.JsonRpcProvider(rpcUrl);

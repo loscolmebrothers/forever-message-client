@@ -20,10 +20,10 @@ export function getProvider(): JsonRpcProvider {
  * SERVER-SIDE ONLY
  */
 export function getContract(): Contract {
-  const contractAddress = process.env.CONTRACT_ADDRESS;
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
   if (!contractAddress) {
-    throw new Error("CONTRACT_ADDRESS environment variable not set");
+    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS environment variable not set");
   }
 
   const provider = getProvider();

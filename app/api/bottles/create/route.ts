@@ -23,7 +23,16 @@ async function processBottleCreation(
       .eq("id", queueId);
 
     console.log(`[Queue ${queueId}] Uploading to IPFS...`);
+
+    if (!process.env.STORACHA_PRINCIPAL_KEY || !process.env.STORACHA_PROOF) {
+      throw new Error(
+        "Missing Storacha credentials. Set STORACHA_PRINCIPAL_KEY and STORACHA_PROOF environment variables."
+      );
+    }
+
     const ipfs = await createIPFSService({
+      principalKey: process.env.STORACHA_PRINCIPAL_KEY,
+      proof: process.env.STORACHA_PROOF,
       gatewayUrl:
         process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
     });
@@ -38,7 +47,7 @@ async function processBottleCreation(
 
     const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
     const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-    const contractAddress = process.env.CONTRACT_ADDRESS;
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
     if (!rpcUrl || !privateKey || !contractAddress) {
       throw new Error("Missing required environment variables");
