@@ -6,6 +6,8 @@ import {
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import fs from "fs";
+import path from "path";
 
 async function processBottleCreation(
   queueId: string,
@@ -24,15 +26,18 @@ async function processBottleCreation(
 
     console.log(`[Queue ${queueId}] Uploading to IPFS...`);
 
-    if (!process.env.STORACHA_PRINCIPAL_KEY || !process.env.STORACHA_PROOF) {
+    if (!process.env.STORACHA_PRINCIPAL_KEY) {
       throw new Error(
-        "Missing Storacha credentials. Set STORACHA_PRINCIPAL_KEY and STORACHA_PROOF environment variables."
+        "Missing Storacha credentials. Set STORACHA_PRINCIPAL_KEY environment variable."
       );
     }
 
+    const proofPath = path.join(process.cwd(), "storacha-forever-message-proof.txt");
+    const proof = fs.readFileSync(proofPath, "utf-8").trim();
+
     const ipfs = await createIPFSService({
       principalKey: process.env.STORACHA_PRINCIPAL_KEY,
-      proof: process.env.STORACHA_PROOF,
+      proof,
       gatewayUrl:
         process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
     });
