@@ -14,7 +14,7 @@
 # NEXT_PUBLIC_IPFS_GATEWAY
 # SUPABASE_SERVICE_ROLE_KEY
 # STORACHA_PRINCIPAL_KEY  # REQUIRED for IPFS uploads
-# STORACHA_PROOF          # REQUIRED for IPFS uploads
+# Note: STORACHA_PROOF is stored in storacha-forever-message-proof.txt (committed to repo)
 
 # Headers for security
 [[headers]]

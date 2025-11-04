@@ -145,6 +145,30 @@ Create a peaceful, interactive ocean where:
 - **Phase 6**: Supabase caching layer
 - **Phase 7**: Advanced polish (custom sprites, sound)
 
+## Deployment
+
+### Environment Variables
+
+Set the following in your Netlify dashboard:
+
+```bash
+# Blockchain
+DEPLOYER_PRIVATE_KEY=0x...
+BASE_SEPOLIA_RPC_URL=https://base-sepolia.g.alchemy.com/v2/...
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x401F06DC3593B3c0cBC977F30c4936588401a4dE
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+
+# Storacha (IPFS)
+STORACHA_PRINCIPAL_KEY=MgCaT...
+NEXT_PUBLIC_IPFS_GATEWAY=https://storacha.link/ipfs
+```
+
+**Note**: The Storacha proof is stored in `storacha-forever-message-proof.txt` (committed to repo) to avoid hitting AWS Lambda's 4KB environment variable limit.
+
 ## Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
