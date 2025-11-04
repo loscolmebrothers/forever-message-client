@@ -155,7 +155,7 @@ Set the following in your Netlify dashboard:
 # Blockchain
 DEPLOYER_PRIVATE_KEY=0x...
 BASE_SEPOLIA_RPC_URL=https://base-sepolia.g.alchemy.com/v2/...
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x401F06DC3593B3c0cBC977F30c4936588401a4dE
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x0c925D3Ad30F7dee61A0D3E3bBdcd9069E97d4B1
 
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co

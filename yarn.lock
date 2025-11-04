@@ -147,10 +147,10 @@
     wrap-ansi "^8.1.0"
     wrap-ansi-cjs "npm:wrap-ansi@^7.0.0"
 
-"@loscolmebrothers/forever-message-ipfs@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-3.1.0.tgz#9bee59cb5d24c5b944db1d77374dc80215148f8c"
-  integrity sha512-NMuCP9BdtIklTXLbddOatJhHrknf6Y7TvEua0bnZU7VCFs05X69ijlz6ghsxV1eP2cklAbEhVsU8pUNoGuXmsQ==
+"@loscolmebrothers/forever-message-ipfs@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-4.1.0.tgz#3f422fe658994d9c548e7ff11468cf7b5151ba13"
+  integrity sha512-AKgzH4J/qsb23Ph4med+SSUkaxld7fYKooboJuNGwwniVu0127YnyHcdFvtiaJCaCa6Ut6qTkgdBDNU+tQOGsg==
   dependencies:
     "@loscolmebrothers/forever-message-types" "^3.0.0"
     "@storacha/client" "^1.8.2"

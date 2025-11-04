@@ -36,7 +36,7 @@ export function TechnicalDetailsModal({
 
   const CONTRACT_ADDRESS =
     process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
-    "0x401F06DC3593B3c0cBC977F30c4936588401a4dE";
+    "0x0c925D3Ad30F7dee61A0D3E3bBdcd9069E97d4B1";
 
   const ipfsGatewayUrl = ipfsCid
     ? `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${ipfsCid}`
