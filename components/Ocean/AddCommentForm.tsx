@@ -1,13 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+
+export interface LoadingComment {
+  id: string;
+  message: string;
+  userId: string;
+}
 
 interface AddCommentFormProps {
   bottleId: number;
   onSuccess: () => void;
+  onLoadingCommentAdd?: (comment: LoadingComment) => void;
+  onLoadingCommentRemove?: (id: string) => void;
 }
 
-export function AddCommentForm({ bottleId, onSuccess }: AddCommentFormProps) {
+export function AddCommentForm({
+  bottleId,
+  onSuccess,
+  onLoadingCommentAdd,
+  onLoadingCommentRemove,
+}: AddCommentFormProps) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,14 +34,37 @@ export function AddCommentForm({ bottleId, onSuccess }: AddCommentFormProps) {
 
     if (!message.trim()) return;
 
+    const toastId = `comment-${bottleId}-${Date.now()}`;
+    const loadingCommentId = toastId;
+    const messageToPost = message;
+
     setLoading(true);
     setError(null);
+    setMessage("");
+
+    const loadingComment: LoadingComment = {
+      id: loadingCommentId,
+      message: messageToPost,
+      userId: "danicolms",
+    };
+
+    onLoadingCommentAdd?.(loadingComment);
+
+    toast.loading("Uploading your comment...", {
+      id: toastId,
+      dismissible: true,
+    });
 
     try {
       const response = await fetch(`/api/bottles/${bottleId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, userId: "danicolms" }),
+        body: JSON.stringify({ message: messageToPost, userId: "danicolms" }),
+      });
+
+      toast.loading("Posting to blockchain...", {
+        id: toastId,
+        dismissible: true,
       });
 
       if (!response.ok) {
@@ -35,10 +72,30 @@ export function AddCommentForm({ bottleId, onSuccess }: AddCommentFormProps) {
         throw new Error(data.details || "Failed to add comment");
       }
 
-      setMessage("");
+      toast.success("Comment posted!", {
+        id: toastId,
+        duration: 3000,
+        dismissible: true,
+        closeButton: true,
+      });
+
+      onLoadingCommentRemove?.(loadingCommentId);
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add comment");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to add comment";
+
+      toast.error("Failed to post comment", {
+        id: toastId,
+        duration: 5000,
+        dismissible: true,
+        closeButton: true,
+        description: errorMessage,
+      });
+
+      onLoadingCommentRemove?.(loadingCommentId);
+      setMessage(messageToPost);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

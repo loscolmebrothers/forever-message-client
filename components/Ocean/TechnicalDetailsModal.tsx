@@ -35,7 +35,8 @@ export function TechnicalDetailsModal({
   }, [onClose]);
 
   const CONTRACT_ADDRESS =
-    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x401F06DC3593B3c0cBC977F30c4936588401a4dE";
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+    "0x401F06DC3593B3c0cBC977F30c4936588401a4dE";
 
   const ipfsGatewayUrl = ipfsCid
     ? `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${ipfsCid}`
@@ -135,7 +136,9 @@ export function TechnicalDetailsModal({
           </div>
 
           <div style={{ padding: "24px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+            >
               {/* Blockchain ID */}
               {bottleId !== null && (
                 <div>
