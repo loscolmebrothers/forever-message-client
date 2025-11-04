@@ -3,10 +3,18 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { ethers } from 'https://esm.sh/ethers@6.15.0';
 
-// Blockchain configuration - using environment variables
-const CONTRACT_ADDRESS = Deno.env.get('CONTRACT_ADDRESS') || '0x0c925D3Ad30F7dee61A0D3E3bBdcd9069E97d4B1';
-const RPC_URL = Deno.env.get('BASE_SEPOLIA_RPC_URL') || 'https://base-sepolia.g.alchemy.com/v2/lYBbh5uL_vSABsjh1e5Gk';
+// Blockchain configuration - MUST be set via Supabase Edge Function secrets
+const CONTRACT_ADDRESS = Deno.env.get('CONTRACT_ADDRESS');
+const RPC_URL = Deno.env.get('BASE_SEPOLIA_RPC_URL');
 const IPFS_GATEWAY = Deno.env.get('IPFS_GATEWAY') || 'https://storacha.link/ipfs';
+
+// Validate required environment variables
+if (!CONTRACT_ADDRESS) {
+  throw new Error('CONTRACT_ADDRESS environment variable is required');
+}
+if (!RPC_URL) {
+  throw new Error('BASE_SEPOLIA_RPC_URL environment variable is required');
+}
 
 // Contract ABI (minimal, just what we need)
 const CONTRACT_ABI = [
