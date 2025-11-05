@@ -95,6 +95,27 @@ export async function POST(request: NextRequest) {
     console.log(`[Process ${queueId}] Waiting for confirmation...`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
+    // Insert into bottles table
+    console.log(`[Process ${queueId}] Syncing to bottles table...`);
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+    const { error: insertError } = await supabaseAdmin.from("bottles").insert({
+      id: bottleId,
+      creator: userAddress,
+      ipfs_hash: uploadResult.cid,
+      message: message,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+      is_forever: false,
+      blockchain_status: "confirmed",
+    });
+
+    if (insertError) {
+      console.error(`[Process ${queueId}] Error inserting into bottles:`, insertError);
+      throw insertError;
+    }
+
     // Mark as completed
     await supabaseAdmin
       .from("bottles_queue")
