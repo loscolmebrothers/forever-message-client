@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { combineCommentsForBottle } from "@/lib/data/combine-comment";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { withAuth } from "@/lib/auth/middleware";
 import fs from "fs";
 import path from "path";
 
@@ -58,39 +59,42 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  try {
-    const bottleId = parseInt(params.id, 10);
+export const POST = withAuth(
+  async (
+    request: NextRequest,
+    user,
+    context: { params: { id: string } }
+  ) => {
+    try {
+      const bottleId = parseInt(context.params.id, 10);
 
-    if (isNaN(bottleId) || bottleId < 1) {
-      return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
-    }
+      if (isNaN(bottleId) || bottleId < 1) {
+        return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
+      }
 
-    // Check if bottle exists and get its expiration info
-    const { data: bottle, error: bottleError } = await supabaseAdmin
-      .from("bottles")
-      .select("id, is_forever, expires_at")
-      .eq("id", bottleId)
-      .eq("blockchain_status", "confirmed")
-      .single();
+      // Check if bottle exists and get its expiration info
+      const { data: bottle, error: bottleError } = await supabaseAdmin
+        .from("bottles")
+        .select("id, is_forever, expires_at")
+        .eq("id", bottleId)
+        .eq("blockchain_status", "confirmed")
+        .single();
 
-    if (bottleError || !bottle) {
-      return NextResponse.json({ error: "Bottle not found" }, { status: 404 });
-    }
+      if (bottleError || !bottle) {
+        return NextResponse.json({ error: "Bottle not found" }, { status: 404 });
+      }
 
-    const expiresAt = new Date(bottle.expires_at);
-    if (!bottle.is_forever && expiresAt.getTime() < Date.now()) {
-      return NextResponse.json(
-        { error: "Cannot comment on expired bottle" },
-        { status: 400 },
-      );
-    }
+      const expiresAt = new Date(bottle.expires_at);
+      if (!bottle.is_forever && expiresAt.getTime() < Date.now()) {
+        return NextResponse.json(
+          { error: "Cannot comment on expired bottle" },
+          { status: 400 },
+        );
+      }
 
-    const body = await request.json();
-    const { message, userId = "danicolms" } = body;
+      const body = await request.json();
+      const { message } = body;
+      const userId = user.wallet_address;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -147,13 +151,11 @@ export async function POST(
       signer: wallet,
     });
 
-    const userAddress = "0xFC3F3646f5e6AA13991E74250224D82301b618a7";
-
     console.log("[API] Adding comment to blockchain...");
     const commentId = await contract.addComment(
       bottleId,
       uploadResult.cid,
-      userAddress,
+      userId,
     );
     console.log("[API] Comment created with ID:", commentId);
 
@@ -182,7 +184,7 @@ export async function POST(
       { status: 500 },
     );
   }
-}
+});
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

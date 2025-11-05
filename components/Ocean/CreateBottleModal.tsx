@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { supabase } from "@/lib/supabase/client";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
@@ -50,10 +52,19 @@ export function CreateBottleModal({
     setError(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Please sign in to create a bottle");
+      }
+
       const response = await fetch("/api/bottles/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, userId: "danicolms" }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ message }),
       });
 
       if (!response.ok) {

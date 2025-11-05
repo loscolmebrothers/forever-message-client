@@ -3,27 +3,22 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { BottleContract } from "@loscolmebrothers/forever-message-ipfs";
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
+import { withAuth } from "@/lib/auth/middleware";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  try {
-    const bottleId = parseInt(params.id, 10);
+export const POST = withAuth(
+  async (
+    request: NextRequest,
+    user,
+    context: { params: { id: string } }
+  ) => {
+    try {
+      const bottleId = parseInt(context.params.id, 10);
 
-    if (isNaN(bottleId) || bottleId < 1) {
-      return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
-    }
+      if (isNaN(bottleId) || bottleId < 1) {
+        return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
+      }
 
-    const body = await request.json();
-    const { userId = "danicolms" } = body; // MVP: hardcoded user, will use auth later
-
-    if (!userId || typeof userId !== "string") {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
-    }
+      const userId = user.wallet_address;
 
     const { data: existingLike, error: checkError } = await supabaseAdmin
       .from("likes")
@@ -70,10 +65,9 @@ export async function POST(
             signer: wallet,
           });
 
-          const userAddress = "0xFC3F3646f5e6AA13991E74250224D82301b618a7"; // Hardcoded for MVP
-          await contract.unlikeBottle(bottleId, userAddress);
+          await contract.unlikeBottle(bottleId, userId);
           console.log(
-            `[API] Blockchain event emitted: BottleUnliked(${bottleId}, ${userAddress})`,
+            `[API] Blockchain event emitted: BottleUnliked(${bottleId}, ${userId})`,
           );
         }
       } catch (blockchainError) {
@@ -129,10 +123,9 @@ export async function POST(
             signer: wallet,
           });
 
-          const userAddress = "0xFC3F3646f5e6AA13991E74250224D82301b618a7"; // Hardcoded for MVP
-          await contract.likeBottle(bottleId, userAddress);
+          await contract.likeBottle(bottleId, userId);
           console.log(
-            `[API] Blockchain event emitted: BottleLiked(${bottleId}, ${userAddress})`,
+            `[API] Blockchain event emitted: BottleLiked(${bottleId}, ${userId})`,
           );
         }
       } catch (blockchainError) {
@@ -175,21 +168,22 @@ export async function POST(
       { status: 500 },
     );
   }
-}
+});
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
-  try {
-    const bottleId = parseInt(params.id, 10);
+export const GET = withAuth(
+  async (
+    request: NextRequest,
+    user,
+    context: { params: { id: string } }
+  ) => {
+    try {
+      const bottleId = parseInt(context.params.id, 10);
 
-    if (isNaN(bottleId) || bottleId < 1) {
-      return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
-    }
+      if (isNaN(bottleId) || bottleId < 1) {
+        return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
+      }
 
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "danicolms";
+      const userId = user.wallet_address;
 
     // Get like count
     const { count, error: countError } = await supabaseAdmin
@@ -240,7 +234,7 @@ export async function GET(
       { status: 500 },
     );
   }
-}
+});
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

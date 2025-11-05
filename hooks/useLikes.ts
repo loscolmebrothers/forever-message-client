@@ -1,5 +1,7 @@
 import useSWR from "swr";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 interface LikeInfo {
   bottleId: number;
@@ -16,20 +18,32 @@ interface LikeResponse {
   userId: string;
 }
 
-const fetcher = async (url: string): Promise<LikeInfo> => {
-  const response = await fetch(url);
+const createAuthenticatedFetcher = async (url: string): Promise<LikeInfo> => {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      "Authorization": `Bearer ${session.access_token}`
+    }
+  });
+
   if (!response.ok) {
     throw new Error(`Failed to fetch like info: ${response.statusText}`);
   }
   return response.json();
 };
 
-export function useLikes(bottleId: number, userId: string = "danicolms") {
+export function useLikes(bottleId: number) {
   const [isToggling, setIsToggling] = useState(false);
+  const { address, isAuthenticated } = useAuth();
 
   const { data, error, mutate, isLoading } = useSWR<LikeInfo>(
-    `/api/bottles/${bottleId}/like?userId=${userId}`,
-    fetcher,
+    isAuthenticated ? `/api/bottles/${bottleId}/like` : null,
+    createAuthenticatedFetcher,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -37,11 +51,17 @@ export function useLikes(bottleId: number, userId: string = "danicolms") {
   );
 
   const toggleLike = async () => {
-    if (isToggling) return;
+    if (isToggling || !isAuthenticated) return;
 
     setIsToggling(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Not authenticated");
+      }
+
       const currentLikeCount = data?.likeCount || 0;
       const currentHasLiked = data?.hasLiked || false;
 
@@ -52,7 +72,7 @@ export function useLikes(bottleId: number, userId: string = "danicolms") {
             ? currentLikeCount - 1
             : currentLikeCount + 1,
           hasLiked: !currentHasLiked,
-          userId,
+          userId: address || "",
         },
         false,
       );
@@ -61,8 +81,9 @@ export function useLikes(bottleId: number, userId: string = "danicolms") {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({}),
       });
 
       if (!response.ok) {

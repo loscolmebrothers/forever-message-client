@@ -30,8 +30,7 @@ interface BottleWithPosition extends BottleWithQueue {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const userId = "danicolms";
-  const { bottles, isLoading, error, isEmpty, mutate, technicalDetails, setTechnicalDetails } = useBottles(userId);
+  const { bottles, isLoading, error, isEmpty, mutate, technicalDetails, setTechnicalDetails } = useBottles();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });

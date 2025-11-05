@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { withAuth } from "@/lib/auth/middleware";
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
-    const { message, userId = "danicolms" } = body;
+    const { message } = body;
+    const userId = user.wallet_address;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { supabase } from "@/lib/supabase/client";
 
 export interface LoadingComment {
   id: string;
@@ -25,6 +27,7 @@ export function AddCommentForm({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { address, isAuthenticated } = useAuth();
 
   const maxLength = 280;
   const remainingChars = maxLength - message.length;
@@ -32,7 +35,12 @@ export function AddCommentForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!message.trim()) return;
+    if (!message.trim() || !isAuthenticated || !address) {
+      if (!isAuthenticated) {
+        toast.error("Please sign in to comment");
+      }
+      return;
+    }
 
     const toastId = `comment-${bottleId}-${Date.now()}`;
     const loadingCommentId = toastId;
@@ -45,7 +53,7 @@ export function AddCommentForm({
     const loadingComment: LoadingComment = {
       id: loadingCommentId,
       message: messageToPost,
-      userId: "danicolms",
+      userId: address,
     };
 
     onLoadingCommentAdd?.(loadingComment);
@@ -56,10 +64,19 @@ export function AddCommentForm({
     });
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Not authenticated");
+      }
+
       const response = await fetch(`/api/bottles/${bottleId}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageToPost, userId: "danicolms" }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ message: messageToPost }),
       });
 
       toast.loading("Posting to blockchain...", {

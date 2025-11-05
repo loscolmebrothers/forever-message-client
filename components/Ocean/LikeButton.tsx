@@ -5,14 +5,10 @@ import { UI_COLORS } from "@/lib/constants";
 
 interface LikeButtonProps {
   bottleId: number;
-  userId?: string;
 }
 
-export function LikeButton({ bottleId, userId = "danicolms" }: LikeButtonProps) {
-  const { likeCount, hasLiked, isToggling, toggleLike } = useLikes(
-    bottleId,
-    userId
-  );
+export function LikeButton({ bottleId }: LikeButtonProps) {
+  const { likeCount, hasLiked, isToggling, toggleLike } = useLikes(bottleId);
 
   const handleClick = async () => {
     try {

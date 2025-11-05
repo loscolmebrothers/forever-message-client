@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { Header } from "@/components/Header";
 
 const OceanStage = dynamic(
   () =>
@@ -13,6 +14,7 @@ const OceanStage = dynamic(
 export default function Home() {
   return (
     <main>
+      <Header />
       <OceanStage />
     </main>
   );
