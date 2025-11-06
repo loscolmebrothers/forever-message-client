@@ -15,10 +15,17 @@ const nextConfig = {
       };
     }
 
+    // Externalize problematic SSR modules
+    if (isServer) {
+      config.externals.push("pino-pretty", "lokijs", "encoding");
+    }
+
     // Ignore optional dependencies that cause warnings
     config.ignoreWarnings = [
       { module: /node_modules\/@metamask\/sdk/ },
       { module: /node_modules\/pino/ },
+      { module: /node_modules\/@walletconnect/ },
+      { module: /node_modules\/idb-keyval/ },
     ];
 
     return config;

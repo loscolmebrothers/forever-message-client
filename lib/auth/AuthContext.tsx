@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { SiweMessage } from 'siwe'
 import { supabase } from '@/lib/supabase/client'
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const signIn = async () => {
+  const signIn = useCallback(async () => {
     if (!address || !isConnected) {
       throw new Error('Wallet not connected')
     }
@@ -109,9 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [address, isConnected, signMessageAsync])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut()
       disconnect()
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign out error:', error)
       throw error
     }
-  }
+  }, [disconnect])
 
   return (
     <AuthContext.Provider
