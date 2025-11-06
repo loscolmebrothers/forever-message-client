@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/lib/auth/AuthContext";
 import { supabase } from "@/lib/supabase/client";
-import { UnauthenticatedModal } from "./UnauthenticatedModal";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
@@ -16,11 +14,11 @@ export function CreateBottleModal({
   onClose,
   onSuccess,
 }: CreateBottleModalProps) {
-  const { isAuthenticated } = useAuth();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [textureLoaded, setTextureLoaded] = useState(false);
+  const [bottleFloat, setBottleFloat] = useState(0);
 
   useEffect(() => {
     const img = new Image();
@@ -46,6 +44,19 @@ export function CreateBottleModal({
       return () => document.removeEventListener("keydown", handleEscape);
     }
   }, [isOpen, onClose]);
+
+  // Animate bottle floating up and down
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let frame = 0;
+    const animate = () => {
+      frame += 0.05;
+      setBottleFloat(Math.sin(frame) * 10);
+      if (isOpen) requestAnimationFrame(animate);
+    };
+    animate();
+  }, [isOpen]);
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
@@ -85,11 +96,6 @@ export function CreateBottleModal({
   };
 
   if (!isOpen) return null;
-
-  // Show unauthenticated modal if user is not logged in
-  if (!isAuthenticated) {
-    return <UnauthenticatedModal isOpen={isOpen} onClose={onClose} />;
-  }
 
   if (!textureLoaded) {
     return (
@@ -165,6 +171,45 @@ export function CreateBottleModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Quirky close button (X) */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "-12px",
+            right: "-12px",
+            width: "36px",
+            height: "36px",
+            border: "3px solid #8b4513",
+            background: "#f5f5dc",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "20px",
+            fontWeight: "bold",
+            color: "#8b4513",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
+            transform: "rotate(0deg)",
+            transition: "all 0.3s",
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "rotate(90deg) scale(1.1)";
+            e.currentTarget.style.backgroundColor = "#8b4513";
+            e.currentTarget.style.color = "#f5f5dc";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "rotate(0deg) scale(1)";
+            e.currentTarget.style.backgroundColor = "#f5f5dc";
+            e.currentTarget.style.color = "#8b4513";
+          }}
+          aria-label="Close"
+        >
+          ×
+        </button>
+
         <div
           style={{
             position: "absolute",
@@ -178,6 +223,7 @@ export function CreateBottleModal({
             backgroundPosition: "center",
             opacity: 0.3,
             pointerEvents: "none",
+            borderRadius: "4px",
           }}
         />
         <style jsx>{`
@@ -226,6 +272,7 @@ export function CreateBottleModal({
           </div>
         )}
 
+        {/* Floating bottle "submit" button */}
         <div
           style={{
             display: "flex",
@@ -239,27 +286,34 @@ export function CreateBottleModal({
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
             style={{
-              padding: "12px 32px",
-              border: "2px solid #5d4037",
-              background: "rgba(139, 69, 19, 0.3)",
-              color: "#2c1810",
+              background: "transparent",
+              border: "none",
               cursor: loading || !message.trim() ? "not-allowed" : "pointer",
               opacity: loading || !message.trim() ? 0.5 : 1,
-              fontFamily: "'AndreaScript', cursive",
-              fontSize: "24px",
-              transition: "all 0.3s",
-              textShadow: "0 1px 2px rgba(255, 255, 255, 0.3)",
+              transform: `translateY(${bottleFloat}px)`,
+              transition: "transform 0.1s ease-out, opacity 0.3s, filter 0.3s",
+              padding: 0,
+              filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.5)";
+                e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(139, 69, 19, 0.3)";
+              e.currentTarget.style.filter = "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))";
             }}
+            aria-label={loading ? "Casting bottle..." : "Cast bottle"}
           >
-            {loading ? "Casting..." : "Cast"}
+            <img
+              src="/assets/bottle-sprites/1.webp"
+              alt="Cast bottle"
+              style={{
+                width: loading ? "100px" : "120px",
+                height: "auto",
+                transition: "width 0.3s",
+              }}
+            />
           </button>
         </div>
       </div>

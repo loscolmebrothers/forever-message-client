@@ -39,9 +39,9 @@ export function OceanStage() {
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
 
-  // Check if we should show the create button when logged out (for dev mode)
-  const showCreateButtonWhenLoggedOut = process.env.NEXT_PUBLIC_SHOW_CREATE_BUTTON_WHEN_LOGGED_OUT === 'true';
-  const showCreateButton = isAuthenticated || showCreateButtonWhenLoggedOut;
+  // In development, always show create button. In production, only show when authenticated.
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const showCreateButton = isAuthenticated || isDevelopment;
 
   const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
     new Map(),
