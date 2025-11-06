@@ -18,6 +18,7 @@ import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
 import { BottleWithQueue } from "@/hooks/useBottleQueue";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 const OCEAN_SCALE = 5;
 
@@ -31,11 +32,16 @@ interface BottleWithPosition extends BottleWithQueue {
 export function OceanStage() {
   const { width, height } = useWindowSize();
   const { bottles, isLoading, error, isEmpty, mutate, technicalDetails, setTechnicalDetails } = useBottles();
+  const { isAuthenticated } = useAuth();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
+
+  // Check if we should show the create button when logged out (for dev mode)
+  const showCreateButtonWhenLoggedOut = process.env.NEXT_PUBLIC_SHOW_CREATE_BUTTON_WHEN_LOGGED_OUT === 'true';
+  const showCreateButton = isAuthenticated || showCreateButtonWhenLoggedOut;
 
   const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
     new Map(),
@@ -163,7 +169,7 @@ export function OceanStage() {
     return (
       <>
         <LoadingState />
-        <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -177,7 +183,7 @@ export function OceanStage() {
     return (
       <>
         <ErrorState error={error} />
-        <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -191,7 +197,7 @@ export function OceanStage() {
     return (
       <>
         <EmptyState />
-        <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -275,7 +281,7 @@ export function OceanStage() {
 
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
-      <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+      {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
       <CreateBottleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

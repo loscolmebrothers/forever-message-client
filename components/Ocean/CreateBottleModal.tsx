@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { supabase } from "@/lib/supabase/client";
+import { UnauthenticatedModal } from "./UnauthenticatedModal";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function CreateBottleModal({
   onClose,
   onSuccess,
 }: CreateBottleModalProps) {
+  const { isAuthenticated } = useAuth();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +85,11 @@ export function CreateBottleModal({
   };
 
   if (!isOpen) return null;
+
+  // Show unauthenticated modal if user is not logged in
+  if (!isAuthenticated) {
+    return <UnauthenticatedModal isOpen={isOpen} onClose={onClose} />;
+  }
 
   if (!textureLoaded) {
     return (
