@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { SiweMessage } from 'siwe'
 import { supabase } from '@/lib/supabase/client'
@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { signMessageAsync } = useSignMessage()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const signingInProgress = useRef(false)
 
   // Check existing session on mount
   useEffect(() => {
@@ -60,7 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Wallet not connected')
     }
 
+    // Prevent multiple concurrent sign-in attempts
+    if (signingInProgress.current) {
+      console.warn('Sign-in already in progress, skipping duplicate request')
+      return
+    }
+
     try {
+      signingInProgress.current = true
       setIsLoading(true)
 
       // Get nonce from server
@@ -107,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign in error:', error)
       throw error
     } finally {
+      signingInProgress.current = false
       setIsLoading(false)
     }
   }, [address, isConnected, signMessageAsync])

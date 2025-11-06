@@ -6,7 +6,7 @@ import { WagmiProvider, createConfig, http } from 'wagmi'
 import { baseSepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/lib/auth/AuthContext'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   rainbowWallet,
   metaMaskWallet,
@@ -36,10 +36,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
     },
   }))
 
+  // Track if we're on client side to trigger config recreation
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   // Configure connectors and wagmi config only on client side to avoid SSR issues
   const config = useMemo(() => {
     // Only initialize connectors in browser to avoid indexedDB SSR errors
-    if (typeof window === 'undefined') {
+    if (!isClient) {
       // Return minimal config for SSR
       return createConfig({
         chains: [baseSepolia],
@@ -78,7 +85,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       },
       ssr: true,
     })
-  }, [])
+  }, [isClient])
 
   return (
     <WagmiProvider config={config}>
