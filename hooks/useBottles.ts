@@ -135,9 +135,9 @@ export function useBottles() {
 
   const pendingBottles: BottleWithQueue[] = queueItems.map((item) => ({
     id: -1, // Temporary ID (negative to distinguish from real bottles)
-    creator: userId,
+    creator: item.user_id, // Wallet address from queue
     ipfsHash: item.ipfs_cid || "",
-    userId: item.user_id,
+    userId: item.user_id, // Same as creator (wallet address)
     createdAt: new Date(item.created_at),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     isForever: false,

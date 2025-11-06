@@ -79,10 +79,12 @@ export async function POST(request: NextRequest) {
       signer: wallet,
     });
 
-    const userAddress = "0xFC3F3646f5e6AA13991E74250224D82301b618a7";
+    // Use the authenticated user's wallet address as the creator
+    // (deployer wallet pays gas, but user's address is the creator)
+    const creatorAddress = userId;
 
-    console.log(`[Process ${queueId}] Creating bottle on blockchain...`);
-    const bottleId = await contract.createBottle(uploadResult.cid, userAddress);
+    console.log(`[Process ${queueId}] Creating bottle on blockchain for creator:`, creatorAddress);
+    const bottleId = await contract.createBottle(uploadResult.cid, creatorAddress);
     console.log(`[Process ${queueId}] Bottle created with ID:`, bottleId);
 
     // Update status to confirming
@@ -101,10 +103,10 @@ export async function POST(request: NextRequest) {
 
     const { error: insertError } = await supabaseAdmin.from("bottles").insert({
       id: bottleId,
-      creator: userAddress,
+      creator: creatorAddress, // Authenticated user's wallet address
       ipfs_hash: uploadResult.cid,
       message: message,
-      user_id: userId,
+      user_id: creatorAddress, // Same as creator (wallet address)
       created_at: new Date().toISOString(),
       expires_at: expiresAt.toISOString(),
       is_forever: false,
