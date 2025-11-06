@@ -15,51 +15,78 @@ export async function POST(request: NextRequest) {
     }
 
     const address = siweMessage.address.toLowerCase()
+    const email = `${address}@wallet.local`
 
-    // Create or get user in Supabase
-    // Using a custom JWT with the wallet address as the user ID
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createUser({
-      email: `${address}@wallet.local`, // Placeholder email
+    // Try to create user first (will fail if exists)
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
       email_confirm: true,
       user_metadata: {
         wallet_address: address,
       },
     })
 
-    if (sessionError) {
-      // If user already exists, sign them in
-      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-        email: `${address}@wallet.local`,
-        password: address, // Using address as password (hashed by Supabase)
-      })
+    let userId: string
 
-      if (signInError) {
-        console.error('Sign in error:', signInError)
-        return NextResponse.json({ error: 'Authentication failed' }, { status: 500 })
+    if (createError) {
+      // User already exists - find them by listing all users
+      const { data: allUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+
+      if (listError || !allUsers) {
+        console.error('Failed to list users:', listError)
+        return NextResponse.json({ error: 'Failed to authenticate' }, { status: 500 })
       }
 
-      return NextResponse.json({
-        session: signInData.session,
-        user: signInData.user,
-      })
+      const existingUser = allUsers.users.find((u) => u.email === email)
+
+      if (!existingUser) {
+        console.error('User not found after creation error:', createError)
+        return NextResponse.json({ error: 'Failed to authenticate' }, { status: 500 })
+      }
+
+      userId = existingUser.id
+    } else {
+      // New user created
+      userId = newUser.user!.id
     }
 
-    // Generate session for new user
-    const { data: sessionResponse, error: tokenError } = await supabaseAdmin.auth.admin.generateLink({
+    // Generate a magic link for the user to create a session
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
-      email: `${address}@wallet.local`,
+      email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      },
     })
 
-    if (tokenError || !sessionResponse) {
-      console.error('Token generation error:', tokenError)
+    if (linkError || !linkData) {
+      console.error('Link generation error:', linkError)
+      return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
+    }
+
+    // Extract the hashed token from the magic link URL
+    const url = new URL(linkData.properties.action_link)
+    const token = url.searchParams.get('token')
+    const tokenHash = url.searchParams.get('token_hash')
+
+    if (!token || !tokenHash) {
+      console.error('Failed to extract tokens from magic link')
+      return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
+    }
+
+    // Exchange the token for a session
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: 'email',
+    })
+
+    if (sessionError || !sessionData) {
+      console.error('Session exchange error:', sessionError)
       return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
     }
 
     return NextResponse.json({
-      session: {
-        access_token: sessionResponse.properties.action_link,
-        refresh_token: sessionResponse.properties.action_link,
-      },
+      session: sessionData.session,
       user: sessionData.user,
     })
   } catch (error) {
