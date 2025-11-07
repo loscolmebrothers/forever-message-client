@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 import { LoginButton } from "./LoginButton";
 
 export function Header() {
-  const { isConnected, isAuthenticated, isLoading, signIn, address } = useAuth();
+  const { isConnected, isAuthenticated, isLoading, signIn, address } =
+    useAuth();
   const hasAttemptedSignIn = useRef(false);
   const isSigningIn = useRef(false);
 
@@ -23,13 +24,19 @@ export function Header() {
       hasAttemptedSignIn.current = true;
       isSigningIn.current = true;
 
-      signIn()
-        .catch((error) => {
-          console.error("Auto sign-in failed:", error);
-        })
-        .finally(() => {
-          isSigningIn.current = false;
-        });
+      // NOTE: Small delay to ensure wallet connection is fully established
+      setTimeout(() => {
+        signIn()
+          .catch((error) => {
+            console.error("Auto sign-in failed:", error);
+            // Reset flags on error so user can retry
+            hasAttemptedSignIn.current = false;
+            isSigningIn.current = false;
+          })
+          .finally(() => {
+            isSigningIn.current = false;
+          });
+      }, 500);
     }
 
     // Reset the flag when user disconnects

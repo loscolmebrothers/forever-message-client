@@ -87,10 +87,12 @@ export function CreateBottleModal({
 
       const data = await response.json();
 
+      // Notification is handled by useBottleQueue which tracks status changes
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create bottle");
+      const errorMessage = err instanceof Error ? err.message : "Failed to create bottle";
+      setError(errorMessage);
       setLoading(false);
     }
   };

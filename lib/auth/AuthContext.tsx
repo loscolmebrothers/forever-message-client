@@ -17,11 +17,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { address, isConnected } = useAccount()
+  const { address: wagmiAddress, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const { signMessageAsync } = useSignMessage()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [authenticatedAddress, setAuthenticatedAddress] = useState<string | undefined>(undefined)
   const signingInProgress = useRef(false)
 
   // Check existing session on mount
@@ -32,6 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession()
         setIsAuthenticated(!!session)
+
+        // Extract wallet address from session metadata
+        if (session?.user?.user_metadata?.wallet_address) {
+          setAuthenticatedAddress(session.user.user_metadata.wallet_address)
+        }
       } catch (error) {
         console.error('Error checking session:', error)
         setIsAuthenticated(false)
@@ -49,6 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session)
+
+      // Update authenticated address from session
+      if (session?.user?.user_metadata?.wallet_address) {
+        setAuthenticatedAddress(session.user.user_metadata.wallet_address)
+      } else {
+        setAuthenticatedAddress(undefined)
+      }
     })
 
     return () => {
@@ -57,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = useCallback(async () => {
-    if (!address || !isConnected) {
+    if (!wagmiAddress || !isConnected) {
       throw new Error('Wallet not connected')
     }
 
@@ -78,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Create SIWE message
       const message = new SiweMessage({
         domain: window.location.host,
-        address,
+        address: wagmiAddress,
         statement: 'Sign in to Forever Message',
         uri: window.location.origin,
         version: '1',
@@ -111,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       setIsAuthenticated(true)
+      setAuthenticatedAddress(wagmiAddress.toLowerCase())
     } catch (error) {
       console.error('Sign in error:', error)
       throw error
@@ -118,18 +132,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signingInProgress.current = false
       setIsLoading(false)
     }
-  }, [address, isConnected, signMessageAsync])
+  }, [wagmiAddress, isConnected, signMessageAsync])
 
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut()
       disconnect()
       setIsAuthenticated(false)
+      setAuthenticatedAddress(undefined)
     } catch (error) {
       console.error('Sign out error:', error)
       throw error
     }
   }, [disconnect])
+
+  // Use authenticated address when available, fallback to wagmi address
+  const address = isAuthenticated ? authenticatedAddress : wagmiAddress
 
   return (
     <AuthContext.Provider

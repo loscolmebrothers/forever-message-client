@@ -1,13 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { toast } from "sonner";
 
 export function LoginButton() {
-  const { isAuthenticated, signOut, address } = useAuth();
+  const { isAuthenticated, isLoading, signOut, address, isConnected } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const previouslyConnected = useRef(false);
+
+  // Close menu when authentication state changes or wallet connects
+  useEffect(() => {
+    if (isAuthenticated || isConnected) {
+      setShowMenu(false);
+    }
+  }, [isAuthenticated, isConnected]);
+
+  // Force close RainbowKit modal when wallet connects
+  useEffect(() => {
+    if (isConnected && !previouslyConnected.current) {
+      previouslyConnected.current = true;
+
+      // Close RainbowKit modal by finding and clicking its close button or backdrop
+      setTimeout(() => {
+        // Try multiple methods to close the RainbowKit modal
+
+        // Method 1: Click the close button (X)
+        const closeButton = document.querySelector('[aria-label="Close"]');
+        if (closeButton instanceof HTMLElement) {
+          closeButton.click();
+          return;
+        }
+
+        // Method 2: Click the backdrop/overlay
+        const backdrop = document.querySelector('[role="dialog"]')?.parentElement;
+        if (backdrop instanceof HTMLElement) {
+          backdrop.click();
+          return;
+        }
+
+        // Method 3: Try ESC key as fallback
+        const escEvent = new KeyboardEvent('keydown', {
+          key: 'Escape',
+          code: 'Escape',
+          keyCode: 27,
+          bubbles: true,
+        });
+        document.dispatchEvent(escEvent);
+      }, 300);
+    }
+
+    if (!isConnected) {
+      previouslyConnected.current = false;
+    }
+  }, [isConnected]);
 
   if (isAuthenticated) {
     // Show logged in state with disconnect option
@@ -27,7 +74,7 @@ export function LoginButton() {
             fontWeight: "500",
           }}
         >
-          {address?.slice(0, 6)}...{address?.slice(-4)}
+          {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connected"}
         </button>
 
         {showMenu && (
@@ -60,6 +107,15 @@ export function LoginButton() {
                 onClick={() => {
                   signOut();
                   setShowMenu(false);
+                  // Clear RainbowKit's wallet selection cache completely
+                  if (typeof window !== 'undefined') {
+                    // Clear all wagmi/RainbowKit localStorage keys
+                    Object.keys(localStorage).forEach(key => {
+                      if (key.startsWith('wagmi.') || key.startsWith('rk-')) {
+                        localStorage.removeItem(key);
+                      }
+                    });
+                  }
                 }}
                 style={{
                   width: "100%",
@@ -93,22 +149,25 @@ export function LoginButton() {
     <div style={{ position: "relative" }}>
       <button
         onClick={() => setShowMenu(!showMenu)}
+        disabled={isLoading}
         style={{
           padding: "10px 20px",
           backgroundColor: "#2c1810",
           color: "white",
           border: "none",
           borderRadius: "8px",
-          cursor: "pointer",
+          cursor: isLoading ? "not-allowed" : "pointer",
           fontFamily: "'ApfelGrotezk', sans-serif",
           fontSize: "14px",
           fontWeight: "500",
+          opacity: isLoading ? 0.7 : 1,
+          transition: "opacity 0.3s",
         }}
       >
-        Login
+        {isLoading ? "Loading..." : "Login"}
       </button>
 
-      {showMenu && (
+      {showMenu && !isLoading && (
         <>
           <div
             style={{
