@@ -185,11 +185,11 @@ export function CreateBottleModal({
           position: "relative",
           backgroundColor: "#f5f5dc",
           borderRadius: "4px",
-          padding: isMobile ? "24px 20px" : "32px 40px",
+          padding: isMobile ? "24px 20px 48px" : "32px 40px 64px",
           maxWidth: "600px",
           width: "90%",
           margin: "0 16px",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
           transition: "all 0.8s ease-in-out",
           transform: isRolling ? "scaleY(0.1)" : "scaleY(1)",
           opacity: isFlying ? 0 : 1,
@@ -201,36 +201,38 @@ export function CreateBottleModal({
           disabled={loading}
           style={{
             position: "absolute",
-            top: "-12px",
-            right: "-12px",
-            width: "36px",
-            height: "36px",
+            top: "8px",
+            right: "8px",
+            width: "24px",
+            height: "24px",
             border: "none",
-            background: "#000000",
+            background: "rgba(0, 0, 0, 0.5)",
             borderRadius: "50%",
             cursor: loading ? "default" : "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "20px",
+            fontSize: "14px",
             fontWeight: "bold",
             color: "#ffffff",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
             transform: "scale(1)",
-            transition: "transform 0.3s, box-shadow 0.3s",
+            transition: "transform 0.2s, background 0.2s, opacity 0.2s",
             zIndex: 10,
-            opacity: loading ? 0.5 : 1,
+            opacity: loading ? 0.3 : 0.6,
           }}
           onMouseEnter={(e) => {
             if (!loading) {
               e.currentTarget.style.transform = "scale(1.1)";
-              e.currentTarget.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)";
+              e.currentTarget.style.background = "rgba(0, 0, 0, 0.8)";
+              e.currentTarget.style.opacity = "1";
             }
           }}
           onMouseLeave={(e) => {
             if (!loading) {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.background = "rgba(0, 0, 0, 0.5)";
+              e.currentTarget.style.opacity = "0.6";
             }
           }}
           aria-label="Close"
@@ -291,10 +293,8 @@ export function CreateBottleModal({
 
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
             marginTop: "8px",
+            textAlign: "right",
             position: "relative",
             zIndex: 1,
           }}
@@ -302,87 +302,91 @@ export function CreateBottleModal({
           <div
             style={{
               fontFamily: "'ApfelGrotezk', sans-serif",
-              fontSize: "14px",
-              color: message.length >= MAX_CHARACTERS ? "#8b4513" : "rgba(44, 24, 16, 0.6)",
+              fontSize: "11px",
+              color: message.length >= MAX_CHARACTERS ? "#8b4513" : "rgba(44, 24, 16, 0.4)",
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
             }}
           >
             {message.length}/{MAX_CHARACTERS}
           </div>
+        </div>
 
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-            }}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-          >
-            {showTooltip && message.trim() && !loading && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "calc(100% + 8px)",
-                  right: "0",
-                  backgroundColor: "#2c1810",
-                  color: "#ffffff",
-                  padding: "8px 12px",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                  fontFamily: "'ApfelGrotezk', sans-serif",
-                  whiteSpace: "nowrap",
-                  zIndex: 100,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  pointerEvents: "none",
-                }}
-              >
-                Seal your message
-              </div>
-            )}
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !message.trim()}
+        <div
+          style={{
+            position: "absolute",
+            bottom: isMobile ? "-48px" : "-64px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 20,
+          }}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          {showTooltip && message.trim() && !loading && (
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                cursor: loading || !message.trim() ? "default" : "pointer",
-                opacity: loading || !message.trim() ? 0.4 : 1,
-                transition: "all 0.3s",
-                padding: 0,
-                filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
-                position: "relative",
-                transform: isBottleFilling ? "scale(1.5)" : "scale(1)",
+                position: "absolute",
+                bottom: "calc(100% + 12px)",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "#2c1810",
+                color: "#ffffff",
+                padding: "8px 12px",
+                borderRadius: "4px",
+                fontSize: "14px",
+                fontFamily: "'ApfelGrotezk', sans-serif",
+                whiteSpace: "nowrap",
+                zIndex: 100,
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                pointerEvents: "none",
               }}
-              onMouseEnter={(e) => {
-                if (!loading && message.trim()) {
-                  e.currentTarget.style.filter = "drop-shadow(0 0 20px rgba(220, 38, 38, 0.6)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
-                  e.currentTarget.style.transform = "scale(1.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading && message.trim()) {
-                  e.currentTarget.style.filter = "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))";
-                  e.currentTarget.style.transform = "scale(1)";
-                }
-              }}
-              aria-label={loading ? "Sealing message..." : "Seal your message"}
             >
-              <img
-                src={isBottleFilling || isSparkling || isFlying ? "/assets/bottle-sprites/1.webp" : "/assets/effects/wax-seal.png"}
-                alt={isBottleFilling || isSparkling || isFlying ? "Bottle" : "Wax seal"}
-                style={{
-                  width: isBottleFilling || isSparkling || isFlying ? "48px" : "64px",
-                  height: "auto",
-                  transition: "all 0.6s ease-in-out",
-                }}
-              />
+              Seal your message
+            </div>
+          )}
 
-              {isSparkling && (
-                <SparkleEffect />
-              )}
-            </button>
-          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !message.trim()}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: loading || !message.trim() ? "default" : "pointer",
+              opacity: loading || !message.trim() ? 0.4 : 1,
+              transition: "all 0.3s",
+              padding: 0,
+              filter: "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
+              position: "relative",
+              transform: isBottleFilling ? "scale(1.8)" : "scale(1)",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading && message.trim()) {
+                e.currentTarget.style.filter = "drop-shadow(0 0 30px rgba(220, 38, 38, 0.8)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))";
+                e.currentTarget.style.transform = "scale(1.15)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading && message.trim()) {
+                e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
+                e.currentTarget.style.transform = "scale(1)";
+              }
+            }}
+            aria-label={loading ? "Sealing message..." : "Seal your message"}
+          >
+            <img
+              src={isBottleFilling || isSparkling || isFlying ? "/assets/bottle-sprites/1.webp" : "/assets/effects/wax-seal.png"}
+              alt={isBottleFilling || isSparkling || isFlying ? "Bottle" : "Wax seal"}
+              style={{
+                width: isBottleFilling || isSparkling || isFlying ? "64px" : isMobile ? "80px" : "96px",
+                height: "auto",
+                transition: "all 0.6s ease-in-out",
+              }}
+            />
+
+            {isSparkling && (
+              <SparkleEffect />
+            )}
+          </button>
         </div>
 
         {error && (
