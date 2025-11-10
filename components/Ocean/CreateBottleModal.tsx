@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { SparkleEffect } from "./SparkleEffect";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
+
+const MAX_CHARACTERS = 200;
 
 export function CreateBottleModal({
   isOpen,
@@ -19,11 +22,23 @@ export function CreateBottleModal({
   const [error, setError] = useState<string | null>(null);
   const [textureLoaded, setTextureLoaded] = useState(false);
   const [bottleFloat, setBottleFloat] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const img = new Image();
     img.src = "https://assets.loscolmebrothers.com/textures/parchment.jpg";
     img.onload = () => setTextureLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
@@ -63,6 +78,13 @@ export function CreateBottleModal({
 
     setLoading(true);
     setError(null);
+    setIsAnimating(true);
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    setShowSparkles(true);
+
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -87,13 +109,18 @@ export function CreateBottleModal({
 
       const data = await response.json();
 
-      // Notification is handled by useBottleQueue which tracks status changes
       onSuccess();
+
+      await new Promise(resolve => setTimeout(resolve, 400));
+      setShowSparkles(false);
+      setIsAnimating(false);
       onClose();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create bottle";
       setError(errorMessage);
       setLoading(false);
+      setIsAnimating(false);
+      setShowSparkles(false);
     }
   };
 
@@ -173,7 +200,7 @@ export function CreateBottleModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Quirky close button (X) */}
+        {/* Close button (styled like CreateBottleButton) */}
         <button
           onClick={onClose}
           style={{
@@ -182,8 +209,8 @@ export function CreateBottleModal({
             right: "-12px",
             width: "36px",
             height: "36px",
-            border: "3px solid #8b4513",
-            background: "#f5f5dc",
+            border: "none",
+            background: "#ffffff",
             borderRadius: "50%",
             cursor: "pointer",
             display: "flex",
@@ -191,21 +218,19 @@ export function CreateBottleModal({
             justifyContent: "center",
             fontSize: "20px",
             fontWeight: "bold",
-            color: "#8b4513",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-            transform: "rotate(0deg)",
-            transition: "all 0.3s",
+            color: "#000000",
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            transform: "scale(1)",
+            transition: "transform 0.3s, box-shadow 0.3s",
             zIndex: 10,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "rotate(90deg) scale(1.1)";
-            e.currentTarget.style.backgroundColor = "#8b4513";
-            e.currentTarget.style.color = "#f5f5dc";
+            e.currentTarget.style.transform = "scale(1.1)";
+            e.currentTarget.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "rotate(0deg) scale(1)";
-            e.currentTarget.style.backgroundColor = "#f5f5dc";
-            e.currentTarget.style.color = "#8b4513";
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
           }}
           aria-label="Close"
         >
@@ -236,7 +261,12 @@ export function CreateBottleModal({
         `}</style>
         <textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue.length <= MAX_CHARACTERS) {
+              setMessage(newValue);
+            }
+          }}
           placeholder="Write your message..."
           style={{
             width: "100%",
@@ -253,10 +283,32 @@ export function CreateBottleModal({
             position: "relative",
             zIndex: 1,
             textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
+            transition: isAnimating ? "all 0.8s ease-in" : "none",
+            transform: isAnimating ? "scale(0.1) translateX(200%)" : "scale(1)",
+            opacity: isAnimating ? 0 : 1,
           }}
           disabled={loading}
           autoFocus
         />
+
+        {/* Character counter */}
+        <div
+          style={{
+            marginTop: "8px",
+            textAlign: "right",
+            fontFamily: "'AndreaScript', cursive",
+            fontSize: "16px",
+            color: message.length >= MAX_CHARACTERS ? "#8b4513" : "rgba(44, 24, 16, 0.6)",
+            position: "relative",
+            zIndex: 1,
+            textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
+            transition: isAnimating ? "all 0.8s ease-in" : "none",
+            transform: isAnimating ? "scale(0.1) translateX(200%)" : "scale(1)",
+            opacity: isAnimating ? 0 : 1,
+          }}
+        >
+          {message.length}/{MAX_CHARACTERS}
+        </div>
 
         {error && (
           <div
@@ -274,50 +326,72 @@ export function CreateBottleModal({
           </div>
         )}
 
-        {/* Floating bottle "submit" button */}
-        <div
+      </div>
+
+      {/* Floating bottle positioned outside right of modal */}
+      <div
+        style={{
+          position: "absolute",
+          right: isMobile ? "50%" : "calc(50% - 250px - 120px)",
+          top: isMobile ? "auto" : "50%",
+          bottom: isMobile ? "calc(50% - 200px)" : "auto",
+          transform: isMobile
+            ? `translateX(50%) translateY(${bottleFloat}px)`
+            : `translateY(calc(-50% + ${bottleFloat}px))`,
+          transition: "transform 0.1s ease-out",
+          pointerEvents: loading || !message.trim() ? "none" : "auto",
+        }}
+      >
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !message.trim()}
           style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "24px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            opacity: loading || !message.trim() ? 0.5 : 1,
+            transition: "opacity 0.3s, filter 0.3s",
+            padding: 0,
+            filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
             position: "relative",
-            zIndex: 1,
+            animation: !loading && message.trim() ? "pulse 2s ease-in-out infinite" : "none",
           }}
+          onMouseEnter={(e) => {
+            if (!loading && message.trim()) {
+              e.currentTarget.style.filter = "drop-shadow(0 0 20px rgba(59, 130, 246, 0.6)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.filter = "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))";
+          }}
+          title="Cast your message into the ocean"
+          aria-label={loading ? "Sealing message..." : "Cast message into the ocean"}
         >
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !message.trim()}
+          <img
+            src="/assets/bottle-sprites/1.webp"
+            alt="Cast bottle"
             style={{
-              background: "transparent",
-              border: "none",
-              cursor: loading || !message.trim() ? "not-allowed" : "pointer",
-              opacity: loading || !message.trim() ? 0.5 : 1,
-              transform: `translateY(${bottleFloat}px)`,
-              transition: "transform 0.1s ease-out, opacity 0.3s, filter 0.3s",
-              padding: 0,
-              filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
+              width: "72px",
+              height: "auto",
+              transition: "width 0.3s",
             }}
-            onMouseEnter={(e) => {
-              if (!loading && message.trim()) {
-                e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.filter = "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))";
-            }}
-            aria-label={loading ? "Casting bottle..." : "Cast bottle"}
-          >
-            <img
-              src="/assets/bottle-sprites/1.webp"
-              alt="Cast bottle"
-              style={{
-                width: loading ? "100px" : "120px",
-                height: "auto",
-                transition: "width 0.3s",
-              }}
-            />
-          </button>
-        </div>
+          />
+        </button>
+
+        {showSparkles && (
+          <SparkleEffect />
+        )}
+
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% {
+              filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            }
+            50% {
+              filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
