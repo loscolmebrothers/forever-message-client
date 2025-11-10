@@ -8,6 +8,7 @@ interface Sparkle {
   y: number;
   size: number;
   delay: number;
+  type: "star" | "dot";
 }
 
 export function SparkleEffect() {
@@ -22,8 +23,9 @@ export function SparkleEffect() {
         id: i,
         x: Math.cos(angle) * distance,
         y: Math.sin(angle) * distance,
-        size: 4 + Math.random() * 4,
+        size: 16 + Math.random() * 16,
         delay: Math.random() * 0.2,
+        type: Math.random() > 0.5 ? "star" : "dot",
       });
     }
     setSparkles(sparkleArray);
@@ -32,17 +34,16 @@ export function SparkleEffect() {
   return (
     <>
       {sparkles.map((sparkle) => (
-        <div
+        <img
           key={sparkle.id}
+          src={`/assets/effects/sparkle-${sparkle.type}.png`}
+          alt=""
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
             width: `${sparkle.size}px`,
             height: `${sparkle.size}px`,
-            backgroundColor: "#ffd700",
-            borderRadius: "50%",
-            boxShadow: "0 0 4px #ffd700, 0 0 8px #ffd700",
             transform: `translate(-50%, -50%) translate(${sparkle.x}px, ${sparkle.y}px)`,
             opacity: 0,
             animation: `sparkle 0.6s ease-out ${sparkle.delay}s forwards`,

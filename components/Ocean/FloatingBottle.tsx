@@ -6,6 +6,7 @@ import { useImage } from "react-konva-utils";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { BOTTLE_VISUAL } from "@/lib/constants";
 import { useBottlePhysics } from "@/hooks/useBottlePhysics";
+import { BottleSprite } from "./BottleSprite";
 
 interface FloatingBottleProps {
   bottle: Bottle;
@@ -153,33 +154,18 @@ export function FloatingBottle({
       scaleY={SPRITE_BASE_SCALE * entranceScale * hoverScale}
       opacity={finalOpacity}
     >
-      {isPending && bottleImage && (
-        <Circle
-          x={imageWidth / 2}
-          y={imageHeight / 2}
-          radius={imageWidth * 1.2}
-          fill="rgba(100, 150, 255, 0.2)"
-          shadowColor="#6495FF"
-          shadowBlur={15}
-          shadowOpacity={0.6 * pulseOpacity}
-        />
-      )}
-
-      {isForever && !isPending && bottleImage && (
-        <Circle
-          x={imageWidth / 2}
-          y={imageHeight / 2}
-          radius={imageWidth}
-          fill="rgba(255, 215, 0, 0.3)"
-          shadowColor="#FFD700"
-          shadowBlur={20}
-          shadowOpacity={0.8}
-        />
-      )}
-
       {bottleImage && (
         <Image alt="Bottle sprite image" image={bottleImage} x={0} y={0} />
       )}
+
+      <BottleSprite
+        x={imageWidth / 2}
+        y={imageHeight / 2}
+        bottleWidth={imageWidth}
+        bottleHeight={imageHeight}
+        isPending={isPending}
+        isForever={isForever && !isPending}
+      />
     </Group>
   );
 }
