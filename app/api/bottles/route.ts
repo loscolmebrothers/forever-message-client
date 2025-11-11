@@ -37,7 +37,6 @@ export async function GET(request: Request) {
 
     const bottleIds = (bottlesData || []).map((b) => b.id);
 
-    // Fetch like counts
     const { data: likesData, error: likesError } = await supabaseAdmin
       .from("likes")
       .select("bottle_id")
@@ -51,7 +50,6 @@ export async function GET(request: Request) {
       {} as Record<number, number>,
     );
 
-    // Fetch comment counts
     const { data: commentsData, error: commentsError } = await supabaseAdmin
       .from("comments")
       .select("bottle_id")

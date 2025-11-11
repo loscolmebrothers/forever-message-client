@@ -58,7 +58,8 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [technicalDetails, setTechnicalDetails] = useState<TechnicalDetails | null>(null);
+  const [technicalDetails, setTechnicalDetails] =
+    useState<TechnicalDetails | null>(null);
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -120,7 +121,6 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
                 id: updatedItem.id,
                 duration: 4000,
                 dismissible: true,
-                closeButton: true,
                 action: {
                   label: "ⓘ",
                   onClick: () => {

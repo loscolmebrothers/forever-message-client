@@ -13,7 +13,12 @@ interface CreateBottleModalProps {
 
 const MAX_CHARACTERS = 120;
 
-type AnimationPhase = "idle" | "rolling" | "bottle-filling" | "sparkling" | "flying";
+type AnimationPhase =
+  | "idle"
+  | "rolling"
+  | "bottle-filling"
+  | "sparkling"
+  | "flying";
 
 export function CreateBottleModal({
   isOpen,
@@ -69,7 +74,8 @@ export function CreateBottleModal({
   }, [isOpen, onClose, loading]);
 
   const handleSubmit = async () => {
-    if (!message.trim() || loading || !modalRef.current || !sealRef.current) return;
+    if (!message.trim() || loading || !modalRef.current || !sealRef.current)
+      return;
 
     setLoading(true);
     setError(null);
@@ -81,7 +87,7 @@ export function CreateBottleModal({
         anime(modalRef.current!, {
           scaleY: 0.1,
           duration: 800,
-          ease: 'inOut(quad)',
+          ease: "inOut(quad)",
           complete: () => resolve(),
         });
       });
@@ -94,19 +100,24 @@ export function CreateBottleModal({
         scale: [0.5, 1.5],
         opacity: [0, 1],
         duration: 600,
-        ease: 'out(elastic(1, .6))',
-        filter: ['drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))', 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))'],
+        ease: "out(elastic(1, .6))",
+        filter: [
+          "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
+          "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
+        ],
       });
     }
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
     setAnimationPhase("sparkling");
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         throw new Error("Please sign in to create a bottle");
@@ -116,7 +127,7 @@ export function CreateBottleModal({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ message }),
       });
@@ -133,26 +144,30 @@ export function CreateBottleModal({
       const fadePromises = [];
 
       if (modalTargets.length > 0) {
-        fadePromises.push(new Promise<void>((resolve) => {
-          anime(modalTargets, {
-            translateY: -200,
-            opacity: 0,
-            duration: 600,
-            ease: 'in(quad)',
-            complete: () => resolve(),
-          });
-        }));
+        fadePromises.push(
+          new Promise<void>((resolve) => {
+            anime(modalTargets, {
+              translateY: -200,
+              opacity: 0,
+              duration: 600,
+              ease: "in(quad)",
+              complete: () => resolve(),
+            });
+          }),
+        );
       }
 
       if (backdropRef.current) {
-        fadePromises.push(new Promise<void>((resolve) => {
-          anime(backdropRef.current!, {
-            opacity: 0,
-            duration: 600,
-            ease: 'in(quad)',
-            complete: () => resolve(),
-          });
-        }));
+        fadePromises.push(
+          new Promise<void>((resolve) => {
+            anime(backdropRef.current!, {
+              opacity: 0,
+              duration: 600,
+              ease: "in(quad)",
+              complete: () => resolve(),
+            });
+          }),
+        );
       }
 
       await Promise.all(fadePromises);
@@ -160,7 +175,8 @@ export function CreateBottleModal({
       onClose();
       onSuccess();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create bottle";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create bottle";
       setError(errorMessage);
       setLoading(false);
       setAnimationPhase("idle");
@@ -169,7 +185,7 @@ export function CreateBottleModal({
         anime(modalRef.current, {
           scaleY: 1,
           duration: 300,
-          ease: 'out(quad)',
+          ease: "out(quad)",
         });
       }
     }
@@ -327,13 +343,13 @@ export function CreateBottleModal({
         <textarea
           value={message}
           onChange={(e) => {
-            const newValue = e.target.value.replace(/\n/g, '');
+            const newValue = e.target.value.replace(/\n/g, "");
             if (newValue.length <= MAX_CHARACTERS) {
               setMessage(newValue);
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               e.preventDefault();
             }
           }}
@@ -373,7 +389,10 @@ export function CreateBottleModal({
             style={{
               fontFamily: "'ApfelGrotezk', sans-serif",
               fontSize: "11px",
-              color: message.length >= MAX_CHARACTERS ? "#8b4513" : "rgba(44, 24, 16, 0.4)",
+              color:
+                message.length >= MAX_CHARACTERS
+                  ? "#8b4513"
+                  : "rgba(44, 24, 16, 0.4)",
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
             }}
           >
@@ -407,21 +426,36 @@ export function CreateBottleModal({
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.filter = "drop-shadow(0 0 30px rgba(220, 38, 38, 0.8)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 0 30px rgba(220, 38, 38, 0.8)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))";
               }
             }}
             onMouseLeave={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
               }
             }}
             aria-label={loading ? "Sealing message..." : "Seal your message"}
           >
             <img
-              src={isBottleFilling || isSparkling || isFlying ? "/assets/bottle-sprites/1.webp" : "/assets/effects/wax-seal.png"}
-              alt={isBottleFilling || isSparkling || isFlying ? "Bottle" : "Wax seal"}
+              src={
+                isBottleFilling || isSparkling || isFlying
+                  ? "/assets/bottle-sprites/1.webp"
+                  : "/assets/wax-seal.png"
+              }
+              alt={
+                isBottleFilling || isSparkling || isFlying
+                  ? "Bottle"
+                  : "Wax seal"
+              }
               style={{
-                width: isBottleFilling || isSparkling || isFlying ? "64px" : isMobile ? "80px" : "96px",
+                width:
+                  isBottleFilling || isSparkling || isFlying
+                    ? "64px"
+                    : isMobile
+                      ? "80px"
+                      : "96px",
                 height: "auto",
                 transition: "all 0.6s ease-in-out",
               }}

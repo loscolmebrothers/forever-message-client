@@ -1,26 +1,26 @@
-import type { Metadata } from 'next'
-import { Toaster } from 'sonner'
-import './globals.css'
-import { Providers } from './providers'
+import type { Metadata } from "next";
+import { Toaster } from "sonner";
+import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: 'Forever Message',
-  description: 'Messages in bottles floating in a digital ocean',
-}
+  title: "Forever Message",
+  description: "Messages in bottles floating in a digital ocean",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body>
         <Providers>
           {children}
-          <Toaster position="top-right" />
+          <Toaster position="bottom-center" />
         </Providers>
       </body>
     </html>
-  )
+  );
 }
