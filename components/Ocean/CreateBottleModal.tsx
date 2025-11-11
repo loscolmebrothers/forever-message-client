@@ -31,6 +31,7 @@ export function CreateBottleModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLButtonElement>(null);
   const sparkleContainerRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const img = new Image();
@@ -94,6 +95,7 @@ export function CreateBottleModal({
         opacity: [0, 1],
         duration: 600,
         ease: 'out(elastic(1, .6))',
+        filter: ['drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))', 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))'],
       });
     }
 
@@ -124,24 +126,39 @@ export function CreateBottleModal({
         throw new Error(data.details || "Failed to create bottle");
       }
 
-      onSuccess();
-
       setAnimationPhase("flying");
 
-      const targets = [modalRef.current, sealRef.current].filter(Boolean);
-      if (targets.length > 0) {
-        await new Promise<void>((resolve) => {
-          anime(targets, {
+      const modalTargets = [modalRef.current, sealRef.current].filter(Boolean);
+
+      const fadePromises = [];
+
+      if (modalTargets.length > 0) {
+        fadePromises.push(new Promise<void>((resolve) => {
+          anime(modalTargets, {
             translateY: -200,
             opacity: 0,
             duration: 600,
             ease: 'in(quad)',
             complete: () => resolve(),
           });
-        });
+        }));
       }
 
+      if (backdropRef.current) {
+        fadePromises.push(new Promise<void>((resolve) => {
+          anime(backdropRef.current!, {
+            opacity: 0,
+            duration: 600,
+            ease: 'in(quad)',
+            complete: () => resolve(),
+          });
+        }));
+      }
+
+      await Promise.all(fadePromises);
+
       onClose();
+      onSuccess();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create bottle";
       setError(errorMessage);
@@ -212,6 +229,7 @@ export function CreateBottleModal({
 
   return (
     <div
+      ref={backdropRef}
       style={{
         position: "fixed",
         top: 0,
