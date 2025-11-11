@@ -2573,6 +2573,11 @@ ajv@^8.0.0, ajv@^8.12.0:
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
 
+animejs@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/animejs/-/animejs-4.2.2.tgz#75f2529cb8a5b837109f94591e1f28a0e50f2e09"
+  integrity sha512-Ys3RuvLdAeI14fsdKCQy7ytu4057QX6Bb7m4jwmfd6iKmUmLquTwk1ut0e4NtRQgCeq/s2Lv5+oMBjz6c7ZuIg==
+
 ansi-regex@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz"
