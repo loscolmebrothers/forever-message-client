@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { SparkleEffect } from "./SparkleEffect";
+import { animate as anime } from "animejs";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
@@ -10,7 +11,7 @@ interface CreateBottleModalProps {
   onSuccess: () => void;
 }
 
-const MAX_CHARACTERS = 200;
+const MAX_CHARACTERS = 120;
 
 type AnimationPhase = "idle" | "rolling" | "bottle-filling" | "sparkling" | "flying";
 
@@ -26,6 +27,10 @@ export function CreateBottleModal({
   const [animationPhase, setAnimationPhase] = useState<AnimationPhase>("idle");
   const [isMobile, setIsMobile] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  const sealRef = useRef<HTMLButtonElement>(null);
+  const sparkleContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const img = new Image();
@@ -63,18 +68,39 @@ export function CreateBottleModal({
   }, [isOpen, onClose, loading]);
 
   const handleSubmit = async () => {
-    if (!message.trim() || loading) return;
+    if (!message.trim() || loading || !modalRef.current || !sealRef.current) return;
 
     setLoading(true);
     setError(null);
 
     setAnimationPhase("rolling");
-    await new Promise(resolve => setTimeout(resolve, 800));
+
+    if (modalRef.current) {
+      await new Promise<void>((resolve) => {
+        anime(modalRef.current!, {
+          scaleY: 0.1,
+          duration: 800,
+          ease: 'inOut(quad)',
+          complete: () => resolve(),
+        });
+      });
+    }
 
     setAnimationPhase("bottle-filling");
+
+    if (sealRef.current) {
+      anime(sealRef.current, {
+        scale: [0.5, 1.5],
+        opacity: [0, 1],
+        duration: 600,
+        ease: 'out(elastic(1, .6))',
+      });
+    }
+
     await new Promise(resolve => setTimeout(resolve, 600));
 
     setAnimationPhase("sparkling");
+
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
@@ -101,7 +127,19 @@ export function CreateBottleModal({
       onSuccess();
 
       setAnimationPhase("flying");
-      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const targets = [modalRef.current, sealRef.current].filter(Boolean);
+      if (targets.length > 0) {
+        await new Promise<void>((resolve) => {
+          anime(targets, {
+            translateY: -200,
+            opacity: 0,
+            duration: 600,
+            ease: 'in(quad)',
+            complete: () => resolve(),
+          });
+        });
+      }
 
       onClose();
     } catch (err) {
@@ -109,6 +147,14 @@ export function CreateBottleModal({
       setError(errorMessage);
       setLoading(false);
       setAnimationPhase("idle");
+
+      if (modalRef.current) {
+        anime(modalRef.current, {
+          scaleY: 1,
+          duration: 300,
+          ease: 'out(quad)',
+        });
+      }
     }
   };
 
@@ -181,6 +227,7 @@ export function CreateBottleModal({
       onClick={loading ? undefined : onClose}
     >
       <div
+        ref={modalRef}
         style={{
           position: "relative",
           backgroundColor: "#f5f5dc",
@@ -190,9 +237,6 @@ export function CreateBottleModal({
           width: "90%",
           margin: "0 16px",
           boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-          transition: "all 0.8s ease-in-out",
-          transform: isRolling ? "scaleY(0.1)" : "scaleY(1)",
-          opacity: isFlying ? 0 : 1,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -265,9 +309,14 @@ export function CreateBottleModal({
         <textarea
           value={message}
           onChange={(e) => {
-            const newValue = e.target.value;
+            const newValue = e.target.value.replace(/\n/g, '');
             if (newValue.length <= MAX_CHARACTERS) {
               setMessage(newValue);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
             }
           }}
           placeholder="Write your message..."
@@ -286,9 +335,12 @@ export function CreateBottleModal({
             position: "relative",
             zIndex: 1,
             textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
           }}
           disabled={loading}
           autoFocus
+          rows={1}
         />
 
         <div
@@ -322,30 +374,8 @@ export function CreateBottleModal({
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          {showTooltip && message.trim() && !loading && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: "calc(100% + 12px)",
-                left: "50%",
-                transform: "translateX(-50%)",
-                backgroundColor: "#2c1810",
-                color: "#ffffff",
-                padding: "8px 12px",
-                borderRadius: "4px",
-                fontSize: "14px",
-                fontFamily: "'ApfelGrotezk', sans-serif",
-                whiteSpace: "nowrap",
-                zIndex: 100,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                pointerEvents: "none",
-              }}
-            >
-              Seal your message
-            </div>
-          )}
-
           <button
+            ref={sealRef}
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
             style={{
@@ -353,22 +383,18 @@ export function CreateBottleModal({
               border: "none",
               cursor: loading || !message.trim() ? "default" : "pointer",
               opacity: loading || !message.trim() ? 0.4 : 1,
-              transition: "all 0.3s",
               padding: 0,
               filter: "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
               position: "relative",
-              transform: isBottleFilling ? "scale(1.8)" : "scale(1)",
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
                 e.currentTarget.style.filter = "drop-shadow(0 0 30px rgba(220, 38, 38, 0.8)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))";
-                e.currentTarget.style.transform = "scale(1.15)";
               }
             }}
             onMouseLeave={(e) => {
               if (!loading && message.trim()) {
                 e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
-                e.currentTarget.style.transform = "scale(1)";
               }
             }}
             aria-label={loading ? "Sealing message..." : "Seal your message"}
@@ -384,9 +410,35 @@ export function CreateBottleModal({
             />
 
             {isSparkling && (
-              <SparkleEffect />
+              <div ref={sparkleContainerRef}>
+                <SparkleEffect />
+              </div>
             )}
           </button>
+
+          {showTooltip && message.trim() && !loading && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "#2c1810",
+                color: "#ffffff",
+                padding: "6px 10px",
+                borderRadius: "4px",
+                fontSize: "11px",
+                fontFamily: "'ApfelGrotezk', sans-serif",
+                whiteSpace: "nowrap",
+                zIndex: 100,
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                pointerEvents: "none",
+                opacity: 0.8,
+              }}
+            >
+              Seal your message
+            </div>
+          )}
         </div>
 
         {error && (
