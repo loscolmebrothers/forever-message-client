@@ -103,6 +103,15 @@ export function CreateBottleModal({
 
     setAnimationPhase("sparkling");
 
+    if (sealRef.current) {
+      anime(sealRef.current, {
+        opacity: 1,
+        filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
+        duration: 300,
+        ease: 'out(quad)',
+      });
+    }
+
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
@@ -130,10 +139,8 @@ export function CreateBottleModal({
 
       const modalTargets = [modalRef.current, sealRef.current].filter(Boolean);
 
-      const fadePromises = [];
-
       if (modalTargets.length > 0) {
-        fadePromises.push(new Promise<void>((resolve) => {
+        await new Promise<void>((resolve) => {
           anime(modalTargets, {
             translateY: -200,
             opacity: 0,
@@ -141,21 +148,8 @@ export function CreateBottleModal({
             ease: 'in(quad)',
             complete: () => resolve(),
           });
-        }));
+        });
       }
-
-      if (backdropRef.current) {
-        fadePromises.push(new Promise<void>((resolve) => {
-          anime(backdropRef.current!, {
-            opacity: 0,
-            duration: 600,
-            ease: 'in(quad)',
-            complete: () => resolve(),
-          });
-        }));
-      }
-
-      await Promise.all(fadePromises);
 
       onClose();
       onSuccess();
@@ -407,12 +401,22 @@ export function CreateBottleModal({
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.filter = "drop-shadow(0 0 30px rgba(220, 38, 38, 0.8)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))";
+                anime(e.currentTarget, {
+                  scale: 1.15,
+                  rotate: 5,
+                  duration: 400,
+                  ease: 'out(elastic(1, .5))',
+                });
               }
             }}
             onMouseLeave={(e) => {
               if (!loading && message.trim()) {
-                e.currentTarget.style.filter = "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))";
+                anime(e.currentTarget, {
+                  scale: 1,
+                  rotate: 0,
+                  duration: 400,
+                  ease: 'out(elastic(1, .5))',
+                });
               }
             }}
             aria-label={loading ? "Sealing message..." : "Seal your message"}
@@ -451,7 +455,7 @@ export function CreateBottleModal({
                 zIndex: 100,
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                 pointerEvents: "none",
-                opacity: 0.8,
+                opacity: 0.5,
               }}
             >
               Seal your message
