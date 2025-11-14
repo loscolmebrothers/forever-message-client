@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import NextImage from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { SparkleEffect } from "./SparkleEffect";
@@ -74,7 +74,7 @@ export function CreateBottleModal({
     }
   }, [isOpen, onClose, loading]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!message.trim() || loading || !modalRef.current || !sealRef.current)
       return;
 
@@ -181,7 +181,20 @@ export function CreateBottleModal({
         });
       }
     }
-  };
+  }, [message, loading, onClose, onSuccess]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !loading) {
+        handleSubmit();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isOpen, loading, handleSubmit]);
 
   if (!isOpen) return null;
 
@@ -411,7 +424,12 @@ export function CreateBottleModal({
               background: "transparent",
               border: "none",
               cursor: loading || !message.trim() ? "default" : "pointer",
-              opacity: loading || !message.trim() ? 0.4 : 1,
+              opacity:
+                isBottleFilling || isSparkling || isFlying
+                  ? 1
+                  : loading || !message.trim()
+                    ? 0.4
+                    : 1,
               padding: 0,
               filter: "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
               position: "relative",
@@ -487,7 +505,8 @@ export function CreateBottleModal({
                 zIndex: 100,
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                 pointerEvents: "none",
-                opacity: 0.5,
+                opacity: 1,
+                transition: "opacity 150ms ease",
               }}
             >
               Seal your message
