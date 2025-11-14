@@ -119,17 +119,15 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
             if (updatedItem.status === "completed") {
               toast.success("Your bottle is floating in the ocean!", {
                 id: updatedItem.id,
-                duration: 4000,
+                duration: 15000,
                 dismissible: true,
                 action: {
-                  label: "ⓘ",
+                  label: "Where exactly?",
                   onClick: () => {
-                    setTechnicalDetails({
-                      bottleId: updatedItem.blockchain_id,
-                      ipfsCid: updatedItem.ipfs_cid,
-                      createdAt: updatedItem.created_at,
-                      completedAt: updatedItem.completed_at,
-                    });
+                    toast.info(
+                      "We're working on making this feature even more special. Check back soon!",
+                      { duration: 5000 }
+                    );
                   },
                 },
               });
