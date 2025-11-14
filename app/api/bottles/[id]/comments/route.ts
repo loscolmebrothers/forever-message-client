@@ -13,7 +13,7 @@ import path from "path";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const bottleId = parseInt(params.id, 10);
@@ -54,22 +54,21 @@ export async function GET(
         error: "Failed to fetch comments",
         details: errorMessage,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export const POST = withAuth(
-  async (
-    request: NextRequest,
-    user,
-    context: { params: { id: string } }
-  ) => {
+  async (request: NextRequest, user, context: { params: { id: string } }) => {
     try {
       const bottleId = parseInt(context.params.id, 10);
 
       if (isNaN(bottleId) || bottleId < 1) {
-        return NextResponse.json({ error: "Invalid bottle ID" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid bottle ID" },
+          { status: 400 }
+        );
       }
 
       // Check if bottle exists and get its expiration info
@@ -81,14 +80,17 @@ export const POST = withAuth(
         .single();
 
       if (bottleError || !bottle) {
-        return NextResponse.json({ error: "Bottle not found" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Bottle not found" },
+          { status: 404 }
+        );
       }
 
       const expiresAt = new Date(bottle.expires_at);
       if (!bottle.is_forever && expiresAt.getTime() < Date.now()) {
         return NextResponse.json(
           { error: "Cannot comment on expired bottle" },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -96,95 +98,99 @@ export const POST = withAuth(
       const { message } = body;
       const userId = user.wallet_address;
 
-    if (!message || typeof message !== "string") {
+      if (!message || typeof message !== "string") {
+        return NextResponse.json(
+          { error: "Message is required and must be a string" },
+          { status: 400 }
+        );
+      }
+
+      if (message.trim().length === 0) {
+        return NextResponse.json(
+          { error: "Message cannot be empty" },
+          { status: 400 }
+        );
+      }
+
+      console.log(`[API] Adding comment to bottle ${bottleId} by ${userId}`);
+      console.log("[API] Message length:", message.length);
+
+      console.log("[API] Uploading comment to IPFS...");
+
+      if (!process.env.STORACHA_PRINCIPAL_KEY) {
+        throw new Error(
+          "Missing Storacha credentials. Set STORACHA_PRINCIPAL_KEY environment variable."
+        );
+      }
+
+      const proofPath = path.join(
+        process.cwd(),
+        "storacha-forever-message-proof.txt"
+      );
+      const proof = fs.readFileSync(proofPath, "utf-8").trim();
+
+      const ipfs = await createIPFSService({
+        principalKey: process.env.STORACHA_PRINCIPAL_KEY,
+        proof,
+        gatewayUrl:
+          process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
+      });
+
+      const uploadResult = await ipfs.uploadComment(message, bottleId, userId);
+      console.log("[API] IPFS upload successful:", uploadResult.cid);
+
+      const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
+      const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
+      if (!rpcUrl || !privateKey || !contractAddress) {
+        throw new Error("Missing required environment variables");
+      }
+
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const wallet = new ethers.Wallet(privateKey, provider);
+
+      const contract = new BottleContract({
+        contractAddress,
+        contractABI: FOREVER_MESSAGE_ABI,
+        signer: wallet,
+      });
+
+      console.log("[API] Adding comment to blockchain...");
+      const commentId = await contract.addComment(
+        bottleId,
+        uploadResult.cid,
+        userId
+      );
+      console.log("[API] Comment created with ID:", commentId);
+
+      return NextResponse.json({
+        success: true,
+        commentId,
+        bottleId,
+        cid: uploadResult.cid,
+        url: uploadResult.url,
+        message: "Comment added successfully.",
+      });
+    } catch (error) {
+      console.error("[API] Error adding comment:", error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       return NextResponse.json(
-        { error: "Message is required and must be a string" },
-        { status: 400 },
+        {
+          error: "Failed to add comment",
+          details: errorMessage,
+          ...(process.env.NODE_ENV === "development" && {
+            stack: error instanceof Error ? error.stack : undefined,
+          }),
+        },
+        { status: 500 }
       );
     }
-
-    if (message.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Message cannot be empty" },
-        { status: 400 },
-      );
-    }
-
-    console.log(`[API] Adding comment to bottle ${bottleId} by ${userId}`);
-    console.log("[API] Message length:", message.length);
-
-    console.log("[API] Uploading comment to IPFS...");
-
-    if (!process.env.STORACHA_PRINCIPAL_KEY) {
-      throw new Error(
-        "Missing Storacha credentials. Set STORACHA_PRINCIPAL_KEY environment variable."
-      );
-    }
-
-    const proofPath = path.join(process.cwd(), "storacha-forever-message-proof.txt");
-    const proof = fs.readFileSync(proofPath, "utf-8").trim();
-
-    const ipfs = await createIPFSService({
-      principalKey: process.env.STORACHA_PRINCIPAL_KEY,
-      proof,
-      gatewayUrl:
-        process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
-    });
-
-    const uploadResult = await ipfs.uploadComment(message, bottleId, userId);
-    console.log("[API] IPFS upload successful:", uploadResult.cid);
-
-    const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
-    const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-
-    if (!rpcUrl || !privateKey || !contractAddress) {
-      throw new Error("Missing required environment variables");
-    }
-
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const wallet = new ethers.Wallet(privateKey, provider);
-
-    const contract = new BottleContract({
-      contractAddress,
-      contractABI: FOREVER_MESSAGE_ABI,
-      signer: wallet,
-    });
-
-    console.log("[API] Adding comment to blockchain...");
-    const commentId = await contract.addComment(
-      bottleId,
-      uploadResult.cid,
-      userId,
-    );
-    console.log("[API] Comment created with ID:", commentId);
-
-    return NextResponse.json({
-      success: true,
-      commentId,
-      bottleId,
-      cid: uploadResult.cid,
-      url: uploadResult.url,
-      message: "Comment added successfully.",
-    });
-  } catch (error) {
-    console.error("[API] Error adding comment:", error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-
-    return NextResponse.json(
-      {
-        error: "Failed to add comment",
-        details: errorMessage,
-        ...(process.env.NODE_ENV === "development" && {
-          stack: error instanceof Error ? error.stack : undefined,
-        }),
-      },
-      { status: 500 },
-    );
   }
-});
+);
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

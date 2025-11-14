@@ -9,7 +9,7 @@
 export function getRandomBottlePosition(
   oceanWidth: number,
   oceanHeight: number,
-  padding: number = 50,
+  padding: number = 50
 ): { x: number; y: number } {
   return {
     x: padding + Math.random() * (oceanWidth - 2 * padding),

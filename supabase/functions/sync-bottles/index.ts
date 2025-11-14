@@ -1,29 +1,33 @@
 // Supabase Edge Function for syncing bottles from blockchain
 // Runs as CRON job every 10 minutes
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { ethers } from 'https://esm.sh/ethers@6.15.0';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { ethers } from "https://esm.sh/ethers@6.15.0";
 
 // Blockchain configuration - MUST be set via Supabase Edge Function secrets
-const CONTRACT_ADDRESS = Deno.env.get('CONTRACT_ADDRESS');
-const RPC_URL = Deno.env.get('BASE_SEPOLIA_RPC_URL');
-const IPFS_GATEWAY = Deno.env.get('IPFS_GATEWAY') || 'https://storacha.link/ipfs';
+const CONTRACT_ADDRESS = Deno.env.get("CONTRACT_ADDRESS");
+const RPC_URL = Deno.env.get("BASE_SEPOLIA_RPC_URL");
+const IPFS_GATEWAY =
+  Deno.env.get("IPFS_GATEWAY") || "https://storacha.link/ipfs";
 
 // Validate required environment variables
 if (!CONTRACT_ADDRESS) {
-  throw new Error('CONTRACT_ADDRESS environment variable is required');
+  throw new Error("CONTRACT_ADDRESS environment variable is required");
 }
 if (!RPC_URL) {
-  throw new Error('BASE_SEPOLIA_RPC_URL environment variable is required');
+  throw new Error("BASE_SEPOLIA_RPC_URL environment variable is required");
 }
 
 // Contract ABI (minimal, just what we need)
 const CONTRACT_ABI = [
-  'function nextBottleId() view returns (uint256)',
-  'function getBottle(uint256 id) view returns (tuple(uint256 id, address creator, string ipfsHash, uint256 createdAt, uint256 expiresAt, bool isForever, bool exists))'
+  "function nextBottleId() view returns (uint256)",
+  "function getBottle(uint256 id) view returns (tuple(uint256 id, address creator, string ipfsHash, uint256 createdAt, uint256 expiresAt, bool isForever, bool exists))",
 ];
 
 // Fetch bottle from blockchain
-async function fetchBottleFromBlockchain(contract: ethers.Contract, id: number) {
+async function fetchBottleFromBlockchain(
+  contract: ethers.Contract,
+  id: number
+) {
   try {
     const rawBottle = await contract.getBottle(id);
     if (!rawBottle.exists) {
@@ -35,7 +39,7 @@ async function fetchBottleFromBlockchain(contract: ethers.Contract, id: number) 
       ipfsHash: rawBottle.ipfsHash,
       createdAt: new Date(Number(rawBottle.createdAt) * 1000),
       expiresAt: new Date(Number(rawBottle.expiresAt) * 1000),
-      isForever: rawBottle.isForever
+      isForever: rawBottle.isForever,
     };
   } catch (error) {
     console.error(`Error fetching bottle ${id}:`, error);
@@ -51,7 +55,7 @@ async function fetchIPFSContent(cid: string) {
     const data = await response.json();
     return {
       message: data.message,
-      userId: data.userId
+      userId: data.userId,
     };
   } catch (error) {
     console.error(`Error fetching IPFS ${cid}:`, error);
@@ -66,22 +70,26 @@ function sleep(ms: number) {
 
 Deno.serve(async (req) => {
   try {
-    console.log('🔄 Starting blockchain sync...');
+    console.log("🔄 Starting blockchain sync...");
     console.log(`Using contract: ${CONTRACT_ADDRESS}`);
 
     // Parse batch parameters from request (optional, for manual syncing)
     const url = new URL(req.url);
-    const manualBatchSize = url.searchParams.get('batchSize');
-    const manualStartId = url.searchParams.get('startId');
+    const manualBatchSize = url.searchParams.get("batchSize");
+    const manualStartId = url.searchParams.get("startId");
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Initialize blockchain provider and contract
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+    const contract = new ethers.Contract(
+      CONTRACT_ADDRESS,
+      CONTRACT_ABI,
+      provider
+    );
 
     // Get total bottles from blockchain
     const nextBottleId = await contract.nextBottleId();
@@ -94,12 +102,12 @@ Deno.serve(async (req) => {
         JSON.stringify({
           success: true,
           synced: 0,
-          message: 'No bottles to sync'
+          message: "No bottles to sync",
         }),
         {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
     }
@@ -111,16 +119,18 @@ Deno.serve(async (req) => {
       // Manual mode: use provided parameters
       startId = parseInt(manualStartId, 10);
       batchSize = parseInt(manualBatchSize, 10);
-      console.log(`Manual batch sync: startId=${startId}, batchSize=${batchSize}`);
+      console.log(
+        `Manual batch sync: startId=${startId}, batchSize=${batchSize}`
+      );
     } else {
       // Auto mode: find missing bottles
-      console.log('Auto mode: finding missing bottles...');
+      console.log("Auto mode: finding missing bottles...");
 
       // Get all existing bottle IDs from Supabase
       const { data: existingBottles } = await supabase
-        .from('bottles')
-        .select('id')
-        .order('id', { ascending: true });
+        .from("bottles")
+        .select("id")
+        .order("id", { ascending: true });
 
       const existingIds = new Set((existingBottles || []).map((b) => b.id));
 
@@ -133,26 +143,28 @@ Deno.serve(async (req) => {
       }
 
       if (missingIds.length === 0) {
-        console.log('✅ All bottles already synced!');
+        console.log("✅ All bottles already synced!");
         return new Response(
           JSON.stringify({
             success: true,
             synced: 0,
-            message: 'All bottles already synced',
+            message: "All bottles already synced",
             total: totalBottles,
-            inDatabase: existingIds.size
+            inDatabase: existingIds.size,
           }),
           {
             headers: {
-              'Content-Type': 'application/json'
-            }
+              "Content-Type": "application/json",
+            },
           }
         );
       }
 
       startId = missingIds[0];
       batchSize = missingIds.length;
-      console.log(`Found ${missingIds.length} missing bottles, syncing: ${missingIds.join(', ')}`);
+      console.log(
+        `Found ${missingIds.length} missing bottles, syncing: ${missingIds.join(", ")}`
+      );
     }
 
     // Calculate end ID for this batch
@@ -182,8 +194,8 @@ Deno.serve(async (req) => {
         console.error(`Failed to fetch bottle ${id}:`, error.message);
 
         // If rate limit, wait longer
-        if (error.message?.includes('429') || error.message?.includes('rate')) {
-          console.log('Rate limit hit, waiting 2s...');
+        if (error.message?.includes("429") || error.message?.includes("rate")) {
+          console.log("Rate limit hit, waiting 2s...");
           await sleep(2000);
         }
       }
@@ -206,8 +218,8 @@ Deno.serve(async (req) => {
         is_forever: bottle.isForever,
         message: ipfsContent?.message || null,
         user_id: ipfsContent?.userId || null,
-        blockchain_status: 'confirmed',
-        last_synced_at: new Date().toISOString()
+        blockchain_status: "confirmed",
+        last_synced_at: new Date().toISOString(),
       });
 
       if ((i + 1) % 50 === 0) {
@@ -222,7 +234,9 @@ Deno.serve(async (req) => {
     for (let i = 0; i < bottlesToSync.length; i += BATCH_SIZE) {
       const batch = bottlesToSync.slice(i, i + BATCH_SIZE);
 
-      const { error } = await supabase.from('bottles').upsert(batch, { onConflict: 'id' });
+      const { error } = await supabase
+        .from("bottles")
+        .upsert(batch, { onConflict: "id" });
 
       if (error) {
         console.error(`Error syncing batch:`, error);
@@ -243,7 +257,7 @@ Deno.serve(async (req) => {
         batch: {
           startId,
           endId,
-          size: batchSize
+          size: batchSize,
         },
         total: totalBottles,
         fetched: successCount,
@@ -251,26 +265,26 @@ Deno.serve(async (req) => {
         synced: syncedCount,
         hasMore,
         nextStartId: hasMore ? nextStartId : null,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
       {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
   } catch (error: any) {
-    console.error('❌ Sync failed:', error);
+    console.error("❌ Sync failed:", error);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message,
       }),
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
   }

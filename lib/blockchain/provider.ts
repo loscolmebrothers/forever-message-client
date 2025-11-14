@@ -23,7 +23,9 @@ export function getContract(): Contract {
   const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
   if (!contractAddress) {
-    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS environment variable not set");
+    throw new Error(
+      "NEXT_PUBLIC_CONTRACT_ADDRESS environment variable not set"
+    );
   }
 
   const provider = getProvider();

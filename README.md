@@ -102,9 +102,9 @@ All steps completed:
 All Konva components must use the `'use client'` directive:
 
 ```tsx
-'use client'
+"use client";
 
-import { Stage, Layer } from 'react-konva'
+import { Stage, Layer } from "react-konva";
 
 export default function OceanStage() {
   // Canvas components need browser APIs
@@ -116,9 +116,9 @@ export default function OceanStage() {
 Import shared types from the monorepo:
 
 ```tsx
-import type { Bottle } from '@/types'
+import type { Bottle } from "@/types";
 // or
-import type { Bottle } from '@loscolmebrothers/forever-message-types'
+import type { Bottle } from "@loscolmebrothers/forever-message-types";
 ```
 
 ### Animation Performance
@@ -130,6 +130,7 @@ import type { Bottle } from '@loscolmebrothers/forever-message-types'
 ## Phase 1 Goals
 
 Create a peaceful, interactive ocean where:
+
 - 5-10 bottles float with autonomous movement
 - Bottles drift horizontally and bob vertically
 - Clicking a bottle opens a modal with its message

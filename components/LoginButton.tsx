@@ -6,7 +6,8 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { toast } from "sonner";
 
 export function LoginButton() {
-  const { isAuthenticated, isLoading, signOut, address, isConnected } = useAuth();
+  const { isAuthenticated, isLoading, signOut, address, isConnected } =
+    useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const previouslyConnected = useRef(false);
 
@@ -34,16 +35,17 @@ export function LoginButton() {
         }
 
         // Method 2: Click the backdrop/overlay
-        const backdrop = document.querySelector('[role="dialog"]')?.parentElement;
+        const backdrop =
+          document.querySelector('[role="dialog"]')?.parentElement;
         if (backdrop instanceof HTMLElement) {
           backdrop.click();
           return;
         }
 
         // Method 3: Try ESC key as fallback
-        const escEvent = new KeyboardEvent('keydown', {
-          key: 'Escape',
-          code: 'Escape',
+        const escEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+          code: "Escape",
           keyCode: 27,
           bubbles: true,
         });
@@ -74,7 +76,9 @@ export function LoginButton() {
             fontWeight: "500",
           }}
         >
-          {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connected"}
+          {address
+            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+            : "Connected"}
         </button>
 
         {showMenu && (
@@ -108,10 +112,10 @@ export function LoginButton() {
                   signOut();
                   setShowMenu(false);
                   // Clear RainbowKit's wallet selection cache completely
-                  if (typeof window !== 'undefined') {
+                  if (typeof window !== "undefined") {
                     // Clear all wagmi/RainbowKit localStorage keys
-                    Object.keys(localStorage).forEach(key => {
-                      if (key.startsWith('wagmi.') || key.startsWith('rk-')) {
+                    Object.keys(localStorage).forEach((key) => {
+                      if (key.startsWith("wagmi.") || key.startsWith("rk-")) {
                         localStorage.removeItem(key);
                       }
                     });

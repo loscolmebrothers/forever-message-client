@@ -19,7 +19,9 @@ interface LikeResponse {
 }
 
 const createAuthenticatedFetcher = async (url: string): Promise<LikeInfo> => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   if (!session) {
     throw new Error("Not authenticated");
@@ -27,8 +29,8 @@ const createAuthenticatedFetcher = async (url: string): Promise<LikeInfo> => {
 
   const response = await fetch(url, {
     headers: {
-      "Authorization": `Bearer ${session.access_token}`
-    }
+      Authorization: `Bearer ${session.access_token}`,
+    },
   });
 
   if (!response.ok) {
@@ -47,7 +49,7 @@ export function useLikes(bottleId: number) {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    },
+    }
   );
 
   const toggleLike = async () => {
@@ -56,7 +58,9 @@ export function useLikes(bottleId: number) {
     setIsToggling(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         throw new Error("Not authenticated");
@@ -74,14 +78,14 @@ export function useLikes(bottleId: number) {
           hasLiked: !currentHasLiked,
           userId: address || "",
         },
-        false,
+        false
       );
 
       const response = await fetch(`/api/bottles/${bottleId}/like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({}),
       });

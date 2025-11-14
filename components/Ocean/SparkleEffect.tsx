@@ -41,12 +41,14 @@ export function SparkleEffect() {
     if (!containerRef.current || sparkles.length === 0) return;
 
     sparkles.forEach((sparkle) => {
-      const el = containerRef.current?.querySelector(`[data-sparkle-id="${sparkle.id}"]`);
+      const el = containerRef.current?.querySelector(
+        `[data-sparkle-id="${sparkle.id}"]`
+      );
       if (!el) return;
 
       anime(el, {
-        translateX: ['0px', `${sparkle.x}px`],
-        translateY: ['0px', `${sparkle.y}px`],
+        translateX: ["0px", `${sparkle.x}px`],
+        translateY: ["0px", `${sparkle.y}px`],
         scale: [0, 1.2],
         rotate: [0, 180],
         opacity: [
@@ -56,23 +58,26 @@ export function SparkleEffect() {
         ],
         duration: sparkle.duration,
         delay: sparkle.delay,
-        ease: 'out(expo)',
+        ease: "out(expo)",
       });
 
-      const imgEl = el.querySelector('img');
+      const imgEl = el.querySelector("img");
       if (imgEl) {
         anime(imgEl, {
           rotate: [0, sparkle.rotation],
           duration: sparkle.duration,
           delay: sparkle.delay,
-          ease: 'linear',
+          ease: "linear",
         });
       }
     });
   }, [sparkles]);
 
   return (
-    <div ref={containerRef} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+    <div
+      ref={containerRef}
+      style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+    >
       {sparkles.map((sparkle) => (
         <div
           key={sparkle.id}
@@ -93,7 +98,8 @@ export function SparkleEffect() {
             style={{
               width: "100%",
               height: "100%",
-              filter: "drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) brightness(1.3)",
+              filter:
+                "drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) brightness(1.3)",
             }}
           />
         </div>

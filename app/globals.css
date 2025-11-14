@@ -1,85 +1,85 @@
 @font-face {
-    font-family: "AndreaScript";
-    src: url("https://assets.loscolmebrothers.com/fonts/AndreaScript.ttf")
-        format("truetype");
-    font-weight: normal;
-    font-style: normal;
+  font-family: "AndreaScript";
+  src: url("https://assets.loscolmebrothers.com/fonts/AndreaScript.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: "ApfelGrotezk";
-    src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Regular.otf")
-        format("opentype");
-    font-weight: normal;
-    font-style: normal;
+  font-family: "ApfelGrotezk";
+  src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Regular.otf")
+    format("opentype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 * {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 html,
 body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-    color: #2c3e50;
-    background: #87ceeb;
+  color: #2c3e50;
+  background: #87ceeb;
 }
 
 main {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
 }
 
 [data-sonner-toast] {
-    background-color: white !important;
-    color: black !important;
-    border-radius: 4px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
-    font-family: "ApfelGrotezk", sans-serif !important;
-    position: relative !important;
+  background-color: white !important;
+  color: black !important;
+  border-radius: 4px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  font-family: "ApfelGrotezk", sans-serif !important;
+  position: relative !important;
 }
 
 [data-sonner-toast] [data-content] {
-    color: black !important;
-    font-weight: 500 !important;
-    position: relative;
-    z-index: 1;
+  color: black !important;
+  font-weight: 500 !important;
+  position: relative;
+  z-index: 1;
 }
 
 [data-sonner-toast] [data-title] {
-    color: black !important;
-    font-weight: 600 !important;
+  color: black !important;
+  font-weight: 600 !important;
 }
 
 [data-sonner-toast] [data-description] {
-    color: black !important;
-    font-size: 13px !important;
+  color: black !important;
+  font-size: 13px !important;
 }
 
 [data-sonner-toast] [data-button] {
-    background-color: lightslategrey !important;
-    color: black !important;
-    font-family: "ApfelGrotezk", sans-serif !important;
-    font-weight: 600 !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+  background-color: lightslategrey !important;
+  color: black !important;
+  font-family: "ApfelGrotezk", sans-serif !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
 }
 
 [data-sonner-toast] [data-button]:hover {
-    background-color: black !important;
-    transform: translateY(-1px);
+  background-color: black !important;
+  transform: translateY(-1px);
 }
 
 [data-sonner-toast] [data-icon] svg {
-    color: grey !important;
+  color: grey !important;
 }

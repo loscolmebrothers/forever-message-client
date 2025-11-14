@@ -42,7 +42,10 @@ export async function POST(request: NextRequest) {
       throw new Error("Missing Storacha credentials");
     }
 
-    const proofPath = path.join(process.cwd(), "storacha-forever-message-proof.txt");
+    const proofPath = path.join(
+      process.cwd(),
+      "storacha-forever-message-proof.txt"
+    );
     const proof = fs.readFileSync(proofPath, "utf-8").trim();
 
     const ipfs = await createIPFSService({
@@ -53,7 +56,10 @@ export async function POST(request: NextRequest) {
     });
 
     const uploadResult = await ipfs.uploadBottle(message, userId);
-    console.log(`[Process ${queueId}] IPFS upload successful:`, uploadResult.cid);
+    console.log(
+      `[Process ${queueId}] IPFS upload successful:`,
+      uploadResult.cid
+    );
 
     // Update status to minting
     await supabaseAdmin
@@ -83,8 +89,14 @@ export async function POST(request: NextRequest) {
     // (deployer wallet pays gas, but user's address is the creator)
     const creatorAddress = userId;
 
-    console.log(`[Process ${queueId}] Creating bottle on blockchain for creator:`, creatorAddress);
-    const bottleId = await contract.createBottle(uploadResult.cid, creatorAddress);
+    console.log(
+      `[Process ${queueId}] Creating bottle on blockchain for creator:`,
+      creatorAddress
+    );
+    const bottleId = await contract.createBottle(
+      uploadResult.cid,
+      creatorAddress
+    );
     console.log(`[Process ${queueId}] Bottle created with ID:`, bottleId);
 
     // Update status to confirming
@@ -114,7 +126,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (insertError) {
-      console.error(`[Process ${queueId}] Error inserting into bottles:`, insertError);
+      console.error(
+        `[Process ${queueId}] Error inserting into bottles:`,
+        insertError
+      );
       throw insertError;
     }
 

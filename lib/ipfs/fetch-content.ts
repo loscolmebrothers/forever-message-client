@@ -15,7 +15,7 @@ const IPFS_GATEWAY =
  * Fetch bottle content from IPFS by CID
  */
 export async function fetchBottleContent(
-  cid: string,
+  cid: string
 ): Promise<IPFSBottle | null> {
   try {
     const url = `${IPFS_GATEWAY}/${cid}`;
@@ -31,7 +31,7 @@ export async function fetchBottleContent(
 
     if (!response.ok) {
       console.error(
-        `IPFS fetch failed for ${cid}: ${response.status} ${response.statusText}`,
+        `IPFS fetch failed for ${cid}: ${response.status} ${response.statusText}`
       );
       return null;
     }
@@ -55,7 +55,7 @@ export async function fetchBottleContent(
  * Fetch multiple bottle contents in parallel
  */
 export async function fetchMultipleBottleContents(
-  cids: string[],
+  cids: string[]
 ): Promise<(IPFSBottle | null)[]> {
   const promises = cids.map((cid) => fetchBottleContent(cid));
   return Promise.all(promises);
@@ -65,7 +65,7 @@ export async function fetchMultipleBottleContents(
  * Fetch comment content from IPFS by CID
  */
 export async function fetchCommentContent(
-  cid: string,
+  cid: string
 ): Promise<IPFSComment | null> {
   try {
     const url = `${IPFS_GATEWAY}/${cid}`;
@@ -80,7 +80,7 @@ export async function fetchCommentContent(
 
     if (!response.ok) {
       console.error(
-        `IPFS fetch failed for ${cid}: ${response.status} ${response.statusText}`,
+        `IPFS fetch failed for ${cid}: ${response.status} ${response.statusText}`
       );
       return null;
     }
@@ -103,7 +103,7 @@ export async function fetchCommentContent(
  * Fetch multiple comment contents in parallel
  */
 export async function fetchMultipleCommentContents(
-  cids: string[],
+  cids: string[]
 ): Promise<(IPFSComment | null)[]> {
   const promises = cids.map((cid) => fetchCommentContent(cid));
   return Promise.all(promises);

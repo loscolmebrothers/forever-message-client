@@ -1,6 +1,6 @@
 // Supabase Edge Function for processing bottle creation
 // Triggered by database webhook on bottles_queue table inserts
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 interface QueueRecord {
   id: string;
@@ -11,33 +11,33 @@ interface QueueRecord {
 
 Deno.serve(async (req) => {
   try {
-    console.log('🔄 Bottle processing triggered');
+    console.log("🔄 Bottle processing triggered");
 
     // Parse webhook payload from Supabase
     const payload = await req.json();
     const record = payload.record as QueueRecord;
 
     // Only process if status is 'queued'
-    if (record.status !== 'queued') {
+    if (record.status !== "queued") {
       console.log(`Skipping ${record.id} - status is ${record.status}`);
       return new Response(JSON.stringify({ skipped: true }), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     console.log(`Processing bottle: ${record.id}`);
 
     // Get Netlify function URL from environment
-    const netlifyUrl = Deno.env.get('NETLIFY_FUNCTION_URL');
+    const netlifyUrl = Deno.env.get("NETLIFY_FUNCTION_URL");
     if (!netlifyUrl) {
-      throw new Error('NETLIFY_FUNCTION_URL not set');
+      throw new Error("NETLIFY_FUNCTION_URL not set");
     }
 
     // Call the Netlify API endpoint that has the full processing logic
     const response = await fetch(`${netlifyUrl}/api/bottles/process`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         queueId: record.id,
@@ -55,10 +55,10 @@ Deno.serve(async (req) => {
     console.log(`✅ Bottle ${record.id} processed successfully`);
 
     return new Response(JSON.stringify(result), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error('❌ Processing failed:', error);
+    console.error("❌ Processing failed:", error);
     return new Response(
       JSON.stringify({
         success: false,
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

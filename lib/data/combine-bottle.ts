@@ -9,14 +9,14 @@ import {
 } from "@/lib/ipfs/fetch-content";
 
 export async function combineBottleData(
-  contractBottle: ContractBottle,
+  contractBottle: ContractBottle
 ): Promise<Bottle | null> {
   try {
     const ipfsData = await fetchBottleContent(contractBottle.ipfsHash);
 
     if (!ipfsData) {
       console.error(
-        `Failed to fetch IPFS data for bottle ${contractBottle.id}`,
+        `Failed to fetch IPFS data for bottle ${contractBottle.id}`
       );
       return null;
     }
@@ -39,14 +39,14 @@ export async function combineBottleData(
   } catch (error) {
     console.error(
       `Error combining bottle data for bottle ${contractBottle.id}:`,
-      error,
+      error
     );
     return null;
   }
 }
 
 export async function combineAllBottles(
-  contractBottles: ContractBottle[],
+  contractBottles: ContractBottle[]
 ): Promise<Bottle[]> {
   if (contractBottles.length === 0) {
     return [];
@@ -62,7 +62,7 @@ export async function combineAllBottles(
 
     if (!ipfsData) {
       console.error(
-        `Failed to fetch IPFS data for bottle ${contractBottle.id}`,
+        `Failed to fetch IPFS data for bottle ${contractBottle.id}`
       );
       continue;
     }

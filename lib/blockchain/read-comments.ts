@@ -1,9 +1,7 @@
 import { getContract } from "./provider";
 import type { ContractComment } from "@loscolmebrothers/forever-message-types";
 
-export async function getComment(
-  id: number,
-): Promise<ContractComment | null> {
+export async function getComment(id: number): Promise<ContractComment | null> {
   try {
     const contract = getContract();
     const rawComment = await contract.comments(id);
@@ -27,7 +25,7 @@ export async function getComment(
 }
 
 export async function getCommentsForBottle(
-  bottleId: number,
+  bottleId: number
 ): Promise<ContractComment[]> {
   try {
     const contract = getContract();

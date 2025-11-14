@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     console.log(
-      `[API] Fetching bottles from Supabase (limit: ${limit}, offset: ${offset})...`,
+      `[API] Fetching bottles from Supabase (limit: ${limit}, offset: ${offset})...`
     );
 
     const { count: totalCount, error: countError } = await supabaseAdmin
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         acc[like.bottle_id] = (acc[like.bottle_id] || 0) + 1;
         return acc;
       },
-      {} as Record<number, number>,
+      {} as Record<number, number>
     );
 
     const { data: commentsData, error: commentsError } = await supabaseAdmin
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
         acc[comment.bottle_id] = (acc[comment.bottle_id] || 0) + 1;
         return acc;
       },
-      {} as Record<number, number>,
+      {} as Record<number, number>
     );
 
     const bottles = (bottlesData || []).map((bottle) => ({
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
     const hasMore = offset + limit < total;
 
     console.log(
-      `[API] Returning ${bottles.length} bottles (total: ${total}, hasMore: ${hasMore})`,
+      `[API] Returning ${bottles.length} bottles (total: ${total}, hasMore: ${hasMore})`
     );
 
     return NextResponse.json({
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
         error: "Failed to fetch bottles",
         message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -8,7 +8,7 @@ const OceanStage = dynamic(
     import("@/components/Ocean/OceanStage").then((module) => ({
       default: module.OceanStage,
     })),
-  { ssr: false },
+  { ssr: false }
 );
 
 export default function Home() {

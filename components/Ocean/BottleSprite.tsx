@@ -58,7 +58,9 @@ export function BottleSprite({
       const distance = bottleWidth * (isPending ? 0.5 : 0.65);
       const baseX = Math.cos(angle) * distance;
       const baseY = Math.sin(angle) * distance;
-      const baseSize = isPending ? 10 + Math.random() * 6 : 14 + Math.random() * 10;
+      const baseSize = isPending
+        ? 10 + Math.random() * 6
+        : 14 + Math.random() * 10;
 
       initialSparkles.push({
         id: i,

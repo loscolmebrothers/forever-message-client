@@ -46,9 +46,7 @@ export function LikeButton({ bottleId }: LikeButtonProps) {
         e.currentTarget.style.transform = "scale(1)";
       }}
     >
-      <span style={{ fontSize: "18px" }}>
-        {hasLiked ? "❤️" : "🤍"}
-      </span>
+      <span style={{ fontSize: "18px" }}>{hasLiked ? "❤️" : "🤍"}</span>
       <span>
         {likeCount} {likeCount === 1 ? "like" : "likes"}
       </span>

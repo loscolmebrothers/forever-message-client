@@ -9,14 +9,14 @@ import {
 import { getCommentsForBottle } from "@/lib/blockchain/read-comments";
 
 export async function combineCommentData(
-  contractComment: ContractComment,
+  contractComment: ContractComment
 ): Promise<Comment | null> {
   try {
     const ipfsData = await fetchCommentContent(contractComment.ipfsHash);
 
     if (!ipfsData) {
       console.error(
-        `Failed to fetch IPFS data for comment ${contractComment.id}`,
+        `Failed to fetch IPFS data for comment ${contractComment.id}`
       );
       return null;
     }
@@ -36,14 +36,14 @@ export async function combineCommentData(
   } catch (error) {
     console.error(
       `Error combining comment data for comment ${contractComment.id}:`,
-      error,
+      error
     );
     return null;
   }
 }
 
 export async function combineCommentsForBottle(
-  bottleId: number,
+  bottleId: number
 ): Promise<Comment[]> {
   try {
     const contractComments = await getCommentsForBottle(bottleId);
@@ -62,7 +62,7 @@ export async function combineCommentsForBottle(
 
       if (!ipfsData) {
         console.error(
-          `Failed to fetch IPFS data for comment ${contractComment.id}`,
+          `Failed to fetch IPFS data for comment ${contractComment.id}`
         );
         continue;
       }
@@ -82,7 +82,7 @@ export async function combineCommentsForBottle(
     }
 
     return comments.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     );
   } catch (error) {
     console.error(`Error combining comments for bottle ${bottleId}:`, error);

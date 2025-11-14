@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         console.error("Failed to list users:", listError);
         return NextResponse.json(
           { error: "Failed to authenticate" },
-          { status: 500 },
+          { status: 500 }
         );
       }
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         console.error("User not found after creation error:", createError);
         return NextResponse.json(
           { error: "Failed to authenticate" },
-          { status: 500 },
+          { status: 500 }
         );
       }
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       console.error("Link generation error:", linkError);
       return NextResponse.json(
         { error: "Failed to create session" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       console.error("Failed to get hashed_token from generateLink");
       return NextResponse.json(
         { error: "Failed to create session" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       console.error("Session verification error:", sessionError);
       return NextResponse.json(
         { error: "Failed to create session" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     console.error("Verification error:", error);
     return NextResponse.json(
       { error: "Authentication failed" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

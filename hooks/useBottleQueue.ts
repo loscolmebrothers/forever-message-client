@@ -112,8 +112,8 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
             const updatedItem = payload.new as QueueItem;
             setQueueItems((prev) =>
               prev.map((item) =>
-                item.id === updatedItem.id ? updatedItem : item,
-              ),
+                item.id === updatedItem.id ? updatedItem : item
+              )
             );
 
             if (updatedItem.status === "completed") {
@@ -135,7 +135,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
               });
               setTimeout(() => {
                 setQueueItems((prev) =>
-                  prev.filter((item) => item.id !== updatedItem.id),
+                  prev.filter((item) => item.id !== updatedItem.id)
                 );
               }, 2000);
             } else if (updatedItem.status === "failed") {
@@ -148,7 +148,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
               });
               setTimeout(() => {
                 setQueueItems((prev) =>
-                  prev.filter((item) => item.id !== updatedItem.id),
+                  prev.filter((item) => item.id !== updatedItem.id)
                 );
               }, 2000);
             } else if (updatedItem.status === "uploading") {
@@ -170,10 +170,10 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
           } else if (payload.eventType === "DELETE") {
             const deletedItem = payload.old as QueueItem;
             setQueueItems((prev) =>
-              prev.filter((item) => item.id !== deletedItem.id),
+              prev.filter((item) => item.id !== deletedItem.id)
             );
           }
-        },
+        }
       )
       .subscribe();
 
@@ -183,7 +183,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   }, [userId, fetchQueueItems]);
 
   const pendingCount = queueItems.filter((item) =>
-    ["queued", "uploading", "minting", "confirming"].includes(item.status),
+    ["queued", "uploading", "minting", "confirming"].includes(item.status)
   ).length;
 
   return {

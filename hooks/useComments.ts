@@ -26,7 +26,7 @@ export function useComments(bottleId: number) {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 5000,
-    },
+    }
   );
 
   return {

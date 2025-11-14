@@ -31,7 +31,15 @@ interface BottleWithPosition extends BottleWithQueue {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const { bottles, isLoading, error, isEmpty, mutate, technicalDetails, setTechnicalDetails } = useBottles();
+  const {
+    bottles,
+    isLoading,
+    error,
+    isEmpty,
+    mutate,
+    technicalDetails,
+    setTechnicalDetails,
+  } = useBottles();
   const { isAuthenticated } = useAuth();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -40,11 +48,11 @@ export function OceanStage() {
   const stageRef = useRef<Konva.Stage>(null);
 
   // In development, always show create button. In production, only show when authenticated.
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env.NODE_ENV === "development";
   const showCreateButton = isAuthenticated || isDevelopment;
 
   const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
-    new Map(),
+    new Map()
   );
 
   const oceanWidth = width * OCEAN_SCALE;
@@ -60,7 +68,7 @@ export function OceanStage() {
         position = getRandomBottlePosition(
           oceanWidth,
           oceanHeight,
-          OCEAN.EDGE_PADDING,
+          OCEAN.EDGE_PADDING
         );
         bottlePositionsRef.current.set(bottle.id, position);
       }
@@ -125,7 +133,7 @@ export function OceanStage() {
       stage.position(constrainedPos);
       setStagePos(constrainedPos);
     },
-    [oceanWidth, oceanHeight, width, height],
+    [oceanWidth, oceanHeight, width, height]
   );
 
   const handleDragEnd = useCallback(() => {
@@ -162,14 +170,16 @@ export function OceanStage() {
       stage.position(constrainedPos);
       setStagePos(constrainedPos);
     },
-    [stagePos, oceanWidth, oceanHeight, width, height],
+    [stagePos, oceanWidth, oceanHeight, width, height]
   );
 
   if (isLoading) {
     return (
       <>
         <LoadingState />
-        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
+        {showCreateButton && (
+          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        )}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -183,7 +193,9 @@ export function OceanStage() {
     return (
       <>
         <ErrorState error={error} />
-        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
+        {showCreateButton && (
+          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        )}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -197,7 +209,9 @@ export function OceanStage() {
     return (
       <>
         <EmptyState />
-        {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
+        {showCreateButton && (
+          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+        )}
         <CreateBottleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -281,7 +295,9 @@ export function OceanStage() {
 
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
-      {showCreateButton && <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />}
+      {showCreateButton && (
+        <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+      )}
       <CreateBottleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

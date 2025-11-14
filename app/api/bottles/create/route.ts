@@ -11,14 +11,14 @@ export const POST = withAuth(async (request: NextRequest, user) => {
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { error: "Message is required and must be a string" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     if (message.trim().length === 0) {
       return NextResponse.json(
         { error: "Message cannot be empty" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -65,7 +65,7 @@ export const POST = withAuth(async (request: NextRequest, user) => {
           stack: error instanceof Error ? error.stack : undefined,
         }),
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 });

@@ -115,12 +115,12 @@ forever-message-client/
 Cypress runs in a real browser with actual canvas rendering:
 
 ```typescript
-describe('Ocean View', () => {
-  it('should render the ocean stage', () => {
-    cy.visit('/')
-    cy.get('[role="main"]').should('exist')
-  })
-})
+describe("Ocean View", () => {
+  it("should render the ocean stage", () => {
+    cy.visit("/");
+    cy.get('[role="main"]').should("exist");
+  });
+});
 ```
 
 #### 2. React Testing Library (Limited for Konva)
@@ -136,6 +136,7 @@ jest.mock('react-konva', () => ({
 ```
 
 **Best approach:**
+
 - Test React logic separately from canvas rendering
 - Use Cypress for visual/canvas tests
 - Test hooks (useBottles, useBottleQueue, useBottlePhysics) in isolation
@@ -168,45 +169,45 @@ describe('MyComponent', () => {
 ### Hook Tests
 
 ```typescript
-import { renderHook, waitFor } from '@testing-library/react'
-import { useMyHook } from '@/hooks/useMyHook'
+import { renderHook, waitFor } from "@testing-library/react";
+import { useMyHook } from "@/hooks/useMyHook";
 
-describe('useMyHook', () => {
-  it('should fetch data on mount', async () => {
-    const { result } = renderHook(() => useMyHook())
+describe("useMyHook", () => {
+  it("should fetch data on mount", async () => {
+    const { result } = renderHook(() => useMyHook());
 
-    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isLoading).toBe(true);
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+      expect(result.current.isLoading).toBe(false);
+    });
 
-    expect(result.current.data).toBeDefined()
-  })
-})
+    expect(result.current.data).toBeDefined();
+  });
+});
 ```
 
 ### E2E Tests
 
 ```typescript
-describe('User Flow', () => {
+describe("User Flow", () => {
   beforeEach(() => {
-    cy.visit('/')
-  })
+    cy.visit("/");
+  });
 
-  it('should complete entire flow', () => {
+  it("should complete entire flow", () => {
     // Arrange
-    cy.get('button').contains('Connect Wallet').click()
+    cy.get("button").contains("Connect Wallet").click();
 
     // Act
-    cy.get('button').contains('Create').click()
-    cy.get('textarea').type('Test message')
-    cy.get('button[aria-label*="Seal"]').click()
+    cy.get("button").contains("Create").click();
+    cy.get("textarea").type("Test message");
+    cy.get('button[aria-label*="Seal"]').click();
 
     // Assert
-    cy.contains('Your bottle is floating').should('be.visible')
-  })
-})
+    cy.contains("Your bottle is floating").should("be.visible");
+  });
+});
 ```
 
 ## Best Practices
@@ -218,15 +219,17 @@ describe('User Flow', () => {
    - Avoid testing internal state or implementation details
 
 2. **Use descriptive test names**
+
    ```typescript
    // Good
-   it('should display error message when form submission fails', () => {})
+   it("should display error message when form submission fails", () => {});
 
    // Bad
-   it('should work', () => {})
+   it("should work", () => {});
    ```
 
 3. **Follow AAA pattern** (Arrange, Act, Assert)
+
    ```typescript
    it('should increment counter', () => {
      // Arrange
@@ -247,23 +250,24 @@ describe('User Flow', () => {
    - Use MSW (Mock Service Worker) for API mocking when possible
 
 2. **Reset mocks between tests**
+
    ```typescript
    beforeEach(() => {
-     jest.clearAllMocks()
-   })
+     jest.clearAllMocks();
+   });
    ```
 
 3. **Mock external dependencies**
    ```typescript
-   jest.mock('@/lib/supabase/client', () => ({
+   jest.mock("@/lib/supabase/client", () => ({
      supabase: {
        auth: {
          getSession: jest.fn().mockResolvedValue({
-           data: { session: mockSession }
-         })
-       }
-     }
-   }))
+           data: { session: mockSession },
+         }),
+       },
+     },
+   }));
    ```
 
 ### Async Testing
@@ -272,8 +276,8 @@ Always use `waitFor` for async operations:
 
 ```typescript
 await waitFor(() => {
-  expect(screen.getByText('Loaded')).toBeInTheDocument()
-})
+  expect(screen.getByText("Loaded")).toBeInTheDocument();
+});
 ```
 
 ### Accessibility
@@ -282,11 +286,11 @@ Use semantic queries when possible:
 
 ```typescript
 // Preferred
-screen.getByRole('button', { name: 'Submit' })
-screen.getByLabelText('Email')
+screen.getByRole("button", { name: "Submit" });
+screen.getByLabelText("Email");
 
 // Avoid (unless necessary)
-screen.getByTestId('submit-button')
+screen.getByTestId("submit-button");
 ```
 
 ## Test Coverage
@@ -294,6 +298,7 @@ screen.getByTestId('submit-button')
 ### Current Coverage Priorities
 
 **High Priority (Must Have):**
+
 1. Authentication flow (Cypress E2E) ✅
 2. Bottle creation flow (Cypress E2E + RTL) ✅
 3. Ocean bottle interactions (Cypress E2E)
@@ -302,11 +307,13 @@ screen.getByTestId('submit-button')
 6. useBottleQueue hook (RTL) ✅
 
 **Medium Priority (Should Have):**
+
 - Component tests for Header, LoginButton
 - Hook tests for useAuth
 - Responsive design tests (Cypress viewports)
 
 **Low Priority (Nice to Have):**
+
 - API route tests with MSW
 - Animation quality tests
 - Performance tests
@@ -338,7 +345,7 @@ moduleNameMapper: {
 Konva is mocked in `jest.setup.ts`. If you see canvas errors, ensure the mock is loaded:
 
 ```typescript
-setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
+setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"];
 ```
 
 #### 3. Cypress can't connect
@@ -357,10 +364,10 @@ Increase timeout for async operations:
 
 ```typescript
 // Jest
-jest.setTimeout(10000)
+jest.setTimeout(10000);
 
 // Cypress
-cy.get('button', { timeout: 10000 })
+cy.get("button", { timeout: 10000 });
 ```
 
 #### 5. RainbowKit/wagmi errors in tests
@@ -401,6 +408,7 @@ To run tests in CI:
 ## Questions?
 
 If you encounter issues not covered in this guide, check:
+
 1. Existing test files for examples
 2. Framework documentation
 3. Create an issue in the project repository

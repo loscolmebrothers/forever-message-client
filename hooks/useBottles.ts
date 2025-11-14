@@ -16,7 +16,7 @@ interface FetchBottlesResponse {
 
 async function fetchBottlesBatch(
   limit: number,
-  offset: number,
+  offset: number
 ): Promise<FetchBottlesResponse> {
   const response = await fetch(`/api/bottles?limit=${limit}&offset=${offset}`);
 
@@ -47,7 +47,8 @@ export function useBottles() {
   const { address } = useAuth();
 
   // Get pending bottles from queue
-  const { queueItems, pendingCount, technicalDetails, setTechnicalDetails } = useBottleQueue(address || "");
+  const { queueItems, pendingCount, technicalDetails, setTechnicalDetails } =
+    useBottleQueue(address || "");
 
   const fetchBatch = useCallback(async (offset: number) => {
     try {
