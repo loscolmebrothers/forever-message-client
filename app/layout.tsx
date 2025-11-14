@@ -18,7 +18,12 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
-          <Toaster position="bottom-center" />
+          <Toaster
+            position="bottom-center"
+            expand={true}
+            richColors
+            duration={10000}
+          />
         </Providers>
       </body>
     </html>

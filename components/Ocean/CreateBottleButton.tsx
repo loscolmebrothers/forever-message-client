@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface CreateBottleButtonProps {
   onClick: () => void;
 }
@@ -49,9 +51,11 @@ export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
           justifyContent: "center",
         }}
       >
-        <img
+        <Image
           src="/assets/bottle-sprites/1.webp"
           alt="Bottle"
+          width={48}
+          height={48}
           style={{
             width: "48px",
             height: "auto",
