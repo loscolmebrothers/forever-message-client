@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 const OceanStage = dynamic(
   () =>
@@ -12,10 +14,21 @@ const OceanStage = dynamic(
 );
 
 export default function Home() {
+  const [loadingComplete, setLoadingComplete] = useState(false);
+
+  const handleLoadingComplete = () => {
+    setLoadingComplete(true);
+  };
+
   return (
     <main>
-      <Header />
-      <OceanStage />
+      {!loadingComplete && <LoadingScreen onComplete={handleLoadingComplete} />}
+      {loadingComplete && (
+        <>
+          <Header />
+          <OceanStage />
+        </>
+      )}
     </main>
   );
 }
