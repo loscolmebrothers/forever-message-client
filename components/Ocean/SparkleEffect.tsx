@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 import { animate as anime } from "animejs";
 
 interface Sparkle {
@@ -92,9 +93,11 @@ export function SparkleEffect() {
             pointerEvents: "none",
           }}
         >
-          <img
+          <Image
             src={`/assets/effects/sparkle-${sparkle.type}.png`}
             alt=""
+            width={sparkle.size}
+            height={sparkle.size}
             style={{
               width: "100%",
               height: "100%",

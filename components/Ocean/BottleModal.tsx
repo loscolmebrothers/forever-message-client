@@ -107,8 +107,8 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
               lineHeight: "1.5",
             }}
           >
-            We're working on making this bottle even more special. Check back
-            soon!
+            We&apos;re working on making this bottle even more special. Check
+            back soon!
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import NextImage from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { SparkleEffect } from "./SparkleEffect";
 import { animate as anime } from "animejs";
@@ -437,7 +438,7 @@ export function CreateBottleModal({
             }}
             aria-label={loading ? "Sealing message..." : "Seal your message"}
           >
-            <img
+            <NextImage
               src={
                 isBottleFilling || isSparkling || isFlying
                   ? "/assets/bottle-sprites/1.webp"
@@ -448,6 +449,8 @@ export function CreateBottleModal({
                   ? "Bottle"
                   : "Wax seal"
               }
+              width={96}
+              height={96}
               style={{
                 width:
                   isBottleFilling || isSparkling || isFlying
