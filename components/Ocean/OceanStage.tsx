@@ -9,7 +9,6 @@ import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
-import { LoadingState } from "./LoadingState";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { TechnicalDetailsModal } from "./TechnicalDetailsModal";
@@ -174,51 +173,15 @@ export function OceanStage() {
   );
 
   if (isLoading) {
-    return (
-      <>
-        <LoadingState />
-        {showCreateButton && (
-          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
-        )}
-        <CreateBottleModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={handleBottleCreated}
-        />
-      </>
-    );
+    return null;
   }
 
   if (error) {
-    return (
-      <>
-        <ErrorState error={error} />
-        {showCreateButton && (
-          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
-        )}
-        <CreateBottleModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={handleBottleCreated}
-        />
-      </>
-    );
+    return <ErrorState error={error} />;
   }
 
   if (isEmpty) {
-    return (
-      <>
-        <EmptyState />
-        {showCreateButton && (
-          <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
-        )}
-        <CreateBottleModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={handleBottleCreated}
-        />
-      </>
-    );
+    return <EmptyState />;
   }
 
   if (width === 0 || height === 0) {

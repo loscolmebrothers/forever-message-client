@@ -431,27 +431,18 @@ export function CreateBottleModal({
                     ? 0.4
                     : 1,
               padding: 0,
-              filter: "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
               position: "relative",
+              transition:
+                "transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
             }}
             onMouseEnter={(e) => {
               if (!loading && message.trim()) {
-                anime(e.currentTarget, {
-                  scale: 1.15,
-                  rotate: 5,
-                  duration: 400,
-                  ease: "out(elastic(1, .5))",
-                });
+                e.currentTarget.style.transform = "scale(1.15) rotate(5deg)";
               }
             }}
             onMouseLeave={(e) => {
               if (!loading && message.trim()) {
-                anime(e.currentTarget, {
-                  scale: 1,
-                  rotate: 0,
-                  duration: 400,
-                  ease: "out(elastic(1, .5))",
-                });
+                e.currentTarget.style.transform = "scale(1) rotate(0deg)";
               }
             }}
             aria-label={loading ? "Sealing message..." : "Seal your message"}
@@ -478,6 +469,8 @@ export function CreateBottleModal({
                       : "96px",
                 height: "auto",
                 transition: "all 0.6s ease-in-out",
+                objectFit: "contain",
+                background: "transparent",
               }}
             />
 
@@ -488,7 +481,7 @@ export function CreateBottleModal({
             )}
           </button>
 
-          {showTooltip && message.trim() && !loading && (
+          {message.trim() && !loading && (
             <div
               style={{
                 position: "absolute",
@@ -505,7 +498,7 @@ export function CreateBottleModal({
                 zIndex: 100,
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                 pointerEvents: "none",
-                opacity: 1,
+                opacity: showTooltip ? 1 : 0,
                 transition: "opacity 150ms ease",
               }}
             >

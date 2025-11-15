@@ -14,20 +14,21 @@ const OceanStage = dynamic(
 );
 
 export default function Home() {
-  const [loadingComplete, setLoadingComplete] = useState(false);
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(true);
 
   const handleLoadingComplete = () => {
-    setLoadingComplete(true);
+    setShowLoadingOverlay(false);
   };
 
   return (
     <main>
-      {!loadingComplete && <LoadingScreen onComplete={handleLoadingComplete} />}
-      {loadingComplete && (
-        <>
-          <Header />
-          <OceanStage />
-        </>
+      {/* Ocean loads in background */}
+      <Header />
+      <OceanStage />
+
+      {/* Loading overlay on top */}
+      {showLoadingOverlay && (
+        <LoadingScreen onComplete={handleLoadingComplete} />
       )}
     </main>
   );

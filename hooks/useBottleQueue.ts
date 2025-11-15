@@ -124,9 +124,8 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
                 action: {
                   label: "Where exactly?",
                   onClick: () => {
-                    toast.info(
-                      "We're working on making this feature even more special. Check back soon!",
-                      { duration: 5000 }
+                    alert(
+                      "We're working on making this feature even more special. Check back soon!"
                     );
                   },
                 },
