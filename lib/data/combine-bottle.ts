@@ -34,7 +34,6 @@ export async function combineBottleData(
       type: ipfsData.type,
       timestamp: ipfsData.timestamp,
       likeCount: ipfsData.likeCount || 0,
-      commentCount: ipfsData.commentCount || 0,
     };
   } catch (error) {
     console.error(
@@ -80,7 +79,6 @@ export async function combineAllBottles(
       type: ipfsData.type,
       timestamp: ipfsData.timestamp,
       likeCount: ipfsData.likeCount || 0,
-      commentCount: ipfsData.commentCount || 0,
     });
   }
 

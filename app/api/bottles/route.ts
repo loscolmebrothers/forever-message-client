@@ -50,19 +50,6 @@ export async function GET(request: Request) {
       {} as Record<number, number>
     );
 
-    const { data: commentsData, error: commentsError } = await supabaseAdmin
-      .from("comments")
-      .select("bottle_id")
-      .in("bottle_id", bottleIds);
-
-    const commentCounts = (commentsData || []).reduce(
-      (acc, comment) => {
-        acc[comment.bottle_id] = (acc[comment.bottle_id] || 0) + 1;
-        return acc;
-      },
-      {} as Record<number, number>
-    );
-
     const bottles = (bottlesData || []).map((bottle) => ({
       id: bottle.id,
       creator: bottle.creator,
@@ -72,7 +59,6 @@ export async function GET(request: Request) {
       expiresAt: new Date(bottle.expires_at),
       isForever: bottle.is_forever,
       likeCount: likeCounts[bottle.id] || 0,
-      commentCount: commentCounts[bottle.id] || 0,
     }));
 
     const hasMore = offset + limit < total;

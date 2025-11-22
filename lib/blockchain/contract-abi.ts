@@ -21,13 +21,6 @@ export const FOREVER_MESSAGE_ABI = [
   },
   {
     type: "function",
-    name: "FOREVER_COMMENTS_THRESHOLD",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "FOREVER_LIKES_THRESHOLD",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -37,27 +30,6 @@ export const FOREVER_MESSAGE_ABI = [
     type: "function",
     name: "SECONDS_PER_DAY",
     inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "addComment",
-    inputs: [
-      { name: "_bottleId", type: "uint256", internalType: "uint256" },
-      { name: "_ipfsHash", type: "string", internalType: "string" },
-      { name: "_commenter", type: "address", internalType: "address" },
-    ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "bottleComments",
-    inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
-    ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -82,24 +54,9 @@ export const FOREVER_MESSAGE_ABI = [
     inputs: [
       { name: "_bottleId", type: "uint256", internalType: "uint256" },
       { name: "_likeCount", type: "uint256", internalType: "uint256" },
-      { name: "_commentCount", type: "uint256", internalType: "uint256" },
     ],
     outputs: [],
     stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "comments",
-    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    outputs: [
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "bottleId", type: "uint256", internalType: "uint256" },
-      { name: "commenter", type: "address", internalType: "address" },
-      { name: "ipfsHash", type: "string", internalType: "string" },
-      { name: "createdAt", type: "uint256", internalType: "uint256" },
-      { name: "exists", type: "bool", internalType: "bool" },
-    ],
-    stateMutability: "view",
   },
   {
     type: "function",
@@ -135,13 +92,6 @@ export const FOREVER_MESSAGE_ABI = [
   },
   {
     type: "function",
-    name: "getBottleComments",
-    inputs: [{ name: "_bottleId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "isBottleExpired",
     inputs: [{ name: "_bottleId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
@@ -160,13 +110,6 @@ export const FOREVER_MESSAGE_ABI = [
   {
     type: "function",
     name: "nextBottleId",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "nextCommentId",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
@@ -288,37 +231,6 @@ export const FOREVER_MESSAGE_ABI = [
         type: "address",
         indexed: true,
         internalType: "address",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "CommentAdded",
-    inputs: [
-      {
-        name: "commentId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "bottleId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "commenter",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "ipfsHash",
-        type: "string",
-        indexed: false,
-        internalType: "string",
       },
     ],
     anonymous: false,
