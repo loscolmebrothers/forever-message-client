@@ -150,7 +150,6 @@ export function useBottles() {
     message: item.message || "",
     type: "bottle",
     likeCount: 0,
-    commentCount: 0,
     timestamp: 0,
     exists: true,
   }));

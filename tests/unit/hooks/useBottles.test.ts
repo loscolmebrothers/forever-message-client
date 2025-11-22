@@ -38,7 +38,6 @@ describe("useBottles", () => {
         message: "Test message",
         type: "bottle",
         likeCount: 0,
-        commentCount: 0,
         timestamp: Date.now(),
         exists: true,
       },
