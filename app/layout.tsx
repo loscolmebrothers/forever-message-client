@@ -17,6 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <link rel="icon" type="image/x-icon" href="/assets/favicon/icon.ico" />
+      <link
+        rel="apple-touch-icon"
+        href="/assets/favicon/apple-touch-icon.png"
+      />
       <body>
         <Providers>
           <NotificationProvider>
