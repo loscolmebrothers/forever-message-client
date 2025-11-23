@@ -25,12 +25,12 @@ jest.mock("@/lib/supabase/client", () => ({
   },
 }));
 
-jest.mock("sonner", () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    loading: jest.fn(),
-  },
+jest.mock("@/lib/notifications/NotificationStore", () => ({
+  useNotifications: () => ({
+    addNotification: jest.fn(),
+    addLoadingToast: jest.fn(),
+    removeLoadingToast: jest.fn(),
+  }),
 }));
 
 describe("useBottleQueue", () => {

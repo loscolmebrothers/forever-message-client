@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { toast } from "sonner";
+import { useNotifications } from "@/lib/notifications/NotificationStore";
 
 export function LoginButton() {
   const { isAuthenticated, isLoading, signOut, address, isConnected } =
     useAuth();
+  const { addNotification } = useNotifications();
   const [showMenu, setShowMenu] = useState(false);
   const previouslyConnected = useRef(false);
 
@@ -232,7 +233,10 @@ export function LoginButton() {
 
             <button
               onClick={() => {
-                toast.info("Email login coming soon!");
+                addNotification({
+                  type: "info",
+                  message: "Email login coming soon!",
+                });
                 setShowMenu(false);
               }}
               style={{
