@@ -34,10 +34,13 @@ export function TechnicalDetailsModal({
     };
   }, [onClose]);
 
-  const CONTRACT_ADDRESS =
-    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
-    "0x0c925D3Ad30F7dee61A0D3E3bBdcd9069E97d4B1";
+  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
+  if (!CONTRACT_ADDRESS) {
+    throw new Error(
+      "NEXT_PUBLIC_CONTRACT_ADDRESS environment variable not set"
+    );
+  }
   const ipfsGatewayUrl = ipfsCid
     ? `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${ipfsCid}`
     : null;

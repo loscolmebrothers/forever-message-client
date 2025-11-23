@@ -913,10 +913,10 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.4.0"
 
-"@loscolmebrothers/forever-message-ipfs@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-4.1.0.tgz#3f422fe658994d9c548e7ff11468cf7b5151ba13"
-  integrity sha512-AKgzH4J/qsb23Ph4med+SSUkaxld7fYKooboJuNGwwniVu0127YnyHcdFvtiaJCaCa6Ut6qTkgdBDNU+tQOGsg==
+"@loscolmebrothers/forever-message-ipfs@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-5.0.0.tgz#f6f482c2568b4db7b5b40562b6f84d75d4c0c674"
+  integrity sha512-Yc2Gv81M9XEtrXE/ooGPJ03Ai8YpaiuMUvz+/LhRugyKgZGmIrBZb1U8LmYkJh19SCiIijRA7+LHEuLCWlNYTA==
   dependencies:
     "@loscolmebrothers/forever-message-types" "^3.0.0"
     "@storacha/client" "^1.8.2"
@@ -926,6 +926,11 @@
   version "3.0.0"
   resolved "https://registry.npmjs.org/@loscolmebrothers/forever-message-types/-/forever-message-types-3.0.0.tgz"
   integrity sha512-cVC5RQQZa1rAVmGgUJc3kVm873P2zA7DOasCVvuphdng4TXYsxKKNzM3Nr9AUP+pQ5D4vmczyLMsbzHllp2rjA==
+
+"@loscolmebrothers/forever-message-types@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-types/-/forever-message-types-4.0.0.tgz#bd775855bbb91c6805ab1c05e3a1ec1b009a4c60"
+  integrity sha512-uavL68PRljqy39yx2RD7G8ITwxj9+40bmIBbwsMFjBT8sIsy2HK6UnpSxa3mAPLuiS3DzJ+M13/QKVPWmQRJbw==
 
 "@metamask/eth-json-rpc-provider@^1.0.0":
   version "1.0.1"

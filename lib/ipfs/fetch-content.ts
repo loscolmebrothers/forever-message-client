@@ -1,6 +1,4 @@
-import type {
-  IPFSBottle,
-} from "@loscolmebrothers/forever-message-types";
+import type { IPFSBottle } from "@loscolmebrothers/forever-message-types";
 
 /**
  * Fetch content from IPFS gateway
