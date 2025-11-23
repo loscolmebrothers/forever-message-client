@@ -60,8 +60,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [error, setError] = useState<Error | null>(null);
   const [technicalDetails, setTechnicalDetails] =
     useState<TechnicalDetails | null>(null);
-  const { addNotification, addLoadingToast, removeLoadingToast } =
-    useNotifications();
+  const { addLoadingToast, removeLoadingToast } = useNotifications();
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -120,27 +119,18 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
 
             if (updatedItem.status === "completed") {
               removeLoadingToast(updatedItem.id);
-              addNotification({
-                type: "success",
-                message: "Your bottle is floating in the ocean!",
-                bottleId: updatedItem.blockchain_id || undefined,
-              });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id)
                 );
-              }, 2000);
+              }, 1000);
             } else if (updatedItem.status === "failed") {
               removeLoadingToast(updatedItem.id);
-              addNotification({
-                type: "error",
-                message: "Couldn't cast your bottle. Please try again.",
-              });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id)
                 );
-              }, 2000);
+              }, 1000);
             } else if (updatedItem.status === "queued") {
               addLoadingToast(updatedItem.id, "Sealing your message...");
             } else if (updatedItem.status === "uploading") {
@@ -166,13 +156,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [
-    userId,
-    fetchQueueItems,
-    addNotification,
-    addLoadingToast,
-    removeLoadingToast,
-  ]);
+  }, [userId, fetchQueueItems, addLoadingToast, removeLoadingToast]);
 
   const pendingCount = queueItems.filter((item) =>
     ["queued", "uploading", "minting", "confirming"].includes(item.status)
