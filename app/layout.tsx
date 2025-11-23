@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { NotificationProvider } from "@/lib/notifications/NotificationStore";
 import { NotificationSidebar } from "@/components/NotificationSidebar";
-import { LoadingToastManager } from "@/components/LoadingToastManager";
+import { CenterToast } from "@/components/CenterToast";
 
 export const metadata: Metadata = {
   title: "Forever Message",
@@ -22,7 +22,7 @@ export default function RootLayout({
           <NotificationProvider>
             {children}
             <NotificationSidebar />
-            <LoadingToastManager />
+            <CenterToast />
           </NotificationProvider>
         </Providers>
       </body>

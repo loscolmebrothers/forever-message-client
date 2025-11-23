@@ -1,28 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  useNotifications,
-  type Notification,
-} from "@/lib/notifications/NotificationStore";
+import { useNotifications } from "@/lib/notifications/NotificationStore";
+import { BellIcon } from "./BellIcon";
 
-function formatTimeAgo(timestamp: number): string {
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
-
-  if (seconds < 60) return "Just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days > 1 ? "s" : ""} ago`;
-}
-
-function NotificationItem({
-  notification,
+function BottleProgressToast({
+  id,
+  message,
   onDismiss,
 }: {
-  notification: Notification;
+  id: string;
+  message: string;
   onDismiss: (id: string) => void;
 }) {
   const [isExiting, setIsExiting] = useState(false);
@@ -30,43 +18,53 @@ function NotificationItem({
   const handleDismiss = () => {
     setIsExiting(true);
     setTimeout(() => {
-      onDismiss(notification.id);
+      onDismiss(id);
     }, 300);
-  };
-
-  const getIcon = (type: Notification["type"]) => {
-    switch (type) {
-      case "success":
-        return "✅";
-      case "error":
-        return "⚠️";
-      case "info":
-        return "ℹ️";
-      default:
-        return "📬";
-    }
   };
 
   return (
     <div
       style={{
-        background: "rgba(255, 255, 255, 0.08)",
-        border: "1px solid rgba(255, 255, 255, 0.12)",
-        borderRadius: "8px",
-        padding: "12px 16px",
+        background: "rgba(20, 20, 30, 0.95)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        borderRadius: "12px",
+        padding: "14px 20px",
         margin: "8px 12px",
-        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         animation: isExiting
           ? "toastExit 0.3s ease-out forwards"
           : "toastEnter 0.3s ease-out",
+        position: "relative",
       }}
     >
+      <div
+        style={{
+          width: "16px",
+          height: "16px",
+          border: "2px solid rgba(255, 255, 255, 0.3)",
+          borderTop: "2px solid #ffffff",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite",
+          flexShrink: 0,
+        }}
+      />
+      <span
+        style={{
+          fontFamily: "ApfelGrotezk, sans-serif",
+          fontSize: "14px",
+          color: "#ffffff",
+          flex: 1,
+        }}
+      >
+        {message}
+      </span>
       <button
         onClick={handleDismiss}
         style={{
-          position: "absolute",
-          top: "8px",
-          right: "8px",
           width: "20px",
           height: "20px",
           border: "none",
@@ -78,6 +76,8 @@ function NotificationItem({
           alignItems: "center",
           justifyContent: "center",
           transition: "color 0.2s ease",
+          flexShrink: 0,
+          padding: 0,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
@@ -88,57 +88,12 @@ function NotificationItem({
       >
         ×
       </button>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "8px",
-          paddingRight: "20px",
-        }}
-      >
-        <span style={{ fontSize: "18px", lineHeight: "1" }}>
-          {getIcon(notification.type)}
-        </span>
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontFamily: "ApfelGrotezk, sans-serif",
-              fontSize: "14px",
-              color: "#ffffff",
-              marginBottom: "4px",
-            }}
-          >
-            {notification.message}
-          </div>
-          {notification.bottleId && (
-            <div
-              style={{
-                fontFamily: "ApfelGrotezk, sans-serif",
-                fontSize: "12px",
-                color: "rgba(255, 255, 255, 0.6)",
-                marginBottom: "2px",
-              }}
-            >
-              Bottle #{notification.bottleId}
-            </div>
-          )}
-          <div
-            style={{
-              fontFamily: "ApfelGrotezk, sans-serif",
-              fontSize: "11px",
-              color: "rgba(255, 255, 255, 0.4)",
-            }}
-          >
-            {formatTimeAgo(notification.timestamp)}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
 
 export function NotificationSidebar() {
-  const { notifications, removeNotification, clearAll } = useNotifications();
+  const { loadingToasts, removeLoadingToast } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -152,14 +107,30 @@ export function NotificationSidebar() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const toastCount = loadingToasts.size;
+
+  useEffect(() => {
+    if (toastCount > 0 && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [toastCount, isOpen]);
+
+  const handleClearAll = () => {
+    Array.from(loadingToasts.keys()).forEach((id) => {
+      removeLoadingToast(id);
+    });
+  };
+
+  if (toastCount === 0 && !isOpen) {
+    return null;
+  }
 
   return (
     <>
       <style jsx global>{`
         @keyframes toastEnter {
           from {
-            transform: translateX(20px);
+            transform: translateX(-20px);
             opacity: 0;
           }
           to {
@@ -179,23 +150,47 @@ export function NotificationSidebar() {
           }
         }
 
-        @keyframes pulse {
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes tabPulse {
           0%,
           100% {
-            transform: scale(1);
+            transform: translateY(-50%) scale(1);
           }
           50% {
-            transform: scale(1.1);
+            transform: translateY(-50%) scale(1.05);
+          }
+        }
+
+        @keyframes slideInFromLeft {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes slideOutToLeft {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-100%);
           }
         }
       `}</style>
 
-      {!isOpen && (
+      {!isOpen && toastCount > 0 && (
         <button
           onClick={() => setIsOpen(true)}
           style={{
             position: "fixed",
-            right: "0",
+            left: "0",
             top: "50%",
             transform: "translateY(-50%)",
             width: "48px",
@@ -203,7 +198,7 @@ export function NotificationSidebar() {
             background: "rgba(20, 20, 30, 0.9)",
             backdropFilter: "blur(8px)",
             border: "none",
-            borderRadius: "8px 0 0 8px",
+            borderRadius: "0 8px 8px 0",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -211,16 +206,20 @@ export function NotificationSidebar() {
             fontSize: "20px",
             zIndex: 1000,
             transition: "all 0.2s ease",
+            animation:
+              toastCount > 0 ? "tabPulse 2s ease-in-out infinite" : "none",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(30, 30, 40, 0.95)";
+            e.currentTarget.style.width = "56px";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "rgba(20, 20, 30, 0.9)";
+            e.currentTarget.style.width = "48px";
           }}
         >
-          🔔
-          {unreadCount > 0 && (
+          <BellIcon hasNotifications={toastCount > 0} />
+          {toastCount > 0 && (
             <span
               style={{
                 position: "absolute",
@@ -237,10 +236,9 @@ export function NotificationSidebar() {
                 justifyContent: "center",
                 fontFamily: "ApfelGrotezk, sans-serif",
                 fontWeight: "bold",
-                animation: "pulse 2s ease-in-out infinite",
               }}
             >
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {toastCount > 9 ? "9+" : toastCount}
             </span>
           )}
         </button>
@@ -257,53 +255,37 @@ export function NotificationSidebar() {
             bottom: 0,
             background: "rgba(0, 0, 0, 0.5)",
             zIndex: 999,
+            animation: "fadeIn 0.3s ease-out",
           }}
         />
       )}
 
-      <div
-        style={{
-          position: "fixed",
-          right: 0,
-          top: 0,
-          width: isMobile ? "90vw" : "320px",
-          height: "100vh",
-          background: "rgba(20, 20, 30, 0.85)",
-          backdropFilter: "blur(12px)",
-          boxShadow: "-4px 0 24px rgba(0, 0, 0, 0.3)",
-          zIndex: 1000,
-          transform: isOpen ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.3s ease-in-out",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      {isOpen && (
         <div
           style={{
-            padding: "16px",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            position: "fixed",
+            left: 0,
+            top: 0,
+            width: isMobile ? "90vw" : "320px",
+            height: "100vh",
+            background: "rgba(20, 20, 30, 0.85)",
+            backdropFilter: "blur(12px)",
+            boxShadow: "4px 0 24px rgba(0, 0, 0, 0.3)",
+            zIndex: 1000,
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            animation: "slideInFromLeft 0.3s ease-out",
           }}
         >
-          <h2
-            style={{
-              fontFamily: "ApfelGrotezk, sans-serif",
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "#ffffff",
-              margin: 0,
-            }}
-          >
-            Notifications
-          </h2>
           <button
             onClick={() => setIsOpen(false)}
             style={{
+              position: "absolute",
+              top: "16px",
+              right: "16px",
               background: "none",
               border: "none",
-              color: "rgba(255, 255, 255, 0.7)",
+              color: "rgba(255, 255, 255, 0.5)",
               fontSize: "24px",
               cursor: "pointer",
               width: "32px",
@@ -312,91 +294,74 @@ export function NotificationSidebar() {
               alignItems: "center",
               justifyContent: "center",
               transition: "color 0.2s ease",
+              zIndex: 1,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+              e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
             }}
           >
             ×
           </button>
-        </div>
 
-        <div
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "hidden",
-          }}
-        >
-          {notifications.length === 0 ? (
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              overflowX: "hidden",
+              paddingTop: "16px",
+              paddingBottom: "16px",
+            }}
+          >
+            {Array.from(loadingToasts.entries()).map(([id, message]) => (
+              <BottleProgressToast
+                key={id}
+                id={id}
+                message={message}
+                onDismiss={removeLoadingToast}
+              />
+            ))}
+          </div>
+
+          {toastCount > 1 && (
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                padding: "32px",
-                textAlign: "center",
+                padding: "16px",
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
               }}
             >
-              <div style={{ fontSize: "48px", marginBottom: "16px" }}>📭</div>
-              <div
+              <button
+                onClick={handleClearAll}
                 style={{
+                  width: "100%",
+                  padding: "8px 16px",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "6px",
                   fontFamily: "ApfelGrotezk, sans-serif",
-                  fontSize: "14px",
-                  color: "rgba(255, 255, 255, 0.4)",
+                  fontSize: "12px",
+                  color: "rgba(255, 255, 255, 0.7)",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background =
+                    "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
                 }}
               >
-                No notifications yet
-              </div>
+                Close all
+              </button>
             </div>
-          ) : (
-            <>
-              {notifications.length > 1 && (
-                <div style={{ padding: "8px 12px", textAlign: "right" }}>
-                  <button
-                    onClick={clearAll}
-                    style={{
-                      background: "rgba(255, 255, 255, 0.1)",
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                      borderRadius: "4px",
-                      padding: "4px 12px",
-                      fontFamily: "ApfelGrotezk, sans-serif",
-                      fontSize: "12px",
-                      color: "rgba(255, 255, 255, 0.7)",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.15)";
-                      e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.1)";
-                      e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                    }}
-                  >
-                    Clear all
-                  </button>
-                </div>
-              )}
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onDismiss={removeNotification}
-                />
-              ))}
-            </>
           )}
         </div>
-      </div>
+      )}
     </>
   );
 }
