@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
-import { ToastInfo } from "@/components/ToastInfo";
+import { NotificationProvider } from "@/lib/notifications/NotificationStore";
+import { NotificationSidebar } from "@/components/NotificationSidebar";
+import { LoadingToastManager } from "@/components/LoadingToastManager";
 
 export const metadata: Metadata = {
   title: "Forever Message",
@@ -18,16 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          {children}
-          <Toaster
-            position="bottom-center"
-            expand={true}
-            richColors
-            duration={10000}
-            visibleToasts={5}
-            offset="80px"
-          />
-          <ToastInfo />
+          <NotificationProvider>
+            {children}
+            <NotificationSidebar />
+            <LoadingToastManager />
+          </NotificationProvider>
         </Providers>
       </body>
     </html>

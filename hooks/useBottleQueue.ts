@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
+import { useNotifications } from "@/lib/notifications/NotificationStore";
 
 export type QueueStatus =
   | "queued"
@@ -60,6 +60,8 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [error, setError] = useState<Error | null>(null);
   const [technicalDetails, setTechnicalDetails] =
     useState<TechnicalDetails | null>(null);
+  const { addNotification, addLoadingToast, removeLoadingToast } =
+    useNotifications();
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -117,18 +119,11 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
             );
 
             if (updatedItem.status === "completed") {
-              toast.success("Your bottle is floating in the ocean!", {
-                id: updatedItem.id,
-                duration: 15000,
-                dismissible: true,
-                action: {
-                  label: "Where exactly?",
-                  onClick: () => {
-                    alert(
-                      "We're working on making this feature even more special. Check back soon!"
-                    );
-                  },
-                },
+              removeLoadingToast(updatedItem.id);
+              addNotification({
+                type: "success",
+                message: "Your bottle is floating in the ocean!",
+                bottleId: updatedItem.blockchain_id || undefined,
               });
               setTimeout(() => {
                 setQueueItems((prev) =>
@@ -136,33 +131,27 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
                 );
               }, 2000);
             } else if (updatedItem.status === "failed") {
-              toast.error("Couldn't cast your bottle. Please try again.", {
-                id: updatedItem.id,
-                duration: 5000,
-                dismissible: true,
-                closeButton: true,
-                description: updatedItem.error || undefined,
+              removeLoadingToast(updatedItem.id);
+              addNotification({
+                type: "error",
+                message: "Couldn't cast your bottle. Please try again.",
               });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id)
                 );
               }, 2000);
+            } else if (updatedItem.status === "queued") {
+              addLoadingToast(updatedItem.id, "Sealing your message...");
             } else if (updatedItem.status === "uploading") {
-              toast.loading("Sealing your message...", {
-                id: updatedItem.id,
-                dismissible: true,
-              });
+              addLoadingToast(updatedItem.id, "Sealing your message...");
             } else if (updatedItem.status === "minting") {
-              toast.loading("Casting your bottle into the ocean...", {
-                id: updatedItem.id,
-                dismissible: true,
-              });
+              addLoadingToast(
+                updatedItem.id,
+                "Casting your bottle into the ocean..."
+              );
             } else if (updatedItem.status === "confirming") {
-              toast.loading("Almost there...", {
-                id: updatedItem.id,
-                dismissible: true,
-              });
+              addLoadingToast(updatedItem.id, "Almost there...");
             }
           } else if (payload.eventType === "DELETE") {
             const deletedItem = payload.old as QueueItem;
@@ -177,7 +166,13 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchQueueItems]);
+  }, [
+    userId,
+    fetchQueueItems,
+    addNotification,
+    addLoadingToast,
+    removeLoadingToast,
+  ]);
 
   const pendingCount = queueItems.filter((item) =>
     ["queued", "uploading", "minting", "confirming"].includes(item.status)
