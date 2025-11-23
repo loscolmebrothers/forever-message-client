@@ -1,14 +1,50 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import NextImage from "next/image";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useLikes } from "@/hooks/useLikes";
 
 interface BottleModalProps {
   bottle: Bottle | null;
   onClose: () => void;
 }
 
+const formatRelativeTime = (timestamp: number) => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  return "just now";
+};
+
+const truncateAddress = (address: string) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 export function BottleModal({ bottle, onClose }: BottleModalProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { likeCount, hasLiked, toggleLike, isToggling } = useLikes(
+    bottle?.id || 0
+  );
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -31,6 +67,15 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
     return null;
   }
 
+  const handleLikeClick = async () => {
+    if (!isAuthenticated || isToggling) return;
+    try {
+      await toggleLike();
+    } catch (error) {
+      console.error("Failed to toggle like:", error);
+    }
+  };
+
   return (
     <div
       style={{
@@ -44,7 +89,7 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
-        padding: "20px",
+        padding: isMobile ? "16px" : "20px",
         animation: "fadeIn 0.2s ease-out",
       }}
       onClick={onClose}
@@ -54,7 +99,7 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
           position: "relative",
           backgroundColor: "#f5f5dc",
           borderRadius: "4px",
-          maxWidth: "400px",
+          maxWidth: "500px",
           width: "100%",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
           animation: "slideUp 0.3s ease-out",
@@ -75,41 +120,169 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
             opacity: 0.3,
             pointerEvents: "none",
             borderRadius: "4px",
+            zIndex: 0,
           }}
         />
 
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            width: "24px",
+            height: "24px",
+            border: "none",
+            background: "rgba(0, 0, 0, 0.5)",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#ffffff",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
+            transform: "scale(1)",
+            transition: "transform 0.2s, background 0.2s, opacity 0.2s",
+            zIndex: 10,
+            opacity: 0.6,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.1)";
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.8)";
+            e.currentTarget.style.opacity = "1";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.5)";
+            e.currentTarget.style.opacity = "0.6";
+          }}
+          aria-label="Close"
+        >
+          ×
+        </button>
+
         <div
           style={{
-            padding: "48px 32px",
+            padding: isMobile ? "32px 24px" : "48px 32px",
             position: "relative",
             zIndex: 1,
-            textAlign: "center",
           }}
         >
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>🚧</div>
-          <h2
+          <div
             style={{
               fontFamily: "'AndreaScript', cursive",
-              fontSize: "32px",
+              fontSize: isMobile ? "24px" : "28px",
               color: "#2c1810",
-              margin: "0 0 16px 0",
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
-            }}
-          >
-            Under Construction
-          </h2>
-          <p
-            style={{
-              fontFamily: "'ApfelGrotezk', sans-serif",
-              fontSize: "16px",
-              color: "rgba(44, 24, 16, 0.7)",
-              margin: 0,
               lineHeight: "1.5",
+              textAlign: "center",
+              marginBottom: "24px",
+              maxHeight: "200px",
+              overflow: "auto",
+              wordWrap: "break-word",
             }}
           >
-            We&apos;re working on making this bottle even more special. Check
-            back soon!
-          </p>
+            {bottle.message}
+          </div>
+
+          <div
+            style={{
+              borderTop: "1px solid rgba(44, 24, 16, 0.1)",
+              paddingTop: "16px",
+              marginTop: "16px",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'ApfelGrotezk', sans-serif",
+                fontSize: "14px",
+                color: "rgba(44, 24, 16, 0.7)",
+                marginBottom: "8px",
+              }}
+            >
+              From: {truncateAddress(bottle.userId)}
+            </div>
+            <div
+              style={{
+                fontFamily: "'ApfelGrotezk', sans-serif",
+                fontSize: "14px",
+                color: "rgba(44, 24, 16, 0.7)",
+                marginBottom: "16px",
+              }}
+            >
+              {formatRelativeTime(bottle.timestamp)}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                marginTop: "16px",
+              }}
+            >
+              <button
+                onClick={handleLikeClick}
+                disabled={!isAuthenticated || isToggling}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor:
+                    !isAuthenticated || isToggling ? "not-allowed" : "pointer",
+                  padding: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  opacity: !isAuthenticated ? 0.5 : 1,
+                  transition: "transform 0.2s ease, opacity 0.2s ease",
+                  transform: hasLiked ? "scale(1.1)" : "scale(1)",
+                }}
+                onMouseEnter={(e) => {
+                  if (isAuthenticated && !isToggling) {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isAuthenticated && !isToggling) {
+                    e.currentTarget.style.transform = hasLiked
+                      ? "scale(1.1)"
+                      : "scale(1)";
+                  }
+                }}
+                aria-label={
+                  hasLiked ? "Unlike this bottle" : "Like this bottle"
+                }
+              >
+                <NextImage
+                  src="/assets/like-heart.png"
+                  alt="Like"
+                  width={32}
+                  height={32}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    filter: hasLiked
+                      ? "none"
+                      : "grayscale(100%) brightness(0.5)",
+                    transition: "filter 0.2s ease",
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'ApfelGrotezk', sans-serif",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    color: "#2c1810",
+                  }}
+                >
+                  {likeCount}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
