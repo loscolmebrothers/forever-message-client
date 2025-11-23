@@ -109,21 +109,11 @@ export function NotificationSidebar() {
 
   const toastCount = loadingToasts.size;
 
-  useEffect(() => {
-    if (toastCount > 0 && !isOpen) {
-      setIsOpen(true);
-    }
-  }, [toastCount, isOpen]);
-
   const handleClearAll = () => {
     Array.from(loadingToasts.keys()).forEach((id) => {
       removeLoadingToast(id);
     });
   };
-
-  if (toastCount === 0 && !isOpen) {
-    return null;
-  }
 
   return (
     <>
@@ -185,7 +175,7 @@ export function NotificationSidebar() {
         }
       `}</style>
 
-      {!isOpen && toastCount > 0 && (
+      {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           style={{
@@ -277,41 +267,49 @@ export function NotificationSidebar() {
             animation: "slideInFromLeft 0.3s ease-out",
           }}
         >
-          <button
-            onClick={() => setIsOpen(false)}
+          <div
             style={{
-              position: "absolute",
-              top: "16px",
-              right: "16px",
-              background: "none",
-              border: "none",
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: "24px",
-              cursor: "pointer",
-              width: "32px",
-              height: "32px",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "color 0.2s ease",
-              zIndex: 1,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
+              justifyContent: "flex-end",
+              padding: "16px",
+              paddingBottom: "8px",
             }}
           >
-            ×
-          </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: "6px",
+                color: "rgba(255, 255, 255, 0.7)",
+                fontSize: "20px",
+                cursor: "pointer",
+                width: "32px",
+                height: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
+              }}
+            >
+              ←
+            </button>
+          </div>
 
           <div
             style={{
               flex: 1,
               overflowY: "auto",
               overflowX: "hidden",
-              paddingTop: "16px",
+              paddingTop: "8px",
               paddingBottom: "16px",
             }}
           >
