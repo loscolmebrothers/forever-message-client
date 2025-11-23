@@ -59,6 +59,9 @@ export async function GET(request: Request) {
       expiresAt: new Date(bottle.expires_at),
       isForever: bottle.is_forever,
       likeCount: likeCounts[bottle.id] || 0,
+      message: bottle.message || "",
+      timestamp: new Date(bottle.created_at).getTime(),
+      type: "bottle" as const,
     }));
 
     const hasMore = offset + limit < total;
