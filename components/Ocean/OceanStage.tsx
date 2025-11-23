@@ -9,7 +9,6 @@ import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
-import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { TechnicalDetailsModal } from "./TechnicalDetailsModal";
 import { useBottles } from "@/hooks/useBottles";
@@ -178,10 +177,6 @@ export function OceanStage() {
 
   if (error) {
     return <ErrorState error={error} />;
-  }
-
-  if (isEmpty) {
-    return <EmptyState />;
   }
 
   if (width === 0 || height === 0) {
