@@ -25,10 +25,6 @@ const formatRelativeTime = (timestamp: number) => {
   return "just now";
 };
 
-const truncateAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
-
 export function BottleModal({ bottle, onClose }: BottleModalProps) {
   const [isMobile, setIsMobile] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -199,17 +195,8 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
                 fontFamily: "'ApfelGrotezk', sans-serif",
                 fontSize: "14px",
                 color: "rgba(44, 24, 16, 0.7)",
-                marginBottom: "8px",
-              }}
-            >
-              From: {truncateAddress(bottle.userId)}
-            </div>
-            <div
-              style={{
-                fontFamily: "'ApfelGrotezk', sans-serif",
-                fontSize: "14px",
-                color: "rgba(44, 24, 16, 0.7)",
                 marginBottom: "16px",
+                textAlign: "center",
               }}
             >
               {formatRelativeTime(bottle.timestamp)}
