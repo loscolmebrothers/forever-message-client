@@ -202,73 +202,73 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
               {formatRelativeTime(bottle.timestamp)}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                marginTop: "16px",
-              }}
-            >
-              <button
-                onClick={handleLikeClick}
-                disabled={!isAuthenticated || isToggling}
+            {isAuthenticated && (
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor:
-                    !isAuthenticated || isToggling ? "not-allowed" : "pointer",
-                  padding: "8px",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
                   gap: "8px",
-                  opacity: !isAuthenticated ? 0.5 : 1,
-                  transition: "transform 0.2s ease, opacity 0.2s ease",
-                  transform: hasLiked ? "scale(1.1)" : "scale(1)",
+                  marginTop: "16px",
                 }}
-                onMouseEnter={(e) => {
-                  if (isAuthenticated && !isToggling) {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (isAuthenticated && !isToggling) {
-                    e.currentTarget.style.transform = hasLiked
-                      ? "scale(1.1)"
-                      : "scale(1)";
-                  }
-                }}
-                aria-label={
-                  hasLiked ? "Unlike this bottle" : "Like this bottle"
-                }
               >
-                <NextImage
-                  src="/assets/like-heart.png"
-                  alt="Like"
-                  width={32}
-                  height={32}
+                <button
+                  onClick={handleLikeClick}
+                  disabled={isToggling}
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    filter: hasLiked
-                      ? "none"
-                      : "grayscale(100%) brightness(0.5)",
-                    transition: "filter 0.2s ease",
+                    background: "transparent",
+                    border: "none",
+                    cursor: isToggling ? "not-allowed" : "pointer",
+                    padding: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    transition: "transform 0.2s ease",
+                    transform: hasLiked ? "scale(1.1)" : "scale(1)",
                   }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'ApfelGrotezk', sans-serif",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    color: "#2c1810",
+                  onMouseEnter={(e) => {
+                    if (!isToggling) {
+                      e.currentTarget.style.transform = "scale(1.05)";
+                    }
                   }}
+                  onMouseLeave={(e) => {
+                    if (!isToggling) {
+                      e.currentTarget.style.transform = hasLiked
+                        ? "scale(1.1)"
+                        : "scale(1)";
+                    }
+                  }}
+                  aria-label={
+                    hasLiked ? "Unlike this bottle" : "Like this bottle"
+                  }
                 >
-                  {likeCount}
-                </span>
-              </button>
-            </div>
+                  <NextImage
+                    src="/assets/like-heart.png"
+                    alt="Like"
+                    width={32}
+                    height={32}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      filter: hasLiked
+                        ? "none"
+                        : "grayscale(100%) brightness(0.5)",
+                      transition: "filter 0.2s ease",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "'ApfelGrotezk', sans-serif",
+                      fontSize: "18px",
+                      fontWeight: "bold",
+                      color: "#2c1810",
+                    }}
+                  >
+                    {likeCount}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

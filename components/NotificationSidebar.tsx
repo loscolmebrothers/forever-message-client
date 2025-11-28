@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNotifications } from "@/lib/notifications/NotificationStore";
 import { BellIcon } from "./BellIcon";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 function BottleProgressToast({
   id,
@@ -93,6 +94,7 @@ function BottleProgressToast({
 }
 
 export function NotificationSidebar() {
+  const { isAuthenticated } = useAuth();
   const { loadingToasts, removeLoadingToast } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -114,6 +116,10 @@ export function NotificationSidebar() {
       removeLoadingToast(id);
     });
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>

@@ -45,10 +45,6 @@ export function OceanStage() {
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
 
-  // In development, always show create button. In production, only show when authenticated.
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const showCreateButton = isAuthenticated || isDevelopment;
-
   const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
     new Map()
   );
@@ -154,7 +150,6 @@ export function OceanStage() {
         y: stagePos.y - dy,
       };
 
-      // Constrain to bounds
       const maxX = 0;
       const minX = -(oceanWidth - width);
       const maxY = 0;
@@ -253,9 +248,10 @@ export function OceanStage() {
 
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
-      {showCreateButton && (
-        <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
-      )}
+      <CreateBottleButton
+        onClick={() => setIsCreateModalOpen(true)}
+        isAuthenticated={isAuthenticated}
+      />
       <CreateBottleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

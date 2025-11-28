@@ -5,7 +5,7 @@ const nextConfig = {
     // Exclude canvas from bundle (Konva tries to import it for server-side rendering)
     config.externals = [...(config.externals || []), { canvas: "canvas" }];
 
-    // Fix for wagmi/RainbowKit SSR issues
+    // Fix for wagmi/Reown AppKit SSR issues
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

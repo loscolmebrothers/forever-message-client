@@ -22,11 +22,9 @@ export default function Home() {
 
   return (
     <main>
-      {/* Ocean loads in background */}
       <Header />
       <OceanStage />
 
-      {/* Loading overlay on top */}
       {showLoadingOverlay && (
         <LoadingScreen onComplete={handleLoadingComplete} />
       )}

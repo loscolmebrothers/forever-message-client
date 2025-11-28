@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import { SiweMessage } from "siwe";
+import { getAddress } from "viem";
 import { supabase } from "@/lib/supabase/client";
 
 interface AuthContextType {
@@ -34,7 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   >(undefined);
   const signingInProgress = useRef(false);
 
-  // Check existing session on mount
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -43,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
 
-        // Extract wallet address from session metadata
         if (session?.user?.user_metadata?.wallet_address) {
           setAuthenticatedAddress(session.user.user_metadata.wallet_address);
         }
@@ -58,14 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession();
   }, []);
 
-  // Listen for auth state changes
   useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
 
-      // Update authenticated address from session
       if (session?.user?.user_metadata?.wallet_address) {
         setAuthenticatedAddress(session.user.user_metadata.wallet_address);
       } else {
@@ -83,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Wallet not connected");
     }
 
-    // Prevent multiple concurrent sign-in attempts
     if (signingInProgress.current) {
       console.warn("Sign-in already in progress, skipping duplicate request");
       return;
@@ -93,14 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signingInProgress.current = true;
       setIsLoading(true);
 
-      // Get nonce from server
       const nonceResponse = await fetch("/api/auth/nonce");
       const { nonce } = await nonceResponse.json();
 
-      // Create SIWE message
+      const checksummedAddress = getAddress(wagmiAddress);
+
       const message = new SiweMessage({
         domain: window.location.host,
-        address: wagmiAddress,
+        address: checksummedAddress,
         statement: "Sign in to Forever Message",
         uri: window.location.origin,
         version: "1",
@@ -108,12 +104,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         nonce,
       });
 
-      // Sign message with wallet
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
 
-      // Verify signature and create session
       const verifyResponse = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const { session } = await verifyResponse.json();
 
-      // Set Supabase session
       await supabase.auth.setSession({
         access_token: session.access_token,
         refresh_token: session.refresh_token,
@@ -141,7 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signingInProgress.current = false;
       setIsLoading(false);
     }
-  }, [wagmiAddress, isConnected, signMessageAsync]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wagmiAddress, isConnected]);
 
   const signOut = useCallback(async () => {
     try {
@@ -155,7 +149,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [disconnect]);
 
-  // Use authenticated address when available, fallback to wagmi address
+  useEffect(() => {
+    if (!isConnected && isAuthenticated) {
+      signOut();
+    }
+  }, [isConnected, isAuthenticated, signOut]);
+
   const address = isAuthenticated ? authenticatedAddress : wagmiAddress;
 
   return (

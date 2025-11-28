@@ -25,7 +25,6 @@ export const POST = withAuth(async (request: NextRequest, user) => {
     console.log("[API] Queueing bottle for user:", userId);
     console.log("[API] Message length:", message.length);
 
-    // Insert into queue - database webhook will trigger processing
     const { data: queueItem, error: queueError } = await supabaseAdmin
       .from("bottles_queue")
       .insert({
@@ -42,7 +41,21 @@ export const POST = withAuth(async (request: NextRequest, user) => {
     }
 
     console.log("[API] Bottle queued with ID:", queueItem.id);
-    console.log("[API] Database webhook will trigger processing");
+    console.log("[API] Triggering background processing...");
+
+    const processUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/bottles/process`;
+
+    fetch(processUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        queueId: queueItem.id,
+        message,
+        userId,
+      }),
+    }).catch((error) => {
+      console.error("[API] Failed to trigger processing:", error);
+    });
 
     return NextResponse.json({
       success: true,
