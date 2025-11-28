@@ -86,7 +86,6 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   }, [userId]);
 
   useEffect(() => {
-    // Don't fetch or subscribe if userId is empty/undefined
     if (!userId) {
       setQueueItems([]);
       setIsLoading(false);

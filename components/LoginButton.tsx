@@ -30,7 +30,9 @@ export function LoginButton() {
           e.currentTarget.style.backgroundColor = "#2c1810";
         }}
       >
-        {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connected"}
+        {address
+          ? `${address.slice(0, 6)}...${address.slice(-4)}`
+          : "Connected"}
       </button>
     );
   }

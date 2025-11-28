@@ -28,8 +28,9 @@ const modal = createAppKit({
   themeMode: "dark",
   themeVariables: {
     "--w3m-accent-color": "#2c1810",
-    "--w3m-font-family": "'ApfelGrotezk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  },
+    "--w3m-font-family":
+      "'ApfelGrotezk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  } as any,
   enableWalletGuide: false,
 });
 

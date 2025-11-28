@@ -3,7 +3,7 @@ import { useBottleQueue } from "@/hooks/useBottleQueue";
 
 const mockChannel = {
   on: jest.fn().mockReturnThis(),
-  subscribe: jest.fn().mockReturnThis(),
+  subscribe: jest.fn(() => mockChannel),
 };
 
 jest.mock("@/lib/supabase/client", () => ({
@@ -12,7 +12,7 @@ jest.mock("@/lib/supabase/client", () => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           in: jest.fn(() => ({
-            order: jest.fn(() => ({
+            order: jest.fn(async () => ({
               data: [],
               error: null,
             })),
@@ -95,7 +95,7 @@ describe("useBottleQueue", () => {
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           in: jest.fn(() => ({
-            order: jest.fn(() => ({
+            order: jest.fn(async () => ({
               data: mockQueueItems,
               error: null,
             })),
@@ -120,7 +120,7 @@ describe("useBottleQueue", () => {
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           in: jest.fn(() => ({
-            order: jest.fn(() => ({
+            order: jest.fn(async () => ({
               data: null,
               error: new Error("Database error"),
             })),
