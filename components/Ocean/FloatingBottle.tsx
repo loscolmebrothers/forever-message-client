@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Group, Image, Circle, Text } from "react-konva";
+import { Group, Image } from "react-konva";
 import { useImage } from "react-konva-utils";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { BOTTLE_VISUAL } from "@/lib/constants";
@@ -18,12 +18,6 @@ interface FloatingBottleProps {
   animationDelay?: number;
 }
 
-/**
- * FloatingBottle Component
- * Renders an individual bottle with autonomous physics-based movement
- * Uses sprite 1 for regular bottles, sprite 2 for forever bottles, sprite 3 for ID=0 (ultra special)
- * Fades in smoothly on first appearance
- */
 export function FloatingBottle({
   bottle,
   initialX,
@@ -62,10 +56,8 @@ export function FloatingBottle({
     bottleWidth: scaledWidth,
   });
 
-  // Smooth fade-in animation on mount (faster entrance)
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Animate opacity from 0 to 1
       let currentOpacity = 0;
       let currentEntranceScale = 0.8;
       const duration = 300; // 300ms animation (faster)
@@ -114,7 +106,6 @@ export function FloatingBottle({
     setIsHovered(false);
   };
 
-  // Calculate hover scale (like CreateBottleButton)
   const hoverScale = isHovered ? 1.1 : 1;
 
   const [pulseOpacity, setPulseOpacity] = useState(1);
