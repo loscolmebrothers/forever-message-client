@@ -21,7 +21,7 @@ interface FloatingBottleProps {
 /**
  * FloatingBottle Component
  * Renders an individual bottle with autonomous physics-based movement
- * Uses sprite 1 for regular bottles, sprite 2 for forever bottles
+ * Uses sprite 1 for regular bottles, sprite 2 for forever bottles, sprite 3 for ID=0 (ultra special)
  * Fades in smoothly on first appearance
  */
 export function FloatingBottle({
@@ -37,12 +37,13 @@ export function FloatingBottle({
   const [entranceScale, setEntranceScale] = useState(0.8);
   const [isHovered, setIsHovered] = useState(false);
   const isForever = bottle.isForever || bottle.id === 1;
+  const isSpecialZero = bottle.id === 0;
 
   const isPending = (bottle as any).blockchainStatus === "pending";
   const queueStatus = (bottle as any).queueStatus;
   const queueProgress = (bottle as any).queueProgress || 0;
 
-  const spriteNumber = isForever ? 2 : 1;
+  const spriteNumber = isSpecialZero ? 3 : isForever ? 2 : 1;
   const [bottleImage] = useImage(`/assets/bottle-sprites/${spriteNumber}.webp`);
 
   const SPRITE_BASE_SCALE = 1.5; // Base scale for bottle sprite size
@@ -165,6 +166,7 @@ export function FloatingBottle({
         bottleHeight={imageHeight}
         isPending={isPending}
         isForever={isForever && !isPending}
+        isSpecialZero={isSpecialZero && !isPending}
       />
     </Group>
   );

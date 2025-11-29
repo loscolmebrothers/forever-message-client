@@ -10,7 +10,7 @@ export const POST = withAuth(
     try {
       const bottleId = parseInt(context.params.id, 10);
 
-      if (isNaN(bottleId) || bottleId < 1) {
+      if (isNaN(bottleId) || bottleId < 0) {
         return NextResponse.json(
           { error: "Invalid bottle ID" },
           { status: 400 }
@@ -177,7 +177,7 @@ export const GET = withAuth(
     try {
       const bottleId = parseInt(context.params.id, 10);
 
-      if (isNaN(bottleId) || bottleId < 1) {
+      if (isNaN(bottleId) || bottleId < 0) {
         return NextResponse.json(
           { error: "Invalid bottle ID" },
           { status: 400 }

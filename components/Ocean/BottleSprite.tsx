@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Group, Image as KonvaImage } from "react-konva";
 import { useImage } from "react-konva-utils";
+import Konva from "konva";
 
 interface Sparkle {
   id: number;
@@ -25,6 +26,7 @@ interface BottleSpriteProps {
   bottleHeight: number;
   isPending?: boolean;
   isForever?: boolean;
+  isSpecialZero?: boolean;
 }
 
 export function BottleSprite({
@@ -34,6 +36,7 @@ export function BottleSprite({
   bottleHeight,
   isPending = false,
   isForever = false,
+  isSpecialZero = false,
 }: BottleSpriteProps) {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [starImage] = useImage("/assets/effects/sparkle-star.png");
@@ -41,7 +44,7 @@ export function BottleSprite({
   const animationFrame = useRef<number>();
 
   useEffect(() => {
-    if (!isPending && !isForever) {
+    if (!isPending && !isForever && !isSpecialZero) {
       setSparkles([]);
       if (animationFrame.current) {
         cancelAnimationFrame(animationFrame.current);
@@ -49,18 +52,21 @@ export function BottleSprite({
       return;
     }
 
-    const baseOpacity = isPending ? 0.3 : 0.7;
-    const count = isPending ? 6 : 10;
+    const baseOpacity = isPending ? 0.3 : isSpecialZero ? 0.9 : 0.7;
+    const count = isPending ? 6 : isSpecialZero ? 16 : 10;
 
     const initialSparkles: Sparkle[] = [];
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
-      const distance = bottleWidth * (isPending ? 0.5 : 0.65);
+      const distance =
+        bottleWidth * (isPending ? 0.5 : isSpecialZero ? 0.75 : 0.65);
       const baseX = Math.cos(angle) * distance;
       const baseY = Math.sin(angle) * distance;
       const baseSize = isPending
         ? 10 + Math.random() * 6
-        : 14 + Math.random() * 10;
+        : isSpecialZero
+          ? 18 + Math.random() * 14
+          : 14 + Math.random() * 10;
 
       initialSparkles.push({
         id: i,
@@ -108,15 +114,21 @@ export function BottleSprite({
         cancelAnimationFrame(animationFrame.current);
       }
     };
-  }, [isPending, isForever, bottleWidth]);
+  }, [isPending, isForever, isSpecialZero, bottleWidth]);
 
-  if (!isPending && !isForever) return null;
+  if (!isPending && !isForever && !isSpecialZero) return null;
 
   return (
     <Group x={x} y={y}>
       {sparkles.map((sparkle) => {
         const image = sparkle.type === "star" ? starImage : dotImage;
         if (!image) return null;
+
+        const hueShift =
+          Math.sin(sparkle.phase + sparkle.rotation * 0.01) * 0.3;
+        const cyan = 0 + hueShift;
+        const magenta = 1 - Math.abs(hueShift);
+        const brightness = 1.3;
 
         return (
           <KonvaImage
@@ -130,7 +142,14 @@ export function BottleSprite({
             rotation={sparkle.rotation}
             offsetX={sparkle.size / 2}
             offsetY={sparkle.size / 2}
-            filters={[]}
+            filters={isSpecialZero ? [Konva.Filters.RGBA] : []}
+            red={isSpecialZero ? cyan * 255 * brightness : undefined}
+            green={isSpecialZero ? magenta * 255 * brightness : undefined}
+            blue={isSpecialZero ? 255 * brightness : undefined}
+            shadowEnabled={isSpecialZero}
+            shadowColor={isSpecialZero ? "cyan" : undefined}
+            shadowBlur={isSpecialZero ? 15 : undefined}
+            shadowOpacity={isSpecialZero ? 0.8 : undefined}
           />
         );
       })}
