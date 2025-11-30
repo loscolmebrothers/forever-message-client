@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNotifications } from "@/lib/notifications/NotificationStore";
+import {
+  useNotifications,
+  CompletionNotification,
+} from "@/lib/notifications/NotificationStore";
 import { BellIcon } from "./BellIcon";
 import { useAuth } from "@/lib/auth/AuthContext";
 
@@ -93,9 +96,237 @@ function BottleProgressToast({
   );
 }
 
+function CompletionToast({
+  notification,
+  onDismiss,
+}: {
+  notification: CompletionNotification;
+  onDismiss: (id: string) => void;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleDismiss = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onDismiss(notification.id);
+    }, 300);
+  };
+
+  const ipfsGateway =
+    process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs";
+  const ipfsUrl = notification.ipfsCid
+    ? `${ipfsGateway}/${notification.ipfsCid}`
+    : null;
+  const blockchainUrl = notification.transactionHash
+    ? `https://sepolia.basescan.org/tx/${notification.transactionHash}`
+    : null;
+
+  return (
+    <div
+      style={{
+        background: "rgba(245, 245, 220, 0.95)",
+        backdropFilter: "blur(8px)",
+        border: "2px solid rgba(139, 69, 19, 0.3)",
+        borderRadius: "12px",
+        padding: "14px 20px",
+        margin: "8px 12px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+        animation: isExiting
+          ? "toastExit 0.3s ease-out forwards"
+          : "toastEnter 0.3s ease-out",
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "8px",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "ApfelGrotezk, sans-serif",
+            fontSize: "14px",
+            color: "#2d1a0a",
+            flex: 1,
+            fontWeight: "500",
+          }}
+        >
+          {notification.message}
+        </span>
+        <button
+          onClick={handleDismiss}
+          style={{
+            width: "20px",
+            height: "20px",
+            border: "none",
+            background: "none",
+            color: "rgba(45, 26, 10, 0.5)",
+            fontSize: "16px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "color 0.2s ease",
+            flexShrink: 0,
+            padding: 0,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "rgba(45, 26, 10, 1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "rgba(45, 26, 10, 0.5)";
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          background: "none",
+          border: "none",
+          padding: "4px 0",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          fontFamily: "ApfelGrotezk, sans-serif",
+          fontSize: "12px",
+          color: "#8b4513",
+          transition: "color 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = "#5c2d0a";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = "#8b4513";
+        }}
+      >
+        <span>Where exactly?</span>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          style={{
+            transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s ease",
+          }}
+        >
+          <path
+            d="M2 4 L6 8 L10 4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+
+      {isExpanded && (
+        <div
+          style={{
+            marginTop: "12px",
+            paddingTop: "12px",
+            borderTop: "1px solid rgba(139, 69, 19, 0.2)",
+            display: "flex",
+            gap: "8px",
+            animation: "expandIn 0.2s ease-out",
+          }}
+        >
+          {ipfsUrl && (
+            <a
+              href={ipfsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: 1,
+                padding: "8px 12px",
+                background: "rgba(139, 69, 19, 0.1)",
+                border: "1px solid rgba(139, 69, 19, 0.3)",
+                borderRadius: "6px",
+                fontFamily: "ApfelGrotezk, sans-serif",
+                fontSize: "12px",
+                color: "#5c2d0a",
+                textDecoration: "none",
+                textAlign: "center",
+                transition: "all 0.2s ease",
+                fontWeight: "500",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
+                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.5)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.1)";
+                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.3)";
+              }}
+            >
+              IPFS
+            </a>
+          )}
+          {blockchainUrl && (
+            <a
+              href={blockchainUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: 1,
+                padding: "8px 12px",
+                background: "rgba(139, 69, 19, 0.1)",
+                border: "1px solid rgba(139, 69, 19, 0.3)",
+                borderRadius: "6px",
+                fontFamily: "ApfelGrotezk, sans-serif",
+                fontSize: "12px",
+                color: "#5c2d0a",
+                textDecoration: "none",
+                textAlign: "center",
+                transition: "all 0.2s ease",
+                fontWeight: "500",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
+                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.5)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(139, 69, 19, 0.1)";
+                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.3)";
+              }}
+            >
+              Blockchain
+            </a>
+          )}
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes expandIn {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export function NotificationSidebar() {
   const { isAuthenticated } = useAuth();
-  const { loadingToasts, removeLoadingToast } = useNotifications();
+  const {
+    loadingToasts,
+    removeLoadingToast,
+    completionNotifications,
+    removeCompletionNotification,
+  } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -109,11 +340,14 @@ export function NotificationSidebar() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const toastCount = loadingToasts.size;
+  const toastCount = loadingToasts.size + completionNotifications.length;
 
   const handleClearAll = () => {
     Array.from(loadingToasts.keys()).forEach((id) => {
       removeLoadingToast(id);
+    });
+    completionNotifications.forEach((notification) => {
+      removeCompletionNotification(notification.id);
     });
   };
 
@@ -319,6 +553,13 @@ export function NotificationSidebar() {
               paddingBottom: "16px",
             }}
           >
+            {completionNotifications.map((notification) => (
+              <CompletionToast
+                key={notification.id}
+                notification={notification}
+                onDismiss={removeCompletionNotification}
+              />
+            ))}
             {Array.from(loadingToasts.entries()).map(([id, message]) => (
               <BottleProgressToast
                 key={id}

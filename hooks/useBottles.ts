@@ -47,8 +47,7 @@ export function useBottles() {
   const { address } = useAuth();
 
   // Get pending bottles from queue
-  const { queueItems, pendingCount, technicalDetails, setTechnicalDetails } =
-    useBottleQueue(address || "");
+  const { queueItems, pendingCount } = useBottleQueue(address || "");
 
   const fetchBatch = useCallback(async (offset: number) => {
     try {
@@ -159,7 +158,7 @@ export function useBottles() {
 
   return {
     bottles: allBottles,
-    confirmedBottles: bottles, // Also expose confirmed-only bottles
+    confirmedBottles: bottles,
     pendingBottles,
     pendingCount,
     isLoading,
@@ -172,7 +171,5 @@ export function useBottles() {
       isFullyLoaded: !hasMore,
       isFetchingMore,
     },
-    technicalDetails,
-    setTechnicalDetails,
   };
 }

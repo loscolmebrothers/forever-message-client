@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  createIPFSService,
+  getIPFSService,
   BottleContract,
 } from "@loscolmebrothers/forever-message-ipfs";
 import { ethers } from "ethers";
@@ -12,9 +12,12 @@ import path from "path";
 export const maxDuration = 60; // Allow up to 60 seconds for processing
 
 export async function POST(request: NextRequest) {
+  let queueId: string | undefined;
+
   try {
     const body = await request.json();
-    const { queueId, message, userId } = body;
+    const { queueId: parsedQueueId, message, userId } = body;
+    queueId = parsedQueueId;
 
     if (!queueId || !message || !userId) {
       return NextResponse.json(
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
     );
     const proof = fs.readFileSync(proofPath, "utf-8").trim();
 
-    const ipfs = await createIPFSService({
+    const ipfs = await getIPFSService({
       principalKey: process.env.STORACHA_PRINCIPAL_KEY,
       proof,
       gatewayUrl:
@@ -93,16 +96,22 @@ export async function POST(request: NextRequest) {
       `[Process ${queueId}] Creating bottle on blockchain for creator:`,
       creatorAddress
     );
-    const bottleId = await contract.createBottle(
+    const { bottleId, transactionHash } = await contract.createBottle(
       uploadResult.cid,
       creatorAddress
     );
     console.log(`[Process ${queueId}] Bottle created with ID:`, bottleId);
+    console.log(`[Process ${queueId}] Transaction hash:`, transactionHash);
 
     // Update status to confirming
     await supabaseAdmin
       .from("bottles_queue")
-      .update({ status: "confirming", blockchain_id: bottleId, progress: 80 })
+      .update({
+        status: "confirming",
+        blockchain_id: bottleId,
+        transaction_hash: transactionHash,
+        progress: 80,
+      })
       .eq("id", queueId);
 
     // Wait for confirmation
@@ -153,18 +162,19 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("[Process] Error:", error);
 
-    // Try to update queue status
-    try {
-      const body = await request.json();
-      await supabaseAdmin
-        .from("bottles_queue")
-        .update({
-          status: "failed",
-          error: error.message,
-        })
-        .eq("id", body.queueId);
-    } catch (updateError) {
-      console.error("[Process] Failed to update error status:", updateError);
+    // Try to update queue status if we have queueId
+    if (queueId) {
+      try {
+        await supabaseAdmin
+          .from("bottles_queue")
+          .update({
+            status: "failed",
+            error: error.message,
+          })
+          .eq("id", queueId);
+      } catch (updateError) {
+        console.error("[Process] Failed to update error status:", updateError);
+      }
     }
 
     return NextResponse.json(

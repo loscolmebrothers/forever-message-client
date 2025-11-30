@@ -11,6 +11,14 @@ export interface Notification {
   read?: boolean;
 }
 
+export interface CompletionNotification {
+  id: string;
+  message: string;
+  ipfsCid: string | null;
+  transactionHash: string | null;
+  timestamp: number;
+}
+
 interface NotificationStore {
   notifications: Notification[];
   addNotification: (
@@ -22,6 +30,11 @@ interface NotificationStore {
   loadingToasts: Map<string, string>;
   addLoadingToast: (id: string, message: string) => void;
   removeLoadingToast: (id: string) => void;
+  completionNotifications: CompletionNotification[];
+  addCompletionNotification: (
+    notification: Omit<CompletionNotification, "timestamp">
+  ) => void;
+  removeCompletionNotification: (id: string) => void;
 }
 
 const NotificationContext = createContext<NotificationStore | undefined>(
@@ -37,6 +50,9 @@ export function NotificationProvider({
   const [loadingToasts, setLoadingToasts] = useState<Map<string, string>>(
     new Map()
   );
+  const [completionNotifications, setCompletionNotifications] = useState<
+    CompletionNotification[]
+  >([]);
 
   const addNotification = useCallback(
     (notification: Omit<Notification, "id" | "timestamp">) => {
@@ -81,6 +97,21 @@ export function NotificationProvider({
     });
   }, []);
 
+  const addCompletionNotification = useCallback(
+    (notification: Omit<CompletionNotification, "timestamp">) => {
+      const newNotification: CompletionNotification = {
+        ...notification,
+        timestamp: Date.now(),
+      };
+      setCompletionNotifications((prev) => [newNotification, ...prev]);
+    },
+    []
+  );
+
+  const removeCompletionNotification = useCallback((id: string) => {
+    setCompletionNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
   return (
     <NotificationContext.Provider
       value={{
@@ -92,6 +123,9 @@ export function NotificationProvider({
         loadingToasts,
         addLoadingToast,
         removeLoadingToast,
+        completionNotifications,
+        addCompletionNotification,
+        removeCompletionNotification,
       }}
     >
       {children}

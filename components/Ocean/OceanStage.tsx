@@ -10,7 +10,6 @@ import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
 import { ErrorState } from "./ErrorState";
-import { TechnicalDetailsModal } from "./TechnicalDetailsModal";
 import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
@@ -29,15 +28,7 @@ interface BottleWithPosition extends BottleWithQueue {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const {
-    bottles,
-    isLoading,
-    error,
-    isEmpty,
-    mutate,
-    technicalDetails,
-    setTechnicalDetails,
-  } = useBottles();
+  const { bottles, isLoading, error, isEmpty, mutate } = useBottles();
   const { isAuthenticated } = useAuth();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -257,16 +248,6 @@ export function OceanStage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleBottleCreated}
       />
-
-      {technicalDetails && (
-        <TechnicalDetailsModal
-          bottleId={technicalDetails.bottleId}
-          ipfsCid={technicalDetails.ipfsCid}
-          createdAt={technicalDetails.createdAt}
-          completedAt={technicalDetails.completedAt}
-          onClose={() => setTechnicalDetails(null)}
-        />
-      )}
     </>
   );
 }

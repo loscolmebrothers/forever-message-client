@@ -30,6 +30,7 @@ export interface QueueItem {
   progress: number;
   ipfs_cid: string | null;
   blockchain_id: number | null;
+  transaction_hash: string | null;
   error: string | null;
   attempts: number;
   max_attempts: number;
@@ -38,29 +39,18 @@ export interface QueueItem {
   completed_at: string | null;
 }
 
-export interface TechnicalDetails {
-  bottleId: number | null;
-  ipfsCid: string | null;
-  createdAt: string;
-  completedAt: string | null;
-}
-
 interface UseBottleQueueResult {
   queueItems: QueueItem[];
   pendingCount: number;
   isLoading: boolean;
   error: Error | null;
-  technicalDetails: TechnicalDetails | null;
-  setTechnicalDetails: (details: TechnicalDetails | null) => void;
 }
 
 export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [technicalDetails, setTechnicalDetails] =
-    useState<TechnicalDetails | null>(null);
-  const { addLoadingToast, removeLoadingToast } = useNotifications();
+  const { addLoadingToast, removeLoadingToast, addCompletionNotification } = useNotifications();
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -118,6 +108,12 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
 
             if (updatedItem.status === "completed") {
               removeLoadingToast(updatedItem.id);
+              addCompletionNotification({
+                id: updatedItem.id,
+                message: "Your bottle has been cast into the ocean!",
+                ipfsCid: updatedItem.ipfs_cid,
+                transactionHash: updatedItem.transaction_hash,
+              });
               setTimeout(() => {
                 setQueueItems((prev) =>
                   prev.filter((item) => item.id !== updatedItem.id)
@@ -155,7 +151,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchQueueItems, addLoadingToast, removeLoadingToast]);
+  }, [userId, fetchQueueItems, addLoadingToast, removeLoadingToast, addCompletionNotification]);
 
   const pendingCount = queueItems.filter((item) =>
     ["queued", "uploading", "minting", "confirming"].includes(item.status)
@@ -166,7 +162,5 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     pendingCount,
     isLoading,
     error,
-    technicalDetails,
-    setTechnicalDetails,
   };
 }
