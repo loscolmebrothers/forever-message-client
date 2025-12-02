@@ -11,14 +11,12 @@ export function GameModal({ isOpen, onContinue }: GameModalProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[10000] animate-fade-in">
       <div
-        className="parchment-modal flex flex-col items-center gap-8"
+        className="parchment-modal flex flex-col items-center gap-8 bg-cover bg-center"
         style={{
           width: "clamp(300px, 80vw, 500px)",
           padding: "clamp(30px, 6vw, 60px)",
           backgroundImage:
             "url(https://assets.loscolmebrothers.com/textures/parchment.jpg)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
         }}
       >
         <h1
@@ -29,10 +27,9 @@ export function GameModal({ isOpen, onContinue }: GameModalProps) {
         </h1>
         <button
           onClick={onContinue}
-          className="parchment-button font-bold"
+          className="parchment-button font-bold py-3 px-10"
           style={{
             fontSize: "clamp(16px, 3vw, 20px)",
-            padding: "12px 40px",
           }}
         >
           Continue

@@ -6,7 +6,7 @@ export function BellIcon({
   hasNotifications?: boolean;
 }) {
   return (
-    <div style={{ position: "relative", width: "24px", height: "24px" }}>
+    <div className="relative w-6 h-6">
       <svg
         width="24"
         height="24"

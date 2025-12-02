@@ -108,10 +108,9 @@ function CompletionToast({
           width="12"
           height="12"
           viewBox="0 0 12 12"
-          className="transition-transform duration-200"
-          style={{
-            transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-          }}
+          className={`transition-transform duration-200 ${
+            isExpanded ? "rotate-180" : "rotate-0"
+          }`}
         >
           <path
             d="M2 4 L6 8 L10 4"
@@ -292,9 +291,10 @@ export function NotificationSidebar() {
 
       {isOpen && (
         <div
-          className="fixed left-0 top-0 h-screen glass-surface-dark shadow-glass-lg z-[1000] flex flex-col"
+          className={`fixed left-0 top-0 h-screen glass-surface-dark shadow-glass-lg z-[1000] flex flex-col ${
+            isMobile ? "w-[90vw]" : "w-[320px]"
+          }`}
           style={{
-            width: isMobile ? "90vw" : "320px",
             animation: "slideInFromLeft 0.3s ease-out",
           }}
         >

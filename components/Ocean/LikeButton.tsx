@@ -22,31 +22,16 @@ export function LikeButton({ bottleId }: LikeButtonProps) {
     <button
       onClick={handleClick}
       disabled={isToggling}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border-2 ${
+        hasLiked
+          ? "bg-red-50 border-red-500 text-red-600"
+          : "bg-gray-50 border-gray-200"
+      } ${isToggling ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:scale-105"}`}
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "8px 16px",
-        backgroundColor: hasLiked ? "#FEE2E2" : "#F9FAFB",
-        border: hasLiked ? "2px solid #EF4444" : "2px solid #E5E7EB",
-        borderRadius: "8px",
-        cursor: isToggling ? "not-allowed" : "pointer",
-        fontSize: "14px",
-        fontWeight: "500",
         color: hasLiked ? "#DC2626" : UI_COLORS.TEXT_PRIMARY,
-        transition: "all 0.2s ease",
-        opacity: isToggling ? 0.6 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!isToggling) {
-          e.currentTarget.style.transform = "scale(1.05)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1)";
       }}
     >
-      <span style={{ fontSize: "18px" }}>{hasLiked ? "❤️" : "🤍"}</span>
+      <span className="text-lg">{hasLiked ? "❤️" : "🤍"}</span>
       <span>
         {likeCount} {likeCount === 1 ? "like" : "likes"}
       </span>

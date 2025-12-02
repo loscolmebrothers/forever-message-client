@@ -19,7 +19,6 @@ export function LoadingScreen({
   onPhaseChange,
 }: LoadingScreenProps) {
   const [percentage, setPercentage] = useState(0);
-  const [showModal, setShowModal] = useState(false);
   const [currentBottleIndex, setCurrentBottleIndex] = useState(0);
 
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -37,14 +36,14 @@ export function LoadingScreen({
       if (progress >= 100) {
         clearInterval(interval);
         onPhaseChange?.(2);
-        // Wait a moment, then magical fade out and show modal
+        // Wait a moment, then fade out and complete
         setTimeout(() => {
           if (overlayRef.current) {
             overlayRef.current.style.opacity = "0";
             overlayRef.current.style.filter = "blur(8px)";
           }
           setTimeout(() => {
-            setShowModal(true);
+            onComplete();
           }, 1000);
         }, 500);
       }
@@ -59,66 +58,30 @@ export function LoadingScreen({
       clearInterval(interval);
       clearInterval(bottleInterval);
     };
-  }, [onPhaseChange]);
-
-  const handleContinue = () => {
-    setShowModal(false);
-    onComplete();
-  };
+  }, [onPhaseChange, onComplete]);
 
   return (
     <>
       {/* Ocean filling overlay */}
       <div
         ref={overlayRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#000000",
-          zIndex: 9999,
-          transition: "opacity 1000ms ease-out, filter 1000ms ease-out",
-          pointerEvents: showModal ? "none" : "auto",
-        }}
+        className="fixed inset-0 bg-black z-[9999] transition-all duration-1000 ease-out pointer-events-auto"
       >
         {/* Rising water effect */}
         <div
+          className="absolute bottom-0 left-0 right-0 transition-all duration-100 linear"
           style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
             height: `${percentage}%`,
             background: "linear-gradient(to top, #1e5a7a 0%, #4682B4 100%)",
-            transition: "height 100ms linear",
           }}
         />
 
         {/* Bottom content */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "40px",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            color: "#ffffff",
-            fontFamily: "ApfelGrotezk, sans-serif",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
+        <div className="absolute bottom-10 left-0 right-0 text-center text-white font-['ApfelGrotezk',sans-serif] flex flex-col items-center gap-3">
           {/* Animated bottle above text */}
           <div
+            className="w-[50px] h-[75px] relative opacity-70"
             style={{
-              width: "50px",
-              height: "75px",
-              position: "relative",
-              opacity: 0.7,
               filter: "drop-shadow(0 0 12px rgba(135, 206, 235, 0.6))",
               animation: "floatBottle 2.5s ease-in-out infinite",
             }}
@@ -132,13 +95,9 @@ export function LoadingScreen({
           </div>
 
           {/* Text */}
-          <div style={{ opacity: 0.4 }}>
-            <div style={{ fontSize: "13px", marginBottom: "4px" }}>
-              Filling the ocean
-            </div>
-            <div style={{ fontSize: "16px", fontWeight: "500" }}>
-              {percentage}%
-            </div>
+          <div className="opacity-40">
+            <div className="text-[13px] mb-1">Filling the ocean</div>
+            <div className="text-base font-medium">{percentage}%</div>
           </div>
         </div>
 
@@ -154,79 +113,6 @@ export function LoadingScreen({
           }
         `}</style>
       </div>
-
-      {/* Forever Message Modal */}
-      {showModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "20px",
-            zIndex: 10000,
-            backgroundColor: "rgba(0, 0, 0, 0.3)",
-            backdropFilter: "blur(10px)",
-            animation: "fadeIn 800ms ease-out",
-          }}
-        >
-          <div
-            className="parchment-modal"
-            style={{
-              width: "clamp(280px, 70vw, 450px)",
-              padding: "clamp(30px, 5vw, 50px)",
-              backgroundImage:
-                "url(https://assets.loscolmebrothers.com/textures/parchment.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "AndreaScript, cursive",
-                fontSize: "clamp(32px, 7vw, 52px)",
-                color: "#2c3e50",
-                margin: 0,
-                textAlign: "center",
-                fontWeight: "normal",
-              }}
-            >
-              Forever Message
-            </h1>
-          </div>
-          <button
-            onClick={handleContinue}
-            className="glass-button"
-            style={{
-              fontSize: "clamp(14px, 2.5vw, 16px)",
-            }}
-          >
-            Continue
-          </button>
-
-          <style jsx>{`
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: scale(0.95);
-              }
-              to {
-                opacity: 1;
-                transform: scale(1);
-              }
-            }
-          `}</style>
-        </div>
-      )}
     </>
   );
 }

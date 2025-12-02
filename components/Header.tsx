@@ -41,14 +41,7 @@ export function Header() {
   }, [isConnected, isAuthenticated, isLoading, address, signIn]);
 
   return (
-    <header
-      style={{
-        position: "fixed",
-        top: 20,
-        right: 20,
-        zIndex: 100,
-      }}
-    >
+    <header className="fixed top-5 right-5 z-[100]">
       <LoginButton />
     </header>
   );

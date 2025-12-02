@@ -172,12 +172,9 @@ export function OceanStage() {
   return (
     <>
       <div
+        className="w-full h-screen overflow-hidden bg-[#1a3d5c]"
         style={{
           cursor: isDragging ? "grabbing" : "grab",
-          width: "100%",
-          height: "100vh",
-          overflow: "hidden",
-          backgroundColor: "#1a3d5c",
         }}
       >
         <Stage

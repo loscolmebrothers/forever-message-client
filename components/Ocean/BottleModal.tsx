@@ -74,150 +74,54 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] animate-fade-in"
-      style={{ padding: isMobile ? "16px" : "20px" }}
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] animate-fade-in ${isMobile ? "p-4" : "p-5"}`}
       onClick={onClose}
     >
       <div
-        className="parchment-modal w-full max-w-[500px] animate-slide-up"
+        className="parchment-modal w-full max-w-[500px] animate-slide-up relative"
         onClick={(e) => e.stopPropagation()}
       >
         <div
+          className="absolute inset-0 opacity-30 pointer-events-none rounded-parchment-md z-0"
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
             backgroundImage:
               "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            opacity: 0.3,
-            pointerEvents: "none",
-            borderRadius: "4px",
-            zIndex: 0,
           }}
         />
 
         <button
           onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            width: "24px",
-            height: "24px",
-            border: "none",
-            background: "rgba(0, 0, 0, 0.5)",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: "#ffffff",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
-            transform: "scale(1)",
-            transition: "transform 0.2s, background 0.2s, opacity 0.2s",
-            zIndex: 10,
-            opacity: 0.6,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.1)";
-            e.currentTarget.style.background = "rgba(0, 0, 0, 0.8)";
-            e.currentTarget.style.opacity = "1";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.background = "rgba(0, 0, 0, 0.5)";
-            e.currentTarget.style.opacity = "0.6";
-          }}
+          className="absolute top-2 right-2 w-6 h-6 border-0 bg-black/50 hover:bg-black/80 rounded-full cursor-pointer flex items-center justify-center text-sm font-bold text-white shadow-sm opacity-60 hover:opacity-100 hover:scale-110 transition-all duration-200 z-10"
           aria-label="Close"
         >
           ×
         </button>
 
         <div
-          style={{
-            padding: isMobile ? "32px 24px" : "48px 32px",
-            position: "relative",
-            zIndex: 1,
-          }}
+          className={`relative z-10 ${isMobile ? "p-8 px-6" : "py-12 px-8"}`}
         >
           <div
+            className={`font-[AndreaScript,cursive] text-ink-dark text-center leading-relaxed mb-6 max-h-[200px] overflow-auto break-words ${isMobile ? "text-2xl" : "text-[28px]"}`}
             style={{
-              fontFamily: "'AndreaScript', cursive",
-              fontSize: isMobile ? "24px" : "28px",
-              color: "#2c1810",
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
-              lineHeight: "1.5",
-              textAlign: "center",
-              marginBottom: "24px",
-              maxHeight: "200px",
-              overflow: "auto",
-              wordWrap: "break-word",
             }}
           >
             {bottle.message}
           </div>
 
-          <div
-            style={{
-              borderTop: "1px solid rgba(44, 24, 16, 0.1)",
-              paddingTop: "16px",
-              marginTop: "16px",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'ApfelGrotezk', sans-serif",
-                fontSize: "14px",
-                color: "rgba(44, 24, 16, 0.7)",
-                marginBottom: "16px",
-                textAlign: "center",
-              }}
-            >
+          <div className="border-t border-ink/10 pt-4 mt-4">
+            <div className="font-apfel text-sm text-ink/70 mb-4 text-center">
               {formatRelativeTime(bottle.timestamp)}
             </div>
 
             {isAuthenticated && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  marginTop: "16px",
-                }}
-              >
+              <div className="flex items-center justify-center gap-2 mt-4">
                 <button
                   onClick={handleLikeClick}
                   disabled={isToggling}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: isToggling ? "not-allowed" : "pointer",
-                    padding: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    transition: "transform 0.2s ease",
-                    transform: hasLiked ? "scale(1.1)" : "scale(1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isToggling) {
-                      e.currentTarget.style.transform = "scale(1.05)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isToggling) {
-                      e.currentTarget.style.transform = hasLiked
-                        ? "scale(1.1)"
-                        : "scale(1)";
-                    }
-                  }}
+                  className={`bg-transparent border-0 cursor-pointer p-2 flex items-center gap-2 transition-transform duration-200 ${isToggling ? "cursor-not-allowed" : ""} ${hasLiked ? "scale-110" : "scale-100"} hover:scale-105`}
                   aria-label={
                     hasLiked ? "Unlike this bottle" : "Like this bottle"
                   }
@@ -227,23 +131,9 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
                     alt="Like"
                     width={32}
                     height={32}
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      filter: hasLiked
-                        ? "none"
-                        : "grayscale(100%) brightness(0.5)",
-                      transition: "filter 0.2s ease",
-                    }}
+                    className={`w-8 h-8 transition-[filter] duration-200 ${hasLiked ? "" : "grayscale brightness-50"}`}
                   />
-                  <span
-                    style={{
-                      fontFamily: "'ApfelGrotezk', sans-serif",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "#2c1810",
-                    }}
-                  >
+                  <span className="font-apfel text-lg font-bold text-ink">
                     {likeCount}
                   </span>
                 </button>

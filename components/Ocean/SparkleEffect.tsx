@@ -75,22 +75,15 @@ export function SparkleEffect() {
   }, [sparkles]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-    >
+    <div ref={containerRef} className="absolute inset-0 pointer-events-none">
       {sparkles.map((sparkle) => (
         <div
           key={sparkle.id}
           data-sparkle-id={sparkle.id}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
           style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
             width: `${sparkle.size}px`,
             height: `${sparkle.size}px`,
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
           }}
         >
           <Image

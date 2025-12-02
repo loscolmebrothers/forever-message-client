@@ -200,42 +200,9 @@ export function CreateBottleModal({
 
   if (!textureLoaded) {
     return (
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 50,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#f5f5dc",
-            borderRadius: "4px",
-            padding: "48px 40px",
-            maxWidth: "500px",
-            width: "100%",
-            margin: "0 16px",
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "300px",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "'AndreaScript', cursive",
-              fontSize: "24px",
-              color: "#2c1810",
-            }}
-          >
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-parchment-modal rounded shadow-[0_20px_60px_rgba(0,0,0,0.5)] py-12 px-10 max-w-[500px] w-full mx-4 flex items-center justify-center min-h-[300px]">
+          <div className="font-['AndreaScript',cursive] text-2xl text-ink">
             Loading...
           </div>
         </div>
@@ -251,59 +218,22 @@ export function CreateBottleModal({
   return (
     <div
       ref={backdropRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={loading ? undefined : onClose}
     >
       <div
         ref={modalRef}
-        style={{
-          position: "relative",
-          backgroundColor: "#f5f5dc",
-          borderRadius: "4px",
-          padding: isMobile ? "24px 20px 48px" : "32px 40px 64px",
-          maxWidth: "600px",
-          width: "90%",
-          margin: "0 16px",
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-        }}
+        className={`relative bg-parchment-modal rounded shadow-[0_10px_30px_rgba(0,0,0,0.2)] max-w-[600px] w-[90%] mx-4 ${
+          isMobile ? "pt-6 px-5 pb-12" : "pt-8 px-10 pb-16"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={loading ? undefined : onClose}
           disabled={loading}
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            width: "24px",
-            height: "24px",
-            border: "none",
-            background: "rgba(0, 0, 0, 0.5)",
-            borderRadius: "50%",
-            cursor: loading ? "default" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: "#ffffff",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
-            transform: "scale(1)",
-            transition: "transform 0.2s, background 0.2s, opacity 0.2s",
-            zIndex: 10,
-            opacity: loading ? 0.3 : 0.6,
-          }}
+          className={`absolute top-2 right-2 w-6 h-6 border-none bg-black/50 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-[0_2px_4px_rgba(0,0,0,0.15)] scale-100 transition-[transform,background,opacity] duration-200 z-10 ${
+            loading ? "opacity-30 cursor-default" : "opacity-60 cursor-pointer"
+          }`}
           onMouseEnter={(e) => {
             if (!loading) {
               e.currentTarget.style.transform = "scale(1.1)";
@@ -324,19 +254,10 @@ export function CreateBottleModal({
         </button>
 
         <div
+          className="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none rounded"
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
             backgroundImage:
               "url('https://assets.loscolmebrothers.com/textures/parchment.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.3,
-            pointerEvents: "none",
-            borderRadius: "4px",
           }}
         />
         <style jsx>{`
@@ -359,46 +280,22 @@ export function CreateBottleModal({
             }
           }}
           placeholder="Write your message..."
-          style={{
-            width: "100%",
-            height: isMobile ? "60px" : "75px",
-            padding: "12px 16px",
-            border: "none",
-            background: "transparent",
-            resize: "none",
-            outline: "none",
-            fontFamily: "'AndreaScript', cursive",
-            fontSize: isMobile ? "18px" : "20px",
-            color: "#2c1810",
-            lineHeight: "1.4",
-            position: "relative",
-            zIndex: 1,
-            textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-          }}
+          className={`w-full py-3 px-4 border-none bg-transparent resize-none outline-none font-['AndreaScript',cursive] text-ink leading-[1.4] relative z-[1] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)] overflow-hidden whitespace-nowrap ${
+            isMobile ? "h-[60px] text-lg" : "h-[75px] text-xl"
+          }`}
           disabled={loading}
           autoFocus
           rows={1}
         />
 
-        <div
-          style={{
-            marginTop: "8px",
-            textAlign: "right",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
+        <div className="mt-2 text-right relative z-[1]">
           <div
+            className="font-['ApfelGrotezk',sans-serif] text-[11px] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)]"
             style={{
-              fontFamily: "'ApfelGrotezk', sans-serif",
-              fontSize: "11px",
               color:
                 message.length >= MAX_CHARACTERS
                   ? "#8b4513"
                   : "rgba(44, 24, 16, 0.4)",
-              textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
             }}
           >
             {message.length}/{MAX_CHARACTERS}
@@ -406,13 +303,9 @@ export function CreateBottleModal({
         </div>
 
         <div
-          style={{
-            position: "absolute",
-            bottom: isMobile ? "-48px" : "-64px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 20,
-          }}
+          className={`absolute left-1/2 -translate-x-1/2 z-20 ${
+            isMobile ? "-bottom-12" : "-bottom-16"
+          }`}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
@@ -420,18 +313,16 @@ export function CreateBottleModal({
             ref={sealRef}
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
+            className={`bg-transparent border-none p-0 relative ${
+              loading || !message.trim() ? "cursor-default" : "cursor-pointer"
+            } ${
+              isBottleFilling || isSparkling || isFlying
+                ? "opacity-100"
+                : loading || !message.trim()
+                  ? "opacity-40"
+                  : "opacity-100"
+            }`}
             style={{
-              background: "transparent",
-              border: "none",
-              cursor: loading || !message.trim() ? "default" : "pointer",
-              opacity:
-                isBottleFilling || isSparkling || isFlying
-                  ? 1
-                  : loading || !message.trim()
-                    ? 0.4
-                    : 1,
-              padding: 0,
-              position: "relative",
               transition:
                 "transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
             }}
@@ -460,6 +351,7 @@ export function CreateBottleModal({
               }
               width={96}
               height={96}
+              className="h-auto transition-all duration-[600ms] ease-in-out object-contain bg-transparent"
               style={{
                 width:
                   isBottleFilling || isSparkling || isFlying
@@ -467,10 +359,6 @@ export function CreateBottleModal({
                     : isMobile
                       ? "80px"
                       : "96px",
-                height: "auto",
-                transition: "all 0.6s ease-in-out",
-                objectFit: "contain",
-                background: "transparent",
               }}
             />
 
@@ -483,24 +371,8 @@ export function CreateBottleModal({
 
           {message.trim() && !loading && (
             <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: "50%",
-                transform: "translateX(-50%)",
-                backgroundColor: "#2c1810",
-                color: "#ffffff",
-                padding: "6px 10px",
-                borderRadius: "4px",
-                fontSize: "11px",
-                fontFamily: "'ApfelGrotezk', sans-serif",
-                whiteSpace: "nowrap",
-                zIndex: 100,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                pointerEvents: "none",
-                opacity: showTooltip ? 1 : 0,
-                transition: "opacity 150ms ease",
-              }}
+              className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-ink text-white py-1.5 px-2.5 rounded text-[11px] font-['ApfelGrotezk',sans-serif] whitespace-nowrap z-[100] shadow-[0_4px_12px_rgba(0,0,0,0.3)] pointer-events-none transition-opacity duration-150 ease-[ease]"
+              style={{ opacity: showTooltip ? 1 : 0 }}
             >
               Seal your message
             </div>
@@ -508,17 +380,7 @@ export function CreateBottleModal({
         </div>
 
         {error && (
-          <div
-            style={{
-              marginTop: "12px",
-              color: "#8b4513",
-              fontSize: "16px",
-              fontFamily: "'ApfelGrotezk', sans-serif",
-              position: "relative",
-              zIndex: 1,
-              textShadow: "0 1px 2px rgba(255, 255, 255, 0.5)",
-            }}
-          >
+          <div className="mt-3 text-[#8b4513] text-base font-['ApfelGrotezk',sans-serif] relative z-[1] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)]">
             {error}
           </div>
         )}

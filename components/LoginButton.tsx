@@ -21,11 +21,11 @@ export function LoginButton() {
     <button
       onClick={() => open()}
       disabled={isLoading}
-      className="glass-button-sm"
-      style={{
-        opacity: isLoading ? 0.7 : 1,
-        cursor: isLoading ? "not-allowed" : "pointer",
-      }}
+      className={`glass-button-sm transition-opacity duration-200 ${
+        isLoading
+          ? "opacity-70 cursor-not-allowed"
+          : "opacity-100 cursor-pointer"
+      }`}
     >
       {isLoading ? "Loading..." : "Connect"}
     </button>

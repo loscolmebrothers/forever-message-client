@@ -34,86 +34,49 @@ function Toast({
     }
   };
 
-  const getColor = () => {
+  const getBorderColor = () => {
     switch (type) {
       case "success":
-        return "#10b981";
+        return "border-emerald-500";
       case "error":
-        return "#ef4444";
+        return "border-red-500";
       case "info":
-        return "#3b82f6";
+        return "border-blue-500";
+    }
+  };
+
+  const getIconBgColor = () => {
+    switch (type) {
+      case "success":
+        return "bg-emerald-500";
+      case "error":
+        return "bg-red-500";
+      case "info":
+        return "bg-blue-500";
     }
   };
 
   return (
     <div
+      className={`flex items-center gap-3 px-5 py-3.5 min-w-[280px] max-w-[500px] rounded-xl backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border ${getBorderColor()}`}
       style={{
         background: "rgba(20, 20, 30, 0.95)",
-        backdropFilter: "blur(12px)",
-        border: `1px solid ${getColor()}`,
-        borderRadius: "12px",
-        padding: "14px 20px",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
         animation: isExiting
           ? "centerToastExit 0.3s ease-out forwards"
           : "centerToastEnter 0.3s ease-out",
-        minWidth: "280px",
-        maxWidth: "500px",
       }}
     >
       <div
-        style={{
-          width: "24px",
-          height: "24px",
-          borderRadius: "50%",
-          background: getColor(),
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          fontSize: "14px",
-          fontWeight: "bold",
-          flexShrink: 0,
-        }}
+        className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${getIconBgColor()}`}
       >
         {getIcon()}
       </div>
-      <span
-        style={{
-          fontFamily: "ApfelGrotezk, sans-serif",
-          fontSize: "14px",
-          color: "#ffffff",
-          flex: 1,
-        }}
-      >
+      <span className="font-['ApfelGrotezk'] text-sm text-white flex-1">
         {message}
       </span>
       <button
         onClick={handleDismiss}
-        style={{
-          width: "20px",
-          height: "20px",
-          border: "none",
-          background: "none",
-          color: "rgba(255, 255, 255, 0.5)",
-          fontSize: "18px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "color 0.2s ease",
-          flexShrink: 0,
-          padding: 0,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-        }}
+        className="w-5 h-5 border-none bg-transparent text-white/50 text-lg cursor-pointer flex items-center justify-center transition-colors duration-200 flex-shrink-0 p-0 hover:text-white"
       >
         ×
       </button>
@@ -151,22 +114,9 @@ export function CenterToast() {
           }
         }
       `}</style>
-      <div
-        style={{
-          position: "fixed",
-          bottom: "80px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 2000,
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          alignItems: "center",
-          pointerEvents: "none",
-        }}
-      >
+      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[2000] flex flex-col gap-3 items-center pointer-events-none">
         {notifications.map((notification) => (
-          <div key={notification.id} style={{ pointerEvents: "auto" }}>
+          <div key={notification.id} className="pointer-events-auto">
             <Toast
               id={notification.id}
               type={notification.type}
