@@ -74,32 +74,12 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: isMobile ? "16px" : "20px",
-        animation: "fadeIn 0.2s ease-out",
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] animate-fade-in"
+      style={{ padding: isMobile ? "16px" : "20px" }}
       onClick={onClose}
     >
       <div
-        style={{
-          position: "relative",
-          backgroundColor: "#f5f5dc",
-          borderRadius: "4px",
-          maxWidth: "500px",
-          width: "100%",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-          animation: "slideUp 0.3s ease-out",
-        }}
+        className="parchment-modal w-full max-w-[500px] animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -272,28 +252,6 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }

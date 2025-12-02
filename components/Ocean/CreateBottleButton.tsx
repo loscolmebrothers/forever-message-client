@@ -35,34 +35,26 @@ export function CreateBottleButton({
         <button
           onClick={isAuthenticated ? onClick : undefined}
           disabled={!isAuthenticated}
+          className="glass-surface shadow-glass-lg transition-all duration-300"
           style={{
-            backgroundColor: "#ffffff",
             borderRadius: "50%",
             width: "80px",
             height: "80px",
-            border: "none",
             cursor: isAuthenticated ? "pointer" : "not-allowed",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow:
-              "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-            transition: "transform 0.3s, box-shadow 0.3s, opacity 0.3s",
             padding: "8px",
             opacity: isAuthenticated ? 1 : 0.6,
           }}
           onMouseEnter={(e) => {
             if (isAuthenticated) {
               e.currentTarget.style.transform = "scale(1.1)";
-              e.currentTarget.style.boxShadow =
-                "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1)";
             }
           }}
           onMouseLeave={(e) => {
             if (isAuthenticated) {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow =
-                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
             }
           }}
           aria-label="Create bottle"
@@ -89,11 +81,15 @@ export function CreateBottleButton({
               }}
             />
             <div
+              className="shadow-glass"
               style={{
                 position: "absolute",
                 bottom: "-4px",
                 right: "-4px",
-                backgroundColor: "#3b82f6",
+                background:
+                  "linear-gradient(135deg, rgba(64, 224, 208, 0.35) 0%, rgba(32, 178, 170, 0.45) 100%)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(127, 255, 212, 0.4)",
                 color: "white",
                 borderRadius: "50%",
                 width: "24px",
@@ -102,9 +98,7 @@ export function CreateBottleButton({
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "16px",
-                fontWeight: "bold",
-                border: "2px solid white",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                fontWeight: 600,
               }}
             >
               +
@@ -115,20 +109,17 @@ export function CreateBottleButton({
 
       {showTooltip && !isAuthenticated && (
         <div
+          className="glass-surface shadow-glass text-glass animate-fade-in"
           style={{
             position: "fixed",
             bottom: "120px",
             right: "32px",
-            backgroundColor: "#2c1810",
-            color: "white",
             padding: "12px 16px",
-            borderRadius: "8px",
             fontSize: "14px",
-            fontFamily: "'ApfelGrotezk', sans-serif",
             whiteSpace: "nowrap",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
             zIndex: 51,
             pointerEvents: "none",
+            borderRadius: "8px",
           }}
         >
           Please connect your wallet to create a bottle
@@ -141,7 +132,7 @@ export function CreateBottleButton({
               height: "0",
               borderLeft: "6px solid transparent",
               borderRight: "6px solid transparent",
-              borderTop: "6px solid #2c1810",
+              borderTop: "6px solid rgba(64, 224, 208, 0.12)",
             }}
           />
         </div>

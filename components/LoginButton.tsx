@@ -9,27 +9,7 @@ export function LoginButton() {
 
   if (isAuthenticated) {
     return (
-      <button
-        onClick={() => open()}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#2c1810",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontFamily: "'ApfelGrotezk', sans-serif",
-          fontSize: "14px",
-          fontWeight: "500",
-          transition: "background-color 0.2s",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#3d2418";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#2c1810";
-        }}
-      >
+      <button onClick={() => open()} className="glass-button-sm">
         {address
           ? `${address.slice(0, 6)}...${address.slice(-4)}`
           : "Connected"}
@@ -41,26 +21,10 @@ export function LoginButton() {
     <button
       onClick={() => open()}
       disabled={isLoading}
+      className="glass-button-sm"
       style={{
-        padding: "10px 20px",
-        backgroundColor: "#2c1810",
-        color: "white",
-        border: "none",
-        borderRadius: "8px",
-        cursor: isLoading ? "not-allowed" : "pointer",
-        fontFamily: "'ApfelGrotezk', sans-serif",
-        fontSize: "14px",
-        fontWeight: "500",
         opacity: isLoading ? 0.7 : 1,
-        transition: "background-color 0.2s, opacity 0.3s",
-      }}
-      onMouseEnter={(e) => {
-        if (!isLoading) {
-          e.currentTarget.style.backgroundColor = "#3d2418";
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "#2c1810";
+        cursor: isLoading ? "not-allowed" : "pointer",
       }}
     >
       {isLoading ? "Loading..." : "Connect"}

@@ -90,17 +90,17 @@ export function OceanBackground({ width, height }: OceanBackgroundProps) {
         fillLinearGradientEndPoint={{ x: 0, y: height }}
         fillLinearGradientColorStops={[
           0,
-          "#87CEEB",
+          "#4a7a9c",
           0.15,
-          "#6bb3e0",
+          "#3d6885",
           0.35,
-          "#4a9fd6",
+          "#2e5570",
           0.55,
-          "#3d7ba8",
+          "#244560",
           0.75,
-          "#2a5a7f",
+          "#1a364f",
           1,
-          "#1a3d5c",
+          "#0f2838",
         ]}
       />
 

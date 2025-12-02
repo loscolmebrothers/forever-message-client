@@ -176,6 +176,7 @@ export function LoadingScreen({
           }}
         >
           <div
+            className="parchment-modal"
             style={{
               width: "clamp(280px, 70vw, 450px)",
               padding: "clamp(30px, 5vw, 50px)",
@@ -183,8 +184,6 @@ export function LoadingScreen({
                 "url(https://assets.loscolmebrothers.com/textures/parchment.jpg)",
               backgroundSize: "cover",
               backgroundPosition: "center",
-              borderRadius: "12px",
-              border: "3px solid #8b4513",
               boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
               display: "flex",
               flexDirection: "column",
@@ -206,25 +205,9 @@ export function LoadingScreen({
           </div>
           <button
             onClick={handleContinue}
+            className="glass-button"
             style={{
-              fontFamily: "ApfelGrotezk, sans-serif",
               fontSize: "clamp(14px, 2.5vw, 16px)",
-              padding: "10px 30px",
-              backgroundColor: "#000000",
-              color: "#ffffff",
-              border: "2px solid #333333",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: "500",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#1a1a1a";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#000000";
-              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             Continue

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: "AndreaScript";
   src: url("https://assets.loscolmebrothers.com/fonts/AndreaScript.ttf")
@@ -14,26 +18,235 @@
   font-style: normal;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@font-face {
+  font-family: "ApfelGrotezk";
+  src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Mittel.otf")
+    format("opentype");
+  font-weight: 500;
+  font-style: normal;
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+@font-face {
+  font-family: "ApfelGrotezk";
+  src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Brukt.otf")
+    format("opentype");
+  font-weight: 600;
+  font-style: normal;
 }
 
-body {
-  color: #2c3e50;
-  background: #87ceeb;
+@font-face {
+  font-family: "ApfelGrotezk";
+  src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Satt.otf")
+    format("opentype");
+  font-weight: 700;
+  font-style: normal;
 }
 
-main {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
+@font-face {
+  font-family: "ApfelGrotezk";
+  src: url("https://assets.loscolmebrothers.com/fonts/ApfelGrotezk/ApfelGrotezk-Fett.otf")
+    format("opentype");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    @apply font-apfel;
+  }
+
+  body {
+    color: #2c3e50;
+    background: #1a3d5c;
+  }
+
+  main {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+}
+
+@layer components {
+  /* Glass Components (Controls) - Water/Ocean aesthetic */
+  .glass-surface {
+    @apply backdrop-blur-glass bg-glass-tint border border-glass-border shadow-glass;
+    background-image: linear-gradient(
+      135deg,
+      rgba(64, 224, 208, 0.12) 0%,
+      rgba(32, 178, 170, 0.16) 100%
+    );
+  }
+
+  .glass-surface-light {
+    @apply backdrop-blur-glass bg-glass-tint-light border border-glass-border-light shadow-glass;
+    background-image: linear-gradient(
+      135deg,
+      rgba(64, 224, 208, 0.10) 0%,
+      rgba(32, 178, 170, 0.14) 100%
+    );
+  }
+
+  .glass-surface-dark {
+    @apply backdrop-blur-glass bg-glass-tint-dark border border-glass-border-dark shadow-glass-lg;
+    background-image: linear-gradient(
+      135deg,
+      rgba(64, 224, 208, 0.15) 0%,
+      rgba(32, 178, 170, 0.20) 100%
+    );
+  }
+
+  .glass-button {
+    @apply glass-surface px-6 py-3 rounded-lg font-apfel text-glass-text;
+    @apply transition-all duration-200 ease-out;
+    @apply active:scale-95;
+    @apply cursor-pointer;
+    font-weight: 600;
+  }
+
+  .glass-button:hover {
+    @apply border-glass-border-dark;
+    background-image: linear-gradient(
+      135deg,
+      rgba(64, 224, 208, 0.18) 0%,
+      rgba(32, 178, 170, 0.24) 100%
+    );
+  }
+
+  .glass-button-sm {
+    @apply glass-surface px-4 py-2 rounded-md font-apfel text-sm text-glass-text;
+    @apply transition-all duration-200 ease-out;
+    @apply active:scale-95;
+    @apply cursor-pointer;
+    font-weight: 600;
+  }
+
+  .glass-button-sm:hover {
+    @apply border-glass-border-dark;
+    background-image: linear-gradient(
+      135deg,
+      rgba(64, 224, 208, 0.18) 0%,
+      rgba(32, 178, 170, 0.24) 100%
+    );
+  }
+
+  .glass-notification {
+    @apply glass-surface rounded-lg p-4 shadow-glass;
+    @apply animate-slide-in;
+  }
+
+  .glass-panel {
+    @apply glass-surface rounded-xl p-6 shadow-glass;
+  }
+
+  /* Parchment Components */
+  .parchment-surface {
+    @apply bg-parchment border-2 border-brown;
+  }
+
+  .parchment-surface-light {
+    @apply bg-parchment-light border-2 border-brown-light;
+  }
+
+  .parchment-modal {
+    @apply parchment-surface rounded-parchment-md p-6 shadow-parchment;
+    @apply font-apfel text-ink;
+  }
+
+  .parchment-button {
+    @apply parchment-surface px-6 py-3 rounded-parchment font-apfel font-medium text-ink;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-parchment-dark hover:border-brown-dark;
+    @apply active:scale-95;
+    @apply cursor-pointer;
+  }
+
+  .parchment-input {
+    @apply parchment-surface px-4 py-2 rounded-parchment font-apfel text-ink;
+    @apply focus:outline-none focus:border-brown-dark focus:ring-2 focus:ring-brown/20;
+  }
+
+  /* Text Styles */
+  .text-glass {
+    @apply text-glass-text font-apfel;
+    font-weight: 600;
+  }
+
+  .text-parchment {
+    @apply text-ink font-apfel;
+  }
+
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.5s ease-out;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes bounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }

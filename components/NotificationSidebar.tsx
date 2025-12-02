@@ -28,67 +28,23 @@ function BottleProgressToast({
 
   return (
     <div
+      className="glass-notification flex items-center gap-3 relative mx-3 my-2"
       style={{
-        background: "rgba(20, 20, 30, 0.95)",
-        backdropFilter: "blur(8px)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        borderRadius: "12px",
-        padding: "14px 20px",
-        margin: "8px 12px",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         animation: isExiting
           ? "toastExit 0.3s ease-out forwards"
           : "toastEnter 0.3s ease-out",
-        position: "relative",
       }}
     >
       <div
+        className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white flex-shrink-0"
         style={{
-          width: "16px",
-          height: "16px",
-          border: "2px solid rgba(255, 255, 255, 0.3)",
-          borderTop: "2px solid #ffffff",
-          borderRadius: "50%",
           animation: "spin 0.8s linear infinite",
-          flexShrink: 0,
         }}
       />
-      <span
-        style={{
-          fontFamily: "ApfelGrotezk, sans-serif",
-          fontSize: "14px",
-          color: "#ffffff",
-          flex: 1,
-        }}
-      >
-        {message}
-      </span>
+      <span className="text-glass text-sm flex-1">{message}</span>
       <button
         onClick={handleDismiss}
-        style={{
-          width: "20px",
-          height: "20px",
-          border: "none",
-          background: "none",
-          color: "rgba(255, 255, 255, 0.5)",
-          fontSize: "16px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "color 0.2s ease",
-          flexShrink: 0,
-          padding: 0,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
-        }}
+        className="w-5 h-5 flex items-center justify-center text-white/50 hover:text-white transition-colors duration-200 cursor-pointer flex-shrink-0 p-0 border-0 bg-transparent text-base"
       >
         ×
       </button>
@@ -124,62 +80,20 @@ function CompletionToast({
 
   return (
     <div
+      className="glass-notification relative mx-3 my-2"
       style={{
-        background: "rgba(245, 245, 220, 0.95)",
-        backdropFilter: "blur(8px)",
-        border: "2px solid rgba(139, 69, 19, 0.3)",
-        borderRadius: "12px",
-        padding: "14px 20px",
-        margin: "8px 12px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         animation: isExiting
           ? "toastExit 0.3s ease-out forwards"
           : "toastEnter 0.3s ease-out",
-        position: "relative",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "8px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "ApfelGrotezk, sans-serif",
-            fontSize: "14px",
-            color: "#2d1a0a",
-            flex: 1,
-            fontWeight: "500",
-          }}
-        >
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-glass font-apfel text-sm flex-1">
           {notification.message}
         </span>
         <button
           onClick={handleDismiss}
-          style={{
-            width: "20px",
-            height: "20px",
-            border: "none",
-            background: "none",
-            color: "rgba(45, 26, 10, 0.5)",
-            fontSize: "16px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "color 0.2s ease",
-            flexShrink: 0,
-            padding: 0,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "rgba(45, 26, 10, 1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "rgba(45, 26, 10, 0.5)";
-          }}
+          className="w-5 h-5 flex items-center justify-center text-glass-text/50 hover:text-glass-text transition-colors duration-200 cursor-pointer flex-shrink-0 p-0 border-0 bg-transparent text-base"
         >
           ×
         </button>
@@ -187,34 +101,16 @@ function CompletionToast({
 
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          background: "none",
-          border: "none",
-          padding: "4px 0",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          fontFamily: "ApfelGrotezk, sans-serif",
-          fontSize: "12px",
-          color: "#8b4513",
-          transition: "color 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = "#5c2d0a";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = "#8b4513";
-        }}
+        className="bg-transparent border-0 py-1 px-0 cursor-pointer flex items-center gap-1.5 font-apfel text-xs text-glass-text/60 hover:text-glass-text transition-colors duration-200"
       >
         <span>Where exactly?</span>
         <svg
           width="12"
           height="12"
           viewBox="0 0 12 12"
+          className="transition-transform duration-200"
           style={{
             transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
           }}
         >
           <path
@@ -229,12 +125,8 @@ function CompletionToast({
 
       {isExpanded && (
         <div
+          className="mt-3 pt-3 border-t border-glass-border flex gap-2"
           style={{
-            marginTop: "12px",
-            paddingTop: "12px",
-            borderTop: "1px solid rgba(139, 69, 19, 0.2)",
-            display: "flex",
-            gap: "8px",
             animation: "expandIn 0.2s ease-out",
           }}
         >
@@ -243,28 +135,7 @@ function CompletionToast({
               href={ipfsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                background: "rgba(139, 69, 19, 0.1)",
-                border: "1px solid rgba(139, 69, 19, 0.3)",
-                borderRadius: "6px",
-                fontFamily: "ApfelGrotezk, sans-serif",
-                fontSize: "12px",
-                color: "#5c2d0a",
-                textDecoration: "none",
-                textAlign: "center",
-                transition: "all 0.2s ease",
-                fontWeight: "500",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
-                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.5)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.1)";
-                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.3)";
-              }}
+              className="flex-1 px-3 py-2 bg-glass-tint border border-glass-border hover:bg-glass-tint-dark hover:border-glass-border-dark rounded-md font-apfel text-xs text-glass-text text-center no-underline transition-all duration-200 font-medium"
             >
               IPFS
             </a>
@@ -274,28 +145,7 @@ function CompletionToast({
               href={blockchainUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                background: "rgba(139, 69, 19, 0.1)",
-                border: "1px solid rgba(139, 69, 19, 0.3)",
-                borderRadius: "6px",
-                fontFamily: "ApfelGrotezk, sans-serif",
-                fontSize: "12px",
-                color: "#5c2d0a",
-                textDecoration: "none",
-                textAlign: "center",
-                transition: "all 0.2s ease",
-                fontWeight: "500",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.2)";
-                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.5)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(139, 69, 19, 0.1)";
-                e.currentTarget.style.borderColor = "rgba(139, 69, 19, 0.3)";
-              }}
+              className="flex-1 px-3 py-2 bg-glass-tint border border-glass-border hover:bg-glass-tint-dark hover:border-glass-border-dark rounded-md font-apfel text-xs text-glass-text text-center no-underline transition-all duration-200 font-medium"
             >
               Blockchain
             </a>
@@ -418,56 +268,15 @@ export function NotificationSidebar() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-12 hover:w-14 glass-surface-dark rounded-r-lg cursor-pointer flex items-center justify-center text-xl z-[1000] transition-all duration-200"
           style={{
-            position: "fixed",
-            left: "0",
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: "48px",
-            height: "48px",
-            background: "rgba(20, 20, 30, 0.9)",
-            backdropFilter: "blur(8px)",
-            border: "none",
-            borderRadius: "0 8px 8px 0",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "20px",
-            zIndex: 1000,
-            transition: "all 0.2s ease",
             animation:
               toastCount > 0 ? "tabPulse 2s ease-in-out infinite" : "none",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(30, 30, 40, 0.95)";
-            e.currentTarget.style.width = "56px";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(20, 20, 30, 0.9)";
-            e.currentTarget.style.width = "48px";
           }}
         >
           <BellIcon hasNotifications={toastCount > 0} />
           {toastCount > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: "6px",
-                right: "6px",
-                width: "18px",
-                height: "18px",
-                background: "#ff4444",
-                borderRadius: "50%",
-                fontSize: "10px",
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "ApfelGrotezk, sans-serif",
-                fontWeight: "bold",
-              }}
-            >
+            <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-apfel font-bold">
               {toastCount > 9 ? "9+" : toastCount}
             </span>
           )}
@@ -477,82 +286,28 @@ export function NotificationSidebar() {
       {isMobile && isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            zIndex: 999,
-            animation: "fadeIn 0.3s ease-out",
-          }}
+          className="fixed inset-0 bg-black/50 z-[999] animate-fade-in"
         />
       )}
 
       {isOpen && (
         <div
+          className="fixed left-0 top-0 h-screen glass-surface-dark shadow-glass-lg z-[1000] flex flex-col"
           style={{
-            position: "fixed",
-            left: 0,
-            top: 0,
             width: isMobile ? "90vw" : "320px",
-            height: "100vh",
-            background: "rgba(20, 20, 30, 0.85)",
-            backdropFilter: "blur(12px)",
-            boxShadow: "4px 0 24px rgba(0, 0, 0, 0.3)",
-            zIndex: 1000,
-            display: "flex",
-            flexDirection: "column",
             animation: "slideInFromLeft 0.3s ease-out",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              padding: "16px",
-              paddingBottom: "8px",
-            }}
-          >
+          <div className="flex justify-end p-4 pb-2">
             <button
               onClick={() => setIsOpen(false)}
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                borderRadius: "6px",
-                color: "rgba(255, 255, 255, 0.7)",
-                fontSize: "20px",
-                cursor: "pointer",
-                width: "32px",
-                height: "32px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
-                e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-              }}
+              className="bg-white/10 hover:bg-white/15 border border-white/20 rounded-md text-white/70 hover:text-white text-xl cursor-pointer w-8 h-8 flex items-center justify-center transition-all duration-200"
             >
               ←
             </button>
           </div>
 
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-              paddingTop: "8px",
-              paddingBottom: "16px",
-            }}
-          >
+          <div className="flex-1 overflow-y-auto overflow-x-hidden pt-2 pb-4">
             {completionNotifications.map((notification) => (
               <CompletionToast
                 key={notification.id}
@@ -571,35 +326,10 @@ export function NotificationSidebar() {
           </div>
 
           {toastCount > 1 && (
-            <div
-              style={{
-                padding: "16px",
-                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
-            >
+            <div className="p-4 border-t border-white/10">
               <button
                 onClick={handleClearAll}
-                style={{
-                  width: "100%",
-                  padding: "8px 16px",
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "6px",
-                  fontFamily: "ApfelGrotezk, sans-serif",
-                  fontSize: "12px",
-                  color: "rgba(255, 255, 255, 0.7)",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background =
-                    "rgba(255, 255, 255, 0.15)";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                }}
+                className="w-full px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-md font-apfel text-xs text-white/70 hover:text-white cursor-pointer transition-all duration-200"
               >
                 Close all
               </button>
