@@ -108,36 +108,62 @@
 
   .glass-button {
     @apply glass-surface px-6 py-3 rounded-lg font-apfel text-glass-text;
-    @apply transition-all duration-200 ease-out;
-    @apply active:scale-95;
+    @apply transition-all duration-300 ease-out;
     @apply cursor-pointer;
     font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1),
+      0 0 0 rgba(127, 255, 212, 0);
   }
 
   .glass-button:hover {
     @apply border-glass-border-dark;
+    transform: scale(1.02);
     background-image: linear-gradient(
       135deg,
       rgba(64, 224, 208, 0.18) 0%,
       rgba(32, 178, 170, 0.24) 100%
     );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15),
+      0 0 20px rgba(127, 255, 212, 0.3);
+  }
+
+  .glass-button:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.2),
+      0 0 30px rgba(127, 255, 212, 0.5);
   }
 
   .glass-button-sm {
     @apply glass-surface px-4 py-2 rounded-md font-apfel text-sm text-glass-text;
-    @apply transition-all duration-200 ease-out;
-    @apply active:scale-95;
+    @apply transition-all duration-300 ease-out;
     @apply cursor-pointer;
     font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1),
+      0 0 0 rgba(127, 255, 212, 0);
   }
 
   .glass-button-sm:hover {
     @apply border-glass-border-dark;
+    transform: scale(1.02);
     background-image: linear-gradient(
       135deg,
       rgba(64, 224, 208, 0.18) 0%,
       rgba(32, 178, 170, 0.24) 100%
     );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15),
+      0 0 20px rgba(127, 255, 212, 0.3);
+  }
+
+  .glass-button-sm:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.2),
+      0 0 30px rgba(127, 255, 212, 0.5);
   }
 
   .glass-notification {
