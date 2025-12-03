@@ -380,9 +380,7 @@ export function CreateBottleModal({
                   ? "/assets/bottle-sprites/1.webp"
                   : "/assets/wax-seal.png"
               }
-              alt={
-                isBottleFilling || isFlying ? "Bottle" : "Wax seal"
-              }
+              alt={isBottleFilling || isFlying ? "Bottle" : "Wax seal"}
               width={96}
               height={96}
               className="h-auto transition-all duration-[600ms] ease-in-out object-contain bg-transparent"
@@ -395,7 +393,6 @@ export function CreateBottleModal({
                       : "96px",
               }}
             />
-
           </button>
 
           {message.trim() && !loading && (
