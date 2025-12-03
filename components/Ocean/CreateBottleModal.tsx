@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import NextImage from "next/image";
 import { supabase } from "@/lib/supabase/client";
-import { SparkleEffect } from "./SparkleEffect";
 import { animate as anime } from "animejs";
 
 interface CreateBottleModalProps {
@@ -14,12 +13,7 @@ interface CreateBottleModalProps {
 
 const MAX_CHARACTERS = 120;
 
-type AnimationPhase =
-  | "idle"
-  | "rolling"
-  | "bottle-filling"
-  | "sparkling"
-  | "flying";
+type AnimationPhase = "idle" | "bottle-filling" | "flying";
 
 export function CreateBottleModal({
   isOpen,
@@ -36,8 +30,8 @@ export function CreateBottleModal({
 
   const modalRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLButtonElement>(null);
-  const sparkleContainerRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const bookmarkRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const img = new Image();
@@ -74,6 +68,19 @@ export function CreateBottleModal({
     }
   }, [isOpen, onClose, loading]);
 
+  useEffect(() => {
+    if (isOpen && bookmarkRef.current) {
+      anime(bookmarkRef.current, {
+        translateY: [-3, 0],
+        rotate: [2, 0],
+        duration: 2000,
+        ease: "inOut(sine)",
+        loop: true,
+        direction: "alternate",
+      });
+    }
+  }, [isOpen]);
+
   const handleSubmit = useCallback(async () => {
     if (!message.trim() || loading || !modalRef.current || !sealRef.current)
       return;
@@ -81,49 +88,16 @@ export function CreateBottleModal({
     setLoading(true);
     setError(null);
 
-    setAnimationPhase("rolling");
-
-    if (modalRef.current) {
-      await new Promise<void>((resolve) => {
-        anime(modalRef.current!, {
-          scaleY: 0.1,
-          duration: 800,
-          ease: "inOut(quad)",
-          complete: () => resolve(),
-        });
-      });
-    }
-
     setAnimationPhase("bottle-filling");
 
     if (sealRef.current) {
       anime(sealRef.current, {
-        scale: [0.5, 1.5],
-        opacity: [0, 1],
-        duration: 600,
-        ease: "out(elastic(1, .6))",
-        filter: [
-          "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
-          "drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
-        ],
+        scale: [1, 1.1, 1],
+        duration: 1000,
+        ease: "inOut(sine)",
+        loop: true,
       });
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    setAnimationPhase("sparkling");
-
-    if (sealRef.current) {
-      anime(sealRef.current, {
-        opacity: 1,
-        filter:
-          "drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))",
-        duration: 300,
-        ease: "out(quad)",
-      });
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 800));
 
     try {
       const {
@@ -155,10 +129,10 @@ export function CreateBottleModal({
       if (modalTargets.length > 0) {
         await new Promise<void>((resolve) => {
           anime(modalTargets, {
-            translateY: -200,
             opacity: 0,
-            duration: 600,
-            ease: "in(quad)",
+            scale: 0.95,
+            duration: 300,
+            ease: "out(quad)",
             complete: () => resolve(),
           });
         });
@@ -172,14 +146,6 @@ export function CreateBottleModal({
       setError(errorMessage);
       setLoading(false);
       setAnimationPhase("idle");
-
-      if (modalRef.current) {
-        anime(modalRef.current, {
-          scaleY: 1,
-          duration: 300,
-          ease: "out(quad)",
-        });
-      }
     }
   }, [message, loading, onClose, onSuccess]);
 
@@ -200,8 +166,21 @@ export function CreateBottleModal({
 
   if (!textureLoaded) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-parchment-modal rounded shadow-[0_20px_60px_rgba(0,0,0,0.5)] py-12 px-10 max-w-[500px] w-full mx-4 flex items-center justify-center min-h-[300px]">
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(32, 178, 170, 0.15) 0%, rgba(15, 40, 56, 0.85) 60%, rgba(0, 0, 0, 0.95) 100%)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <div
+          className="bg-parchment rounded-parchment-md py-12 px-10 max-w-[500px] w-full mx-4 flex items-center justify-center min-h-[300px]"
+          style={{
+            boxShadow:
+              "0 0 0 1px rgba(139, 69, 19, 0.2), 0 8px 24px rgba(139, 69, 19, 0.25), 0 0 40px rgba(255, 223, 186, 0.3)",
+          }}
+        >
           <div className="font-['AndreaScript',cursive] text-2xl text-ink">
             Loading...
           </div>
@@ -210,47 +189,104 @@ export function CreateBottleModal({
     );
   }
 
-  const isRolling = animationPhase === "rolling";
   const isBottleFilling = animationPhase === "bottle-filling";
-  const isSparkling = animationPhase === "sparkling";
   const isFlying = animationPhase === "flying";
 
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center z-50"
       onClick={loading ? undefined : onClose}
+      style={{
+        background:
+          "radial-gradient(ellipse at center, rgba(32, 178, 170, 0.15) 0%, rgba(15, 40, 56, 0.85) 60%, rgba(0, 0, 0, 0.95) 100%)",
+        backdropFilter: "blur(8px)",
+      }}
     >
       <div
         ref={modalRef}
-        className={`relative bg-parchment-modal rounded shadow-[0_10px_30px_rgba(0,0,0,0.2)] max-w-[600px] w-[90%] mx-4 ${
+        className={`relative bg-parchment rounded-parchment-md max-w-[600px] w-[90%] mx-4 ${
           isMobile ? "pt-6 px-5 pb-12" : "pt-8 px-10 pb-16"
-        }`}
+        } z-[60]`}
         onClick={(e) => e.stopPropagation()}
+        style={{
+          boxShadow:
+            "0 0 0 1px rgba(139, 69, 19, 0.2), 0 8px 24px rgba(139, 69, 19, 0.25), 0 0 40px rgba(255, 223, 186, 0.3)",
+        }}
       >
         <button
+          ref={bookmarkRef}
           onClick={loading ? undefined : onClose}
           disabled={loading}
-          className={`absolute top-2 right-2 w-6 h-6 border-none bg-black/50 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-[0_2px_4px_rgba(0,0,0,0.15)] scale-100 transition-[transform,background,opacity] duration-200 z-10 ${
-            loading ? "opacity-30 cursor-default" : "opacity-60 cursor-pointer"
+          className={`absolute top-2 right-3 w-7 h-[34px] flex flex-col items-center justify-center transition-all duration-300 z-[70] ${
+            loading ? "opacity-30 cursor-default" : "opacity-100 cursor-pointer"
           }`}
+          style={{
+            filter: loading
+              ? "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.2))"
+              : "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))",
+          }}
           onMouseEnter={(e) => {
             if (!loading) {
-              e.currentTarget.style.transform = "scale(1.1)";
-              e.currentTarget.style.background = "rgba(0, 0, 0, 0.8)";
-              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "scale(1.15) rotate(5deg)";
+              e.currentTarget.style.filter =
+                "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
             }
           }}
           onMouseLeave={(e) => {
             if (!loading) {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.background = "rgba(0, 0, 0, 0.5)";
-              e.currentTarget.style.opacity = "0.6";
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.filter =
+                "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))";
+            }
+          }}
+          onMouseDown={(e) => {
+            if (!loading) {
+              e.currentTarget.style.transform = "scale(1.05) rotate(3deg)";
+              e.currentTarget.style.filter =
+                "drop-shadow(0 6px 12px rgba(139, 69, 19, 0.5)) drop-shadow(0 0 16px rgba(255, 223, 186, 0.8))";
+            }
+          }}
+          onMouseUp={(e) => {
+            if (!loading) {
+              e.currentTarget.style.transform = "scale(1.15) rotate(5deg)";
+              e.currentTarget.style.filter =
+                "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
             }
           }}
           aria-label="Close"
         >
-          ×
+          {/* Bookmark flag shape */}
+          <svg
+            width="28"
+            height="34"
+            viewBox="0 0 28 34"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="pointer-events-none"
+          >
+            {/* Flag body */}
+            <path
+              d="M0 0 L28 0 L28 34 L14 27 L0 34 Z"
+              fill="#d4cfb5"
+              stroke="#8b4513"
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
+            />
+            {/* X symbol */}
+            <text
+              x="14"
+              y="16"
+              fontSize="16"
+              fontWeight="bold"
+              fill="rgba(44, 24, 16, 0.4)"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontFamily="Arial, sans-serif"
+            >
+              ×
+            </text>
+          </svg>
         </button>
 
         <div
@@ -280,8 +316,8 @@ export function CreateBottleModal({
             }
           }}
           placeholder="Write your message..."
-          className={`w-full py-3 px-4 border-none bg-transparent resize-none outline-none font-['AndreaScript',cursive] text-ink leading-[1.4] relative z-[1] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)] overflow-hidden whitespace-nowrap ${
-            isMobile ? "h-[60px] text-lg" : "h-[75px] text-xl"
+          className={`w-full py-3 px-4 border-none bg-transparent resize-none outline-none font-['AndreaScript',cursive] text-ink leading-relaxed relative z-[1] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)] break-words overflow-hidden ${
+            isMobile ? "min-h-[300px] text-2xl" : "min-h-[250px] text-[28px]"
           }`}
           disabled={loading}
           autoFocus
@@ -290,7 +326,7 @@ export function CreateBottleModal({
 
         <div className="mt-2 text-right relative z-[1]">
           <div
-            className="font-['ApfelGrotezk',sans-serif] text-[11px] text-shadow-[0_1px_2px_rgba(255,255,255,0.5)]"
+            className="font-['ApfelGrotezk',sans-serif] text-base font-medium text-shadow-[0_1px_2px_rgba(255,255,255,0.5)]"
             style={{
               color:
                 message.length >= MAX_CHARACTERS
@@ -316,7 +352,7 @@ export function CreateBottleModal({
             className={`bg-transparent border-none p-0 relative ${
               loading || !message.trim() ? "cursor-default" : "cursor-pointer"
             } ${
-              isBottleFilling || isSparkling || isFlying
+              isBottleFilling || isFlying
                 ? "opacity-100"
                 : loading || !message.trim()
                   ? "opacity-40"
@@ -340,21 +376,19 @@ export function CreateBottleModal({
           >
             <NextImage
               src={
-                isBottleFilling || isSparkling || isFlying
+                isBottleFilling || isFlying
                   ? "/assets/bottle-sprites/1.webp"
                   : "/assets/wax-seal.png"
               }
               alt={
-                isBottleFilling || isSparkling || isFlying
-                  ? "Bottle"
-                  : "Wax seal"
+                isBottleFilling || isFlying ? "Bottle" : "Wax seal"
               }
               width={96}
               height={96}
               className="h-auto transition-all duration-[600ms] ease-in-out object-contain bg-transparent"
               style={{
                 width:
-                  isBottleFilling || isSparkling || isFlying
+                  isBottleFilling || isFlying
                     ? "64px"
                     : isMobile
                       ? "80px"
@@ -362,11 +396,6 @@ export function CreateBottleModal({
               }}
             />
 
-            {isSparkling && (
-              <div ref={sparkleContainerRef}>
-                <SparkleEffect />
-              </div>
-            )}
           </button>
 
           {message.trim() && !loading && (

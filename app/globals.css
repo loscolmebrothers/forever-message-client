@@ -169,24 +169,43 @@
 
   /* Parchment Components */
   .parchment-surface {
-    @apply bg-parchment border-2 border-brown;
+    @apply bg-parchment rounded-parchment-md;
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.1),
+      0 4px 12px rgba(139, 69, 19, 0.15), 0 0 0 rgba(255, 223, 186, 0);
   }
 
   .parchment-surface-light {
-    @apply bg-parchment-light border-2 border-brown-light;
+    @apply bg-parchment-light rounded-parchment-md;
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.08),
+      0 4px 12px rgba(139, 69, 19, 0.12), 0 0 0 rgba(255, 223, 186, 0);
   }
 
   .parchment-modal {
-    @apply parchment-surface rounded-parchment-md p-6 shadow-parchment;
-    @apply font-apfel text-ink;
+    @apply bg-parchment rounded-parchment-md p-6 font-apfel text-ink;
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.2),
+      0 8px 24px rgba(139, 69, 19, 0.25), 0 0 0 rgba(255, 223, 186, 0);
+    transition: all 0.3s ease-out;
   }
 
   .parchment-button {
-    @apply parchment-surface px-6 py-3 rounded-parchment font-apfel font-medium text-ink;
-    @apply transition-all duration-200 ease-out;
-    @apply hover:bg-parchment-dark hover:border-brown-dark;
-    @apply active:scale-95;
+    @apply bg-parchment px-6 py-3 rounded-parchment font-apfel font-medium text-ink;
     @apply cursor-pointer;
+    transition: all 0.3s ease-out;
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.15),
+      0 4px 12px rgba(139, 69, 19, 0.2), 0 0 0 rgba(255, 223, 186, 0);
+  }
+
+  .parchment-button:hover {
+    @apply bg-parchment-dark;
+    transform: scale(1.03);
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.25),
+      0 6px 18px rgba(139, 69, 19, 0.3), 0 0 25px rgba(255, 223, 186, 0.4);
+  }
+
+  .parchment-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 1px rgba(139, 69, 19, 0.3),
+      0 8px 24px rgba(139, 69, 19, 0.35), 0 0 35px rgba(255, 223, 186, 0.6);
   }
 
   .parchment-input {
