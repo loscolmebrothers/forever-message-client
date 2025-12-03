@@ -79,7 +79,7 @@ export function CreateBottleButton({
               style={{
                 background:
                   "linear-gradient(135deg, rgba(64, 224, 208, 0.35) 0%, rgba(32, 178, 170, 0.45) 100%)",
-                fontWeight: 600,
+                fontWeight: 500,
               }}
             >
               +
