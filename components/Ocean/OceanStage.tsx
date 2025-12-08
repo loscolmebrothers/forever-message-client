@@ -236,10 +236,7 @@ export function OceanStage() {
 
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
-      <CreateBottleButton
-        onClick={() => setIsCreateModalOpen(true)}
-        isAuthenticated={isAuthenticated}
-      />
+      <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
       <CreateBottleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

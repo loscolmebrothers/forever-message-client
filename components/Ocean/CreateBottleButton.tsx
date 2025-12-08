@@ -2,23 +2,21 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useAccount } from "wagmi";
 
 interface CreateBottleButtonProps {
   onClick: () => void;
-  isAuthenticated: boolean;
 }
 
-export function CreateBottleButton({
-  onClick,
-  isAuthenticated,
-}: CreateBottleButtonProps) {
+export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const { isConnected } = useAccount();
 
   return (
     <div className="relative">
       <div
         onMouseEnter={() => {
-          if (!isAuthenticated) {
+          if (!isConnected) {
             setShowTooltip(true);
           }
         }}
@@ -28,38 +26,38 @@ export function CreateBottleButton({
         className="fixed bottom-8 right-8 z-50"
       >
         <button
-          onClick={isAuthenticated ? onClick : undefined}
-          disabled={!isAuthenticated}
+          onClick={isConnected ? onClick : undefined}
+          disabled={!isConnected}
           className={`glass-surface rounded-full w-20 h-20 flex items-center justify-center p-2 transition-all duration-300 ease-out ${
-            isAuthenticated
+            isConnected
               ? "cursor-pointer opacity-100 hover:scale-105 active:scale-100"
               : "cursor-not-allowed opacity-60"
           }`}
           style={{
-            boxShadow: isAuthenticated
+            boxShadow: isConnected
               ? "inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 rgba(127, 255, 212, 0)"
               : "inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.15)",
           }}
           onMouseEnter={(e) => {
-            if (isAuthenticated) {
+            if (isConnected) {
               e.currentTarget.style.boxShadow =
                 "inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 12px 32px rgba(0, 0, 0, 0.2), 0 0 25px rgba(127, 255, 212, 0.35)";
             }
           }}
           onMouseLeave={(e) => {
-            if (isAuthenticated) {
+            if (isConnected) {
               e.currentTarget.style.boxShadow =
                 "inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 rgba(127, 255, 212, 0)";
             }
           }}
           onMouseDown={(e) => {
-            if (isAuthenticated) {
+            if (isConnected) {
               e.currentTarget.style.boxShadow =
                 "inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 16px 40px rgba(0, 0, 0, 0.25), 0 0 35px rgba(127, 255, 212, 0.55)";
             }
           }}
           onMouseUp={(e) => {
-            if (isAuthenticated) {
+            if (isConnected) {
               e.currentTarget.style.boxShadow =
                 "inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 12px 32px rgba(0, 0, 0, 0.2), 0 0 25px rgba(127, 255, 212, 0.35)";
             }
@@ -88,7 +86,7 @@ export function CreateBottleButton({
         </button>
       </div>
 
-      {showTooltip && !isAuthenticated && (
+      {showTooltip && !isConnected && (
         <div className="glass-surface shadow-glass text-glass animate-fade-in fixed bottom-[120px] right-8 px-4 py-3 text-sm whitespace-nowrap z-[51] pointer-events-none rounded-lg">
           Please connect your wallet to create a bottle
           <div
