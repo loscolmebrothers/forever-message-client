@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import NextImage from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { animate as anime } from "animejs";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 interface CreateBottleModalProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export function CreateBottleModal({
   const sealRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const bookmarkRef = useRef<HTMLButtonElement>(null);
+
+  const { isAuthenticated, signIn } = useAuth();
 
   useEffect(() => {
     const img = new Image();
@@ -100,12 +103,17 @@ export function CreateBottleModal({
     }
 
     try {
+      // Auto-authenticate if not already authenticated
+      if (!isAuthenticated) {
+        await signIn();
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error("Please sign in to create a bottle");
+        throw new Error("Authentication failed");
       }
 
       const response = await fetch("/api/bottles/create", {
