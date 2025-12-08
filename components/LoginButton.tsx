@@ -1,18 +1,18 @@
 "use client";
 
 import { useAppKit } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 export function LoginButton() {
-  const { isAuthenticated, isLoading, address } = useAuth();
+  const { address } = useAccount();
+  const { isAuthenticated, isLoading } = useAuth();
   const { open } = useAppKit();
 
-  if (isAuthenticated) {
+  if (address) {
     return (
       <button onClick={() => open()} className="glass-button-sm">
-        {address
-          ? `${address.slice(0, 6)}...${address.slice(-4)}`
-          : "Connected"}
+        {`${address.slice(0, 6)}...${address.slice(-4)}`}
       </button>
     );
   }

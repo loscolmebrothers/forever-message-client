@@ -14,8 +14,6 @@ import { getAddress } from "viem";
 import { supabase } from "@/lib/supabase/client";
 
 interface AuthContextType {
-  address: string | undefined;
-  isConnected: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: () => Promise<void>;
@@ -30,9 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { signMessageAsync } = useSignMessage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [authenticatedAddress, setAuthenticatedAddress] = useState<
-    string | undefined
-  >(undefined);
   const signingInProgress = useRef(false);
 
   useEffect(() => {
@@ -42,10 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
-
-        if (session?.user?.user_metadata?.wallet_address) {
-          setAuthenticatedAddress(session.user.user_metadata.wallet_address);
-        }
       } catch (error) {
         console.error("Error checking session:", error);
         setIsAuthenticated(false);
@@ -62,12 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
-
-      if (session?.user?.user_metadata?.wallet_address) {
-        setAuthenticatedAddress(session.user.user_metadata.wallet_address);
-      } else {
-        setAuthenticatedAddress(undefined);
-      }
     });
 
     return () => {
@@ -126,7 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       setIsAuthenticated(true);
-      setAuthenticatedAddress(wagmiAddress.toLowerCase());
     } catch (error) {
       console.error("Sign in error:", error);
       throw error;
@@ -142,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       disconnect();
       setIsAuthenticated(false);
-      setAuthenticatedAddress(undefined);
     } catch (error) {
       console.error("Sign out error:", error);
       throw error;
@@ -155,13 +138,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, isAuthenticated, signOut]);
 
-  const address = isAuthenticated ? authenticatedAddress : wagmiAddress;
-
   return (
     <AuthContext.Provider
       value={{
-        address,
-        isConnected,
         isAuthenticated,
         isLoading,
         signIn,
