@@ -6,7 +6,7 @@ import {
   CompletionNotification,
 } from "@/lib/notifications/NotificationStore";
 import { BellIcon } from "./BellIcon";
-import { useAuth } from "@/lib/auth/AuthContext";
+import { useAccount } from "wagmi";
 
 function BottleProgressToast({
   id,
@@ -169,7 +169,7 @@ function CompletionToast({
 }
 
 export function NotificationSidebar() {
-  const { isAuthenticated } = useAuth();
+  const { isConnected } = useAccount();
   const {
     loadingToasts,
     removeLoadingToast,
@@ -200,7 +200,7 @@ export function NotificationSidebar() {
     });
   };
 
-  if (!isAuthenticated) {
+  if (!isConnected) {
     return null;
   }
 

@@ -22,9 +22,6 @@ export const POST = withAuth(async (request: NextRequest, user) => {
       );
     }
 
-    console.log("[API] Queueing bottle for user:", userId);
-    console.log("[API] Message length:", message.length);
-
     const { data: queueItem, error: queueError } = await supabaseAdmin
       .from("bottles_queue")
       .insert({

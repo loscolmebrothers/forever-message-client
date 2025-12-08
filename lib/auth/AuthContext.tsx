@@ -18,6 +18,8 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  address: `0x${string}` | undefined;
+  isConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -145,6 +147,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signOut,
+        address: wagmiAddress,
+        isConnected,
       }}
     >
       {children}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
 import { useBottleQueue, BottleWithQueue } from "./useBottleQueue";
-import { useAuth } from "@/lib/auth/AuthContext";
+import { useAccount } from "wagmi";
 
 const PROGRESSIVE_LOADING = {
   BATCH_SIZE: 20,
@@ -44,10 +44,9 @@ export function useBottles() {
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const { address } = useAuth();
-
-  // Get pending bottles from queue
-  const { queueItems, pendingCount } = useBottleQueue(address || "");
+  const { address } = useAccount();
+  const lowercaseAddress = address ? address.toLowerCase() : "";
+  const { queueItems, pendingCount } = useBottleQueue(lowercaseAddress);
 
   const fetchBatch = useCallback(async (offset: number) => {
     try {
