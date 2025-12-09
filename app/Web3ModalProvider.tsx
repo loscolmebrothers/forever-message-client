@@ -12,7 +12,8 @@ const queryClient = new QueryClient();
 const metadata = {
   name: "Forever Message",
   description: "Messages in bottles floating in a digital ocean",
-  url: "https://forever-message.com",
+  // url: "http://localhost:3000",
+  url: "https://forever-dev.loscolmebrothers.com",
   icons: ["https://assets.loscolmebrothers.com/logo.png"],
 };
 

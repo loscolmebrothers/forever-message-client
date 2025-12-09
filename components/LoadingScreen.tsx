@@ -1,117 +1,302 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
+import { animate, createTimeline, spring } from "animejs";
 
 interface LoadingScreenProps {
   onComplete: () => void;
-  onPhaseChange?: (phase: number) => void;
 }
 
-const BOTTLE_SPRITES = [
-  "/assets/bottle-sprites/1.webp",
-  "/assets/bottle-sprites/2.webp",
-  "/assets/bottle-sprites/3.webp",
-];
-
-export function LoadingScreen({
-  onComplete,
-  onPhaseChange,
-}: LoadingScreenProps) {
-  const [percentage, setPercentage] = useState(0);
-  const [currentBottleIndex, setCurrentBottleIndex] = useState(0);
-
+export function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const gradientRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const socialsRef = useRef<HTMLDivElement>(null);
 
-  // Ocean filling animation
+  const text1Ref = useRef<HTMLSpanElement>(null);
+  const text2Ref = useRef<HTMLSpanElement>(null);
+  const text3Ref = useRef<HTMLSpanElement>(null);
+  const text4Ref = useRef<HTMLSpanElement>(null);
+  const text5Ref = useRef<HTMLSpanElement>(null);
+  const text6Ref = useRef<HTMLSpanElement>(null);
+
+  const bottleRef = useRef<HTMLSpanElement>(null);
+  const heartRef = useRef<HTMLSpanElement>(null);
+  const foreverBottleRef = useRef<HTMLSpanElement>(null);
+  const sparkle1Ref = useRef<HTMLSpanElement>(null);
+  const sparkle2Ref = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
-    const duration = 4000;
-    const startTime = Date.now();
-
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / duration) * 100, 100);
-      setPercentage(Math.floor(progress));
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        onPhaseChange?.(2);
-        // Wait a moment, then fade out and complete
-        setTimeout(() => {
-          if (overlayRef.current) {
-            overlayRef.current.style.opacity = "0";
-            overlayRef.current.style.filter = "blur(8px)";
-          }
-          setTimeout(() => {
-            onComplete();
-          }, 1000);
-        }, 500);
-      }
-    }, 50);
-
-    // Cycle through bottle sprites
-    const bottleInterval = setInterval(() => {
-      setCurrentBottleIndex((prev) => (prev + 1) % BOTTLE_SPRITES.length);
-    }, 500);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(bottleInterval);
+    const textSpringEntryAnimation = {
+      opacity: [0, 1],
+      translateY: [10, 0],
+      ease: spring({ bounce: 0.4, duration: 400 }),
+      duration: 250,
     };
-  }, [onPhaseChange, onComplete]);
+
+    const spriteSpringEntryAnimation = (finalPosition: number = 0) => ({
+      opacity: [0, 1],
+      scale: [0.5, 1],
+      translateY: [20, finalPosition],
+      duration: 500,
+      ease: spring({ bounce: 0.65, duration: 400 }),
+    });
+
+    const timeline = createTimeline();
+
+    timeline
+      .add([text1Ref.current], textSpringEntryAnimation, 250)
+      .add([text2Ref.current], textSpringEntryAnimation, 900)
+      .add([bottleRef.current], spriteSpringEntryAnimation(-16), 1000)
+      .add([text3Ref.current, text4Ref.current], textSpringEntryAnimation, 1800)
+      .add([heartRef.current], spriteSpringEntryAnimation(), 1900)
+      .add([text5Ref.current], textSpringEntryAnimation, 2800)
+      .add([text6Ref.current], textSpringEntryAnimation, 2880)
+      .add(
+        [foreverBottleRef.current, sparkle1Ref.current, sparkle2Ref.current],
+        spriteSpringEntryAnimation(-12),
+        3000
+      )
+      .add(
+        [buttonRef.current],
+        {
+          opacity: [0, 1],
+          duration: 500,
+          ease: "in",
+        },
+        3200
+      )
+      .add(
+        [sparkle1Ref.current],
+        {
+          translateY: [-12, -18, -12],
+          rotate: [0, 180, 360],
+          opacity: [1, 0.6, 1],
+          duration: 2000,
+          loop: true,
+          ease: "inOutSine",
+        },
+        3200
+      )
+      .add(
+        [sparkle2Ref.current],
+        {
+          translateY: [-12, -16, -12],
+          rotate: [0, -180, -360],
+          opacity: [1, 0.7, 1],
+          duration: 2500,
+          loop: true,
+          ease: "inOutSine",
+        },
+        3200
+      )
+      .add(
+        [gradientRef.current],
+        {
+          translateX: [0, 100, 0, -100, 0],
+          translateY: [0, -50, 0, 50, 0],
+          opacity: [0.3, 0.5, 0.3],
+          duration: 8000,
+          loop: true,
+          ease: "inOutSine",
+        },
+        3400
+      )
+      .add([socialsRef.current], spriteSpringEntryAnimation(), 3400);
+  }, []);
+
+  const handleDiveIn = () => {
+    if (overlayRef.current) {
+      animate(overlayRef.current, {
+        opacity: [1, 0],
+        filter: ["blur(0px)", "blur(8px)"],
+        duration: 500,
+        ease: "in",
+      });
+
+      setTimeout(() => {
+        onComplete();
+      }, 500);
+    }
+  };
 
   return (
     <>
-      {/* Ocean filling overlay */}
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-black z-[9999] transition-all duration-1000 ease-out pointer-events-auto"
+        className="fixed inset-0 z-[9999] pointer-events-auto bg-[#0f1f2e] overflow-hidden"
       >
-        {/* Rising water effect */}
         <div
-          className="absolute bottom-0 left-0 right-0 transition-all duration-100 linear"
+          ref={gradientRef}
+          className="absolute inset-0 opacity-0"
           style={{
-            height: `${percentage}%`,
-            background: "linear-gradient(to top, #1e5a7a 0%, #4682B4 100%)",
+            background:
+              "radial-gradient(circle at 50% 50%, rgba(64, 224, 208, 0.15) 0%, rgba(32, 178, 170, 0.20) 40%, transparent 70%)",
+            filter: "blur(60px)",
           }}
         />
-
-        {/* Bottom content */}
-        <div className="absolute bottom-10 left-0 right-0 text-center text-white font-['ApfelGrotezk',sans-serif] flex flex-col items-center gap-3">
-          {/* Animated bottle above text */}
-          <div
-            className="w-[50px] h-[75px] relative opacity-70"
-            style={{
-              filter: "drop-shadow(0 0 12px rgba(135, 206, 235, 0.6))",
-              animation: "floatBottle 2.5s ease-in-out infinite",
-            }}
-          >
-            <Image
-              src={BOTTLE_SPRITES[currentBottleIndex]}
-              alt=""
-              fill
-              style={{ objectFit: "contain" }}
-            />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-4">
+          <div className="w-full max-w-3xl mx-auto px-4">
+            <div
+              className="text-white text-base font-light leading-relaxed"
+              style={{
+                fontFamily: "ApfelGrotezk, sans-serif",
+                textAlign: "center",
+              }}
+            >
+              <span ref={text1Ref} className="inline-block opacity-0">
+                Connect your wallet.
+              </span>
+              <span ref={text2Ref} className="inline-block opacity-0">
+                &nbsp; &nbsp; Cast a bottle.
+              </span>
+              <span
+                ref={bottleRef}
+                className="inline-block ml-2 relative w-7 h-7 align-middle  opacity-0"
+              >
+                <Image
+                  src="/assets/bottle-sprites/1.webp"
+                  alt="Bottle sprite"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                />
+              </span>
+              <span ref={text3Ref} className="inline-block opacity-0">
+                &nbsp; &nbsp; Read and like
+              </span>
+              <span
+                ref={heartRef}
+                className="inline-block mx-1 relative w-6 h-6 align-middle  opacity-0"
+              >
+                <Image
+                  src="/assets/like-heart.png"
+                  alt="Heart sprite"
+                  className="object-contain"
+                  width={24}
+                  height={24}
+                />
+              </span>
+              <span ref={text4Ref} className="inline-block opacity-0">
+                {"other people's bottles."}
+              </span>
+              <br />
+              <br />
+              <span ref={text5Ref} className="inline-block opacity-0">
+                Watch bottles become
+              </span>
+              <span className="inline-block relative align-middle">
+                <span
+                  ref={text6Ref}
+                  className="text-2xl ml-2 inline-block opacity-0"
+                  style={{ fontFamily: "AndreaScript, cursive" }}
+                >
+                  forever
+                </span>
+                <span
+                  ref={foreverBottleRef}
+                  className="inline-block relative w-7 h-7 align-middle mx-3  opacity-0"
+                >
+                  <Image
+                    src="/assets/bottle-sprites/2.webp"
+                    alt="Forever bottle sprite"
+                    width={28}
+                    height={28}
+                  />
+                </span>
+                <span
+                  ref={sparkle1Ref}
+                  className="absolute -top-0.1 right-0 w-4 h-4 opacity-0"
+                  style={{
+                    filter: "drop-shadow(0 0 4px rgba(127, 255, 212, 1))",
+                  }}
+                >
+                  <Image
+                    src="/assets/effects/sparkle-star.png"
+                    alt="Sparkle 1"
+                    className="object-contain"
+                    width={16}
+                    height={16}
+                  />
+                </span>
+                <span
+                  ref={sparkle2Ref}
+                  className="absolute -top-0.5 right-2 w-3 h-3 opacity-0"
+                  style={{
+                    filter: "drop-shadow(0 0 3px rgba(127, 255, 212, 0.9))",
+                  }}
+                >
+                  <Image
+                    src="/assets/effects/sparkle-star.png"
+                    alt="Sparkle 2"
+                    className="object-contain"
+                    width={12}
+                    height={12}
+                  />
+                </span>
+              </span>
+            </div>
           </div>
 
-          {/* Text */}
-          <div className="opacity-40">
-            <div className="text-[13px] mb-1">Filling the ocean</div>
-            <div className="text-base font-medium">{percentage}%</div>
+          <button
+            ref={buttonRef}
+            onClick={handleDiveIn}
+            className="glass-button"
+            style={{ opacity: 0 }}
+          >
+            Dive in
+          </button>
+
+          <div
+            ref={socialsRef}
+            className="absolute bottom-8 flex flex-col items-center gap-2 opacity-0"
+            style={{ left: "50%", transform: "translateX(-50%)" }}
+          >
+            <div className="flex items-center gap-4">
+              <a
+                href="https://github.com/loscolmebrothers/forever-message-docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-glass-text-muted hover:text-glass-text transition-colors duration-200"
+                aria-label="GitHub Repository"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+              </a>
+              <a
+                href="https://sepolia.basescan.org/address/0xe9392f61C18c897cC5e49e3D8b23F9a5704d3342"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-glass-text-muted hover:text-glass-text transition-colors duration-200"
+                aria-label="Built on Base"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 111 111"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H3.9565e-07C2.35281 87.8625 26.0432 110.034 54.921 110.034Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </a>
+            </div>
+            <p className="text-glass-text-muted text-xs font-apfel font-light opacity-40 mt-2">
+              (We pay for all the blockchain fees)
+            </p>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes floatBottle {
-            0%,
-            100% {
-              transform: translateY(0px) rotate(-3deg);
-            }
-            50% {
-              transform: translateY(-10px) rotate(3deg);
-            }
-          }
-        `}</style>
       </div>
     </>
   );
