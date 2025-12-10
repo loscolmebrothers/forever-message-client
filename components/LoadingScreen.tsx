@@ -139,103 +139,110 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-4">
           <div className="w-full max-w-3xl mx-auto px-4">
             <div
-              className="text-white text-base font-light leading-relaxed"
+              className="text-white text-base font-light leading-relaxed flex flex-col items-center gap-6"
               style={{
                 fontFamily: "ApfelGrotezk, sans-serif",
-                textAlign: "center",
               }}
             >
-              <span ref={text1Ref} className="inline-block opacity-0">
-                Connect your wallet.
-              </span>
-              <span ref={text2Ref} className="inline-block opacity-0">
-                &nbsp; &nbsp; Cast a bottle.
-              </span>
-              <span
-                ref={bottleRef}
-                className="inline-block ml-2 relative w-7 h-7 align-middle  opacity-0"
-              >
-                <Image
-                  src="/assets/bottle-sprites/1.webp"
-                  alt="Bottle sprite"
-                  width={28}
-                  height={28}
-                  className="object-contain"
-                />
-              </span>
-              <span ref={text3Ref} className="inline-block opacity-0">
-                &nbsp; &nbsp; Read and like
-              </span>
-              <span
-                ref={heartRef}
-                className="inline-block mx-1 relative w-6 h-6 align-middle  opacity-0"
-              >
-                <Image
-                  src="/assets/like-heart.png"
-                  alt="Heart sprite"
-                  className="object-contain"
-                  width={24}
-                  height={24}
-                />
-              </span>
-              <span ref={text4Ref} className="inline-block opacity-0">
-                {"other people's bottles."}
-              </span>
-              <br />
-              <br />
-              <span ref={text5Ref} className="inline-block opacity-0">
-                Watch bottles become
-              </span>
-              <span className="inline-block relative align-middle">
-                <span
-                  ref={text6Ref}
-                  className="text-2xl ml-2 inline-block opacity-0"
-                  style={{ fontFamily: "AndreaScript, cursive" }}
-                >
-                  forever
+              {/* Line 1: Responsive wrapping */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 md:gap-x-3">
+                {/* Section 1: Connect your wallet */}
+                <span className="inline-flex items-center opacity-0" ref={text1Ref}>
+                  Connect your wallet.
                 </span>
-                <span
-                  ref={foreverBottleRef}
-                  className="inline-block relative w-7 h-7 align-middle mx-3  opacity-0"
-                >
-                  <Image
-                    src="/assets/bottle-sprites/2.webp"
-                    alt="Forever bottle sprite"
-                    width={28}
-                    height={28}
-                  />
+
+                {/* Section 2: Cast a bottle + sprite */}
+                <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                  <span className="opacity-0" ref={text2Ref}>
+                    Cast a bottle.
+                  </span>
+                  <span className="relative w-7 h-7 opacity-0" ref={bottleRef}>
+                    <Image
+                      src="/assets/bottle-sprites/1.webp"
+                      alt="Bottle sprite"
+                      width={28}
+                      height={28}
+                      className="object-contain"
+                    />
+                  </span>
                 </span>
-                <span
-                  ref={sparkle1Ref}
-                  className="absolute -top-0.1 right-0 w-4 h-4 opacity-0"
-                  style={{
-                    filter: "drop-shadow(0 0 4px rgba(127, 255, 212, 1))",
-                  }}
-                >
-                  <Image
-                    src="/assets/effects/sparkle-star.png"
-                    alt="Sparkle 1"
-                    className="object-contain"
-                    width={16}
-                    height={16}
-                  />
+
+                {/* Section 3: Read and like + heart + bottles */}
+                <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                  <span className="opacity-0" ref={text3Ref}>
+                    Read and like
+                  </span>
+                  <span className="relative w-6 h-6 opacity-0" ref={heartRef}>
+                    <Image
+                      src="/assets/like-heart.png"
+                      alt="Heart sprite"
+                      className="object-contain"
+                      width={24}
+                      height={24}
+                    />
+                  </span>
+                  <span className="opacity-0" ref={text4Ref}>
+                    {"other people's bottles."}
+                  </span>
                 </span>
-                <span
-                  ref={sparkle2Ref}
-                  className="absolute -top-0.5 right-2 w-3 h-3 opacity-0"
-                  style={{
-                    filter: "drop-shadow(0 0 3px rgba(127, 255, 212, 0.9))",
-                  }}
-                >
-                  <Image
-                    src="/assets/effects/sparkle-star.png"
-                    alt="Sparkle 2"
-                    className="object-contain"
-                    width={12}
-                    height={12}
-                  />
+              </div>
+
+              {/* Line 2: Watch bottles become forever */}
+              <div className="flex items-center justify-center gap-2">
+                <span className="opacity-0" ref={text5Ref}>
+                  Watch bottles become
                 </span>
-              </span>
+                <span className="inline-block relative">
+                  <span
+                    ref={text6Ref}
+                    className="text-2xl opacity-0"
+                    style={{ fontFamily: "AndreaScript, cursive" }}
+                  >
+                    forever
+                  </span>
+                  <span
+                    ref={foreverBottleRef}
+                    className="inline-block relative w-7 h-7 mx-3 opacity-0"
+                  >
+                    <Image
+                      src="/assets/bottle-sprites/2.webp"
+                      alt="Forever bottle sprite"
+                      width={28}
+                      height={28}
+                    />
+                  </span>
+                  <span
+                    ref={sparkle1Ref}
+                    className="absolute -top-0.1 right-0 w-4 h-4 opacity-0"
+                    style={{
+                      filter: "drop-shadow(0 0 4px rgba(127, 255, 212, 1))",
+                    }}
+                  >
+                    <Image
+                      src="/assets/effects/sparkle-star.png"
+                      alt="Sparkle 1"
+                      className="object-contain"
+                      width={16}
+                      height={16}
+                    />
+                  </span>
+                  <span
+                    ref={sparkle2Ref}
+                    className="absolute -top-0.5 right-2 w-3 h-3 opacity-0"
+                    style={{
+                      filter: "drop-shadow(0 0 3px rgba(127, 255, 212, 0.9))",
+                    }}
+                  >
+                    <Image
+                      src="/assets/effects/sparkle-star.png"
+                      alt="Sparkle 2"
+                      className="object-contain"
+                      width={12}
+                      height={12}
+                    />
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
 
