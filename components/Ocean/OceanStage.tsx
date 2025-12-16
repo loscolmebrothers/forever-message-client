@@ -9,6 +9,7 @@ import { FloatingBottle } from "./FloatingBottle";
 import { BottleModal } from "./BottleModal";
 import { CreateBottleButton } from "./CreateBottleButton";
 import { CreateBottleModal } from "./CreateBottleModal";
+import { LOSCOLMEBROTHERSLogo } from "./LOSCOLMEBROTHERSLogo";
 import { ErrorState } from "./ErrorState";
 import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/bottle-utils";
@@ -237,6 +238,7 @@ export function OceanStage() {
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
       <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+      <LOSCOLMEBROTHERSLogo />
       <CreateBottleModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
