@@ -47,7 +47,7 @@ export function LOSCOLMEBROTHERSLogo() {
       href="https://loscolmebrothers.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-0 left-1/2 z-50 cursor-pointer bg-cyan-100 p-2 pb-4 rounded-b-none opacity-30 glass-button-sm hover:opacity-50"
+      className="fixed bottom-0 left-1/2 z-50 cursor-pointer p-2 pb-4 rounded-b-none glass-button-sm opacity-80"
       aria-label="Visit Los Colmebrothers"
     >
       <Image
@@ -55,7 +55,7 @@ export function LOSCOLMEBROTHERSLogo() {
         alt="Los Colmebrothers"
         width={120}
         height={30}
-        className="h-4 w-auto"
+        className="h-4 w-auto invert-[1]"
       />
     </a>
   );
