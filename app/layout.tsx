@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import "./globals.css";
-import { Providers } from "./providers";
 import { NotificationProvider } from "@/lib/notifications/NotificationStore";
-import { NotificationSidebar } from "@/components/NotificationSidebar";
-import { CenterToast } from "@/components/CenterToast";
+import Sidebar from "@/components/Sidebar";
+
+import { Providers } from "./providers";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Forever Message",
@@ -30,8 +30,7 @@ export default async function RootLayout({
         <Providers cookies={cookies}>
           <NotificationProvider>
             {children}
-            <NotificationSidebar />
-            <CenterToast />
+            <Sidebar />
           </NotificationProvider>
         </Providers>
       </body>

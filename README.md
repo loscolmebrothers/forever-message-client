@@ -1,198 +1,73 @@
 # Forever Message - Client
 
-> **Phase 1: The Floating Ocean** - Interactive canvas-based frontend for the Forever Message platform
+**Decentralized message-in-a-bottle application** built on Base blockchain with IPFS storage.
 
 ## Overview
 
-A Next.js 14 + react-konva application that displays messages in bottles floating in a digital ocean. Users can click bottles to read messages stored on the Base blockchain and IPFS.
+Forever Message is a Next.js 14 application that combines blockchain technology, IPFS storage, and modern web3 tools to create an immersive experience where users can cast messages into a shared digital ocean.
 
-## Tech Stack
+### Key Features
 
-- **Next.js 14** - App Router
-- **TypeScript** - Type safety
-- **react-konva** - Canvas rendering
-- **@react-spring/konva** - Physics-based animations
-- **@loscolmebrothers/forever-message-types** - Shared types from monorepo
+- **Interactive Ocean Canvas**: 2D bottle visualization with Konva
+- **Web3 Authentication**: Sign-in with Ethereum (SIWE) via Reown AppKit
+- **Decentralized Storage**: Messages stored on IPFS (Storacha)
+- **Blockchain Immutability**: Bottles minted as NFTs on Base Sepolia
+- **Real-time Updates**: Queue-based async processing with live notifications
+- **Professional Animations**: anime.js timeline orchestration
+- **Glass-morphism UI**: Modern ocean-themed design system
 
-## Project Structure
+### Tech Stack
 
-```
-forever-message-client/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Main ocean view
-│   ├── globals.css        # Global styles
-│   └── api/               # Future API routes
-├── components/
-│   ├── Ocean/             # Konva components
-│   └── ui/                # Reusable UI components
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities and constants
-├── types/                 # TypeScript type definitions
-└── public/
-    └── assets/            # Images, sprites, etc.
-```
+- Next.js 14 (App Router)
+- React 18 + TypeScript
+- Konva (2D canvas)
+- Reown AppKit + wagmi + viem
+- Supabase (PostgreSQL + Real-time)
+- Storacha (IPFS)
+- Tailwind CSS + anime.js
 
-## Getting Started
-
-### Installation
+## Quick Start
 
 ```bash
+# Install dependencies
 yarn install
-```
 
-### Development
+# Copy environment variables
+cp .env.example .env.local
 
-```bash
+# Run development server
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3000](http://localhost:3000)
 
-### Build
+## Documentation
+
+For complete documentation including architecture, data flows, tech stack details, and development guides, see:
+
+**[forever-message-docs](../forever-message-docs/)**
+
+- [Getting Started Guide](../forever-message-docs/getting-started.md)
+- [Architecture Overview](../forever-message-docs/architecture/overview.md)
+- [Data Flow Diagrams](../forever-message-docs/architecture/data-flow.md)
+- [Tech Stack Details](../forever-message-docs/architecture/tech-stack.md)
+
+## Testing
 
 ```bash
-yarn build
-yarn start
+yarn test              # Unit tests (Jest)
+yarn test:e2e          # E2E tests (Cypress)
+yarn ci                # Full CI pipeline
 ```
 
-## Current Status
-
-### ✅ Phase 1 MVP - COMPLETE!
-
-All steps completed:
-
-- [x] **Step 1**: Project Setup
-  - Next.js 14 initialized with TypeScript
-  - Dependencies installed (react-konva, @react-spring/konva, usehooks-ts)
-  - Folder structure created
-  - TypeScript configured with path aliases
-
-- [x] **Step 2**: Konva Stage Setup
-  - Full-screen ocean canvas with gradient background
-  - Responsive window sizing
-  - Layer-based architecture for performance
-
-- [x] **Step 3**: Mock Data & Constants
-  - 10 mock bottles with varied engagement data
-  - Constants for physics, colors, and visuals
-  - Helper functions for random positioning
-
-- [x] **Step 4**: Floating Bottle Component
-  - Physics-based horizontal drift with boundary detection
-  - Vertical bobbing using sine wave animations
-  - Subtle rotation based on direction
-  - Visual distinction for "forever" bottles (golden color)
-  - Click handling for bottle selection
-
-- [x] **Step 5**: Message Modal
-  - Beautiful modal overlay with backdrop
-  - Displays message content and metadata
-  - Shows engagement stats (likes, comments)
-  - Expiration countdown with visual warnings
-  - Escape key and click-outside-to-close functionality
-  - Smooth enter/exit animations
-
-- [x] **Testing**: Build successful, dev server running on http://localhost:3000
-
-## Development Guidelines
-
-### Component Patterns
-
-All Konva components must use the `'use client'` directive:
-
-```tsx
-"use client";
-
-import { Stage, Layer } from "react-konva";
-
-export default function OceanStage() {
-  // Canvas components need browser APIs
-}
-```
-
-### Type Safety
-
-Import shared types from the monorepo:
-
-```tsx
-import type { Bottle } from "@/types";
-// or
-import type { Bottle } from "@loscolmebrothers/forever-message-types";
-```
-
-### Animation Performance
-
-- Use `@react-spring/konva` for smooth physics
-- Cache static layers when possible
-- Limit re-renders with proper memoization
-
-## Phase 1 Goals
-
-Create a peaceful, interactive ocean where:
-
-- 5-10 bottles float with autonomous movement
-- Bottles drift horizontally and bob vertically
-- Clicking a bottle opens a modal with its message
-- Design is responsive (desktop + mobile)
-- Aesthetic is Studio Ghibli meets MapleStory
-
-## Future Phases
-
-- **Phase 2**: Real blockchain/IPFS data integration
-- **Phase 3**: User authentication (Magic Link + Web3)
-- **Phase 4**: Bottle creation UI
-- **Phase 5**: Likes, comments, forever status
-- **Phase 6**: Supabase caching layer
-- **Phase 7**: Advanced polish (custom sprites, sound)
+See [TESTING.md](./TESTING.md) for details.
 
 ## Deployment
 
-### Environment Variables
+Deployed on Netlify with automatic deployments from `main` branch.
 
-Set the following in your Netlify dashboard:
+Environment variables are configured in the Netlify dashboard. See the [Getting Started Guide](../forever-message-docs/getting-started.md#environment-variables) for required variables.
 
-```bash
-# Blockchain
-DEPLOYER_PRIVATE_KEY=0x...
-BASE_SEPOLIA_RPC_URL=https://base-sepolia.g.alchemy.com/v2/...
-NEXT_PUBLIC_CONTRACT_ADDRESS=...
+## License
 
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-
-# Storacha (IPFS)
-STORACHA_PRINCIPAL_KEY=MgCaT...
-NEXT_PUBLIC_IPFS_GATEWAY=https://storacha.link/ipfs
-```
-
-**Note**: The Storacha proof is stored in `storacha-forever-message-proof.txt` (committed to repo) to avoid hitting AWS Lambda's 4KB environment variable limit.
-
-## Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [react-konva Documentation](https://konvajs.org/docs/react/)
-- [React Spring Documentation](https://www.react-spring.dev/)
-- [PLANNING.md](../PLANNING.md) - Full project plan
-
-## What You Can Do Now
-
-1. **View the Ocean**: Open http://localhost:3000 and see 10 bottles floating
-2. **Click Any Bottle**: Opens a modal with the message and metadata
-3. **Watch Them Float**: Each bottle has autonomous drift and bobbing physics
-4. **Spot the Forever Bottle**: Look for the golden bottle (Bottle #6) that achieved forever status
-
-## Known Limitations (Phase 1)
-
-- Mock data only (no real blockchain/IPFS integration yet)
-- No user authentication
-- No ability to create bottles
-- No like/comment functionality
-- Simple geometric shapes (custom sprites coming in Phase 7)
-
----
-
-**Status**: Phase 1 MVP Complete ✅  
-**Last Updated**: October 26, 2025
+See [LICENSE](./LICENSE)

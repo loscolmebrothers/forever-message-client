@@ -5,10 +5,6 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-/**
- * ErrorState Component
- * Displayed when there's an error fetching bottles
- */
 export function ErrorState({ error, onRetry }: ErrorStateProps) {
   return (
     <div

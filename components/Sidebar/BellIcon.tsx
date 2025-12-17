@@ -1,6 +1,6 @@
 "use client";
 
-export function BellIcon({
+export default function BellIcon({
   hasNotifications = false,
 }: {
   hasNotifications?: boolean;

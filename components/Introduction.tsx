@@ -4,13 +4,12 @@ import { useRef, useEffect } from "react";
 import Image from "next/image";
 import { animate, createTimeline, spring } from "animejs";
 
-interface LoadingScreenProps {
+interface IntroductionProps {
   onComplete: () => void;
 }
 
-export function LoadingScreen({ onComplete }: LoadingScreenProps) {
+export default function Introduction({ onComplete }: IntroductionProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const gradientRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const socialsRef = useRef<HTMLDivElement>(null);
 
@@ -52,19 +51,10 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       .add([text3Ref.current, text4Ref.current], textSpringEntryAnimation, 1800)
       .add([heartRef.current], spriteSpringEntryAnimation(), 1900)
       .add([text5Ref.current], textSpringEntryAnimation, 2800)
-      .add([text6Ref.current], textSpringEntryAnimation, 2880)
+      .add([text6Ref.current], textSpringEntryAnimation, 3200)
       .add(
         [foreverBottleRef.current, sparkle1Ref.current, sparkle2Ref.current],
         spriteSpringEntryAnimation(-12),
-        3000
-      )
-      .add(
-        [buttonRef.current],
-        {
-          opacity: [0, 1],
-          duration: 500,
-          ease: "in",
-        },
         3200
       )
       .add(
@@ -92,18 +82,15 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         3200
       )
       .add(
-        [gradientRef.current],
+        [buttonRef.current],
         {
-          translateX: [0, 100, 0, -100, 0],
-          translateY: [0, -50, 0, 50, 0],
-          opacity: [0.3, 0.5, 0.3],
-          duration: 8000,
-          loop: true,
-          ease: "inOutSine",
+          opacity: [0, 1],
+          duration: 500,
+          ease: "in",
         },
-        3400
+        3500
       )
-      .add([socialsRef.current], spriteSpringEntryAnimation(), 3400);
+      .add([socialsRef.current], spriteSpringEntryAnimation(), 3500);
   }, []);
 
   const handleDiveIn = () => {
@@ -127,15 +114,6 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         ref={overlayRef}
         className="fixed inset-0 z-[9999] pointer-events-auto bg-[#0f1f2e] overflow-hidden"
       >
-        <div
-          ref={gradientRef}
-          className="absolute inset-0 opacity-0"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 50%, rgba(64, 224, 208, 0.15) 0%, rgba(32, 178, 170, 0.20) 40%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-4">
           <div className="w-full max-w-3xl mx-auto px-4">
             <div
@@ -147,7 +125,10 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
               {/* Line 1: Responsive wrapping */}
               <div className="flex flex-wrap items-center justify-center gap-x-2 md:gap-x-3">
                 {/* Section 1: Connect your wallet */}
-                <span className="inline-flex items-center opacity-0" ref={text1Ref}>
+                <span
+                  className="inline-flex items-center opacity-0"
+                  ref={text1Ref}
+                >
                   Connect your wallet.
                 </span>
 

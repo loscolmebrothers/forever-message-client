@@ -6,7 +6,7 @@ import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { withAuth } from "@/lib/auth/middleware";
 
 export const POST = withAuth(
-  async (request: NextRequest, user, context: { params: { id: string } }) => {
+  async (_: NextRequest, user, context: { params: { id: string } }) => {
     try {
       const bottleId = parseInt(context.params.id, 10);
 
@@ -173,7 +173,7 @@ export const POST = withAuth(
 );
 
 export const GET = withAuth(
-  async (request: NextRequest, user, context: { params: { id: string } }) => {
+  async (_: NextRequest, user, context: { params: { id: string } }) => {
     try {
       const bottleId = parseInt(context.params.id, 10);
 
@@ -186,7 +186,6 @@ export const GET = withAuth(
 
       const userId = user.wallet_address;
 
-      // Get like count
       const { count, error: countError } = await supabaseAdmin
         .from("likes")
         .select("*", { count: "exact", head: true })

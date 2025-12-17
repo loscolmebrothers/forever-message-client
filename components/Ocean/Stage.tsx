@@ -4,19 +4,18 @@ import { useState, useMemo, useCallback, useRef } from "react";
 import { Stage, Layer, Rect } from "react-konva";
 import { useWindowSize } from "usehooks-ts";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
-import { OceanBackground } from "./OceanBackground";
-import { FloatingBottle } from "./FloatingBottle";
-import { BottleModal } from "./BottleModal";
-import { CreateBottleButton } from "./CreateBottleButton";
-import { CreateBottleModal } from "./CreateBottleModal";
-import { LOSCOLMEBROTHERSLogo } from "./LOSCOLMEBROTHERSLogo";
-import { ErrorState } from "./ErrorState";
+import { OceanBackground } from "./Background";
+import { FloatingBottle } from "../Bottle/FloatingBottle";
+import { BottleModal } from "../Bottle/BottleModal";
+import { CreateBottleButton } from "../Bottle/CreateBottleButton";
+import { CreateBottleModal } from "../Bottle/CreateBottleModal";
+import { LOSCOLMEBROTHERSLogo } from "../LOSCOLMEBROTHERSLogo";
+import { ErrorState } from "../ErrorState";
 import { useBottles } from "@/hooks/useBottles";
 import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
 import { BottleWithQueue } from "@/hooks/useBottleQueue";
-import { useAuth } from "@/lib/auth/AuthContext";
 
 const OCEAN_SCALE = 5;
 
@@ -29,8 +28,7 @@ interface BottleWithPosition extends BottleWithQueue {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const { bottles, isLoading, error, isEmpty, mutate } = useBottles();
-  const { isAuthenticated } = useAuth();
+  const { bottles, isLoading, error, mutate } = useBottles();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });

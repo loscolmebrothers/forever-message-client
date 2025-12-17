@@ -4,9 +4,9 @@ import { useAppKit } from "@reown/appkit/react";
 import { useAccount } from "wagmi";
 import { useAuth } from "@/lib/auth/AuthContext";
 
-export function LoginButton() {
+export default function LoginButton() {
   const { address } = useAccount();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const { open } = useAppKit();
 
   if (address) {

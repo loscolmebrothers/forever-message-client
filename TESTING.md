@@ -370,12 +370,12 @@ jest.setTimeout(10000);
 cy.get("button", { timeout: 10000 });
 ```
 
-#### 5. RainbowKit/wagmi errors in tests
+#### 5. Reown AppKit/wagmi errors in tests
 
 Mock these dependencies in your test files:
 
 ```typescript
-jest.mock('@rainbow-me/rainbowkit', () => ({
+jest.mock('@reown/appkit-wagmi', () => ({
   ConnectButton: () => <button>Connect Wallet</button>
 }))
 ```

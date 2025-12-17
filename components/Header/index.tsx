@@ -2,9 +2,9 @@
 
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useEffect, useRef } from "react";
-import { LoginButton } from "./LoginButton";
+import LoginButton from "./LoginButton";
 
-export function Header() {
+export default function Header() {
   const { isConnected, isAuthenticated, isLoading, signIn, address } =
     useAuth();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Web3ModalProvider } from "./Web3ModalProvider";
+import { Web3ModalProvider } from "@/lib/auth/Web3ModalProvider";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { useState, useEffect } from "react";
 

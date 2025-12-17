@@ -1,11 +1,3 @@
-/**
- * Utility functions for bottle positioning and animation
- */
-
-/**
- * Get random initial position for a bottle
- * Ensures bottles are within ocean bounds with padding
- */
 export function getRandomBottlePosition(
   oceanWidth: number,
   oceanHeight: number,
@@ -17,16 +9,10 @@ export function getRandomBottlePosition(
   };
 }
 
-/**
- * Get random velocity for drift
- */
 export function getRandomVelocity(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-/**
- * Get random phase offset for bobbing (prevents sync)
- */
 export function getRandomPhase(): number {
   return Math.random() * Math.PI * 2;
 }
