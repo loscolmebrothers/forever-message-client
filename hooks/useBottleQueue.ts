@@ -110,7 +110,10 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
               removeLoadingToast(updatedItem.id);
               addCompletionNotification({
                 id: updatedItem.id,
-                message: "Your bottle has been cast into the ocean!",
+                message: updatedItem.blockchain_id
+                  ? `Bottle #${updatedItem.blockchain_id} has been cast into the ocean!`
+                  : "Your bottle has been cast into the ocean!",
+                bottleId: updatedItem.blockchain_id,
                 ipfsCid: updatedItem.ipfs_cid,
                 transactionHash: updatedItem.transaction_hash,
               });

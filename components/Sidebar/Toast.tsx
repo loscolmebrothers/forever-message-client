@@ -81,9 +81,16 @@ export function CompletionToast({
       }}
     >
       <div className="flex items-center gap-3 mb-2">
-        <span className="text-glass font-apfel text-sm flex-1">
-          {notification.message}
-        </span>
+        <div className="flex-1">
+          <span className="text-glass font-apfel text-sm">
+            {notification.message}
+          </span>
+          {notification.bottleId !== null && (
+            <div className="text-glass-text/60 font-apfel text-xs mt-1">
+              #{notification.bottleId}
+            </div>
+          )}
+        </div>
         <button
           onClick={handleDismiss}
           className="w-5 h-5 flex items-center justify-center text-glass-text/50 hover:text-glass-text transition-colors duration-200 cursor-pointer flex-shrink-0 p-0 border-0 bg-transparent text-base"

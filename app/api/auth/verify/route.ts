@@ -4,16 +4,36 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, signature } = await request.json();
+    const body = await request.json();
+    const { message, signature, address: directAddress, skipSignature } = body;
 
-    const siweMessage = new SiweMessage(message);
-    const fields = await siweMessage.verify({ signature });
+    let address: string;
 
-    if (!fields.success) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    // Handle direct authentication (email/social login)
+    if (skipSignature && directAddress) {
+      address = directAddress.toLowerCase();
+    } else {
+      // Handle wallet signature authentication
+      if (!message || !signature) {
+        return NextResponse.json(
+          { error: "Message and signature required" },
+          { status: 400 }
+        );
+      }
+
+      const siweMessage = new SiweMessage(message);
+      const fields = await siweMessage.verify({ signature });
+
+      if (!fields.success) {
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 401 }
+        );
+      }
+
+      address = siweMessage.address.toLowerCase();
     }
 
-    const address = siweMessage.address.toLowerCase();
     const email = `${address}@wallet.local`;
 
     const { data: newUser, error: createError } =

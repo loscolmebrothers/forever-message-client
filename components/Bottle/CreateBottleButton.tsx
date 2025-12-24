@@ -3,12 +3,22 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import {
+  formatTimeUntilReset,
+  type DailyLimitStatus,
+} from "@/hooks/useDailyLimit";
 
 interface CreateBottleButtonProps {
   onClick: () => void;
+  limitStatus: DailyLimitStatus | null;
+  timeUntilReset: number | null;
 }
 
-export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
+export function CreateBottleButton({
+  onClick,
+  limitStatus,
+  timeUntilReset,
+}: CreateBottleButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const { isConnected } = useAccount();
 
@@ -16,7 +26,7 @@ export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
     <div className="relative">
       <div
         onMouseEnter={() => {
-          if (!isConnected) {
+          if (!isConnected || limitStatus?.isLimitReached) {
             setShowTooltip(true);
           }
         }}
@@ -26,10 +36,14 @@ export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
         className="fixed bottom-8 right-8 z-50"
       >
         <button
-          onClick={isConnected ? onClick : undefined}
-          disabled={!isConnected}
+          onClick={
+            isConnected && limitStatus && !limitStatus.isLimitReached
+              ? onClick
+              : undefined
+          }
+          disabled={!isConnected || !limitStatus || limitStatus.isLimitReached}
           className={`glass-surface rounded-full w-20 h-20 flex items-center justify-center p-2 transition-all duration-300 ease-out ${
-            isConnected
+            isConnected && limitStatus && !limitStatus.isLimitReached
               ? "cursor-pointer opacity-100 hover:scale-105 active:scale-100"
               : "cursor-not-allowed opacity-60"
           }`}
@@ -84,11 +98,24 @@ export function CreateBottleButton({ onClick }: CreateBottleButtonProps) {
             </div>
           </div>
         </button>
+
+        {isConnected && limitStatus && (
+          <div className="flex justify-center mt-2">
+            <div className="glass-surface shadow-glass text-glass px-3 py-1.5 text-xs whitespace-nowrap rounded-lg text-center">
+              You have {limitStatus.bottlesRemaining} bottle
+              {limitStatus.bottlesRemaining !== 1 ? "s" : ""} left
+            </div>
+          </div>
+        )}
       </div>
 
-      {showTooltip && !isConnected && (
+      {showTooltip && (!isConnected || limitStatus?.isLimitReached) && (
         <div className="glass-surface shadow-glass text-glass animate-fade-in fixed bottom-[120px] right-8 px-4 py-3 text-sm whitespace-nowrap z-[51] pointer-events-none rounded-lg">
-          Please connect your wallet to create a bottle
+          {!isConnected
+            ? "Please connect your wallet to create a bottle"
+            : limitStatus?.isLimitReached
+              ? `Daily limit reached. Resets in ${formatTimeUntilReset(timeUntilReset || 0)}`
+              : "Create a bottle"}
           <div
             className="absolute -bottom-1.5 right-8 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent"
             style={{

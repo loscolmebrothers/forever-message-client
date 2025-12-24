@@ -14,6 +14,7 @@ export interface Notification {
 export interface CompletionNotification {
   id: string;
   message: string;
+  bottleId: number | null;
   ipfsCid: string | null;
   transactionHash: string | null;
   timestamp: number;

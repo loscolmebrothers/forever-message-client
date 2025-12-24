@@ -19,7 +19,7 @@
     "ci": "yarn lint && yarn format:check && yarn build && yarn test && yarn test:e2e"
   },
   "dependencies": {
-    "@loscolmebrothers/forever-message-ipfs": "5.0.2",
+    "@loscolmebrothers/forever-message-ipfs": "^6.0.1",
     "@loscolmebrothers/forever-message-types": "^4.0.0",
     "@react-spring/konva": "^9.7.3",
     "@reown/appkit": "^1.8.14",

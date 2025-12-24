@@ -918,10 +918,10 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.4.0"
 
-"@loscolmebrothers/forever-message-ipfs@5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-5.0.2.tgz#31af783d77d5b3422db698e200fcc8750d01fd49"
-  integrity sha512-GQ8u/Qs0hXeuxN+5TcNMaNqAwhQbg3X+SQMeCZMu53W9grnYAo5o8LzubmDUWJULKJCzwlJxYgLAecHDkm/P3Q==
+"@loscolmebrothers/forever-message-ipfs@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@loscolmebrothers/forever-message-ipfs/-/forever-message-ipfs-6.0.1.tgz#24922975f56984efa496463ff72632c01a533a37"
+  integrity sha512-RnsjgE/mGU9SelUzQv1CORRu7UY80wUHkJrddXV6YRTkKopnw+r40tOrmvfVkA+IekpZ09wlKgPT2wA3UQd6Ig==
   dependencies:
     "@loscolmebrothers/forever-message-types" "^4.0.0"
     "@storacha/client" "^1.8.2"

@@ -242,6 +242,9 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
             <div className="font-apfel text-sm text-ink/70 text-center">
               {formatRelativeTime(bottle.timestamp)}
             </div>
+            <div className="font-apfel text-xs text-ink/50 text-center mt-2">
+              #{bottle.id}
+            </div>
           </div>
         </div>
 

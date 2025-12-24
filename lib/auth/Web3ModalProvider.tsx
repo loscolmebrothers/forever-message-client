@@ -33,6 +33,7 @@ const modal = createAppKit({
       "'ApfelGrotezk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   } as any,
   enableWalletGuide: false,
+  allowUnsupportedChain: false,
 });
 
 interface Web3ModalProviderProps {

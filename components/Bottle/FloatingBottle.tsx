@@ -30,7 +30,7 @@ export function FloatingBottle({
   const [opacity, setOpacity] = useState(0);
   const [entranceScale, setEntranceScale] = useState(0.8);
   const [isHovered, setIsHovered] = useState(false);
-  const isForever = bottle.isForever || bottle.id === 1;
+  const isForever = bottle.isForever;
   const isSpecialZero = bottle.id === 0;
 
   const isPending = (bottle as any).blockchainStatus === "pending";

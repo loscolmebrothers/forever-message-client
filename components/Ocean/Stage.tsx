@@ -16,6 +16,8 @@ import { getRandomBottlePosition } from "@/lib/bottle-utils";
 import { OCEAN } from "@/lib/constants";
 import type Konva from "konva";
 import { BottleWithQueue } from "@/hooks/useBottleQueue";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useDailyLimit } from "@/hooks/useDailyLimit";
 
 const OCEAN_SCALE = 5;
 
@@ -34,6 +36,14 @@ export function OceanStage() {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
+
+  const { address } = useAuth();
+  const userId = address || null;
+  const {
+    status: limitStatus,
+    timeUntilReset,
+    refetch: refetchLimit,
+  } = useDailyLimit(userId);
 
   const bottlePositionsRef = useRef<Map<number, { x: number; y: number }>>(
     new Map()
@@ -93,6 +103,7 @@ export function OceanStage() {
     setTimeout(() => {
       mutate();
     }, 2000);
+    refetchLimit();
   };
 
   const handleDragStart = useCallback(() => {
@@ -235,11 +246,18 @@ export function OceanStage() {
 
       <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
 
-      <CreateBottleButton onClick={() => setIsCreateModalOpen(true)} />
+      <CreateBottleButton
+        onClick={() => setIsCreateModalOpen(true)}
+        limitStatus={limitStatus}
+        timeUntilReset={timeUntilReset}
+      />
       <LOSCOLMEBROTHERSLogo />
       <CreateBottleModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          refetchLimit(); // Refetch limit whenever modal closes (success or error)
+        }}
         onSuccess={handleBottleCreated}
       />
     </>

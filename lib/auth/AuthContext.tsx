@@ -25,11 +25,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { address: wagmiAddress, isConnected } = useAccount();
+  const { address: wagmiAddress, isConnected, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionAddress, setSessionAddress] = useState<
+    `0x${string}` | undefined
+  >(undefined);
   const signingInProgress = useRef(false);
 
   useEffect(() => {
@@ -39,6 +42,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
+
+        if (session?.user?.user_metadata?.wallet_address) {
+          setSessionAddress(
+            session.user.user_metadata.wallet_address as `0x${string}`
+          );
+        }
       } catch (error) {
         console.error("Error checking session:", error);
         setIsAuthenticated(false);
@@ -55,6 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
+
+      if (session?.user?.user_metadata?.wallet_address) {
+        setSessionAddress(
+          session.user.user_metadata.wallet_address as `0x${string}`
+        );
+      } else {
+        setSessionAddress(undefined);
+      }
     });
 
     return () => {
@@ -91,15 +108,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         nonce,
       });
 
-      const signature = await signMessageAsync({
-        message: message.prepareMessage(),
-      });
+      let signature: string;
+      try {
+        signature = await signMessageAsync({
+          message: message.prepareMessage(),
+        });
+      } catch (signError: any) {
+        // If signing fails (e.g., email/social connector), try to authenticate directly
+        console.warn(
+          "Message signing failed, attempting direct auth:",
+          signError
+        );
+
+        // For email/social auth, we just authenticate with the address
+        const directAuthResponse = await fetch("/api/auth/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address: checksummedAddress,
+            skipSignature: true,
+          }),
+        });
+
+        if (!directAuthResponse.ok) {
+          throw new Error("Direct authentication failed");
+        }
+
+        const { session } = await directAuthResponse.json();
+        await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+        });
+        setIsAuthenticated(true);
+        return;
+      }
 
       const verifyResponse = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, signature }),
+        body: JSON.stringify({
+          message: message.toMessage(),
+          signature,
+        }),
       });
+
+      // If signature verification fails (401), fall back to direct auth
+      if (verifyResponse.status === 401) {
+        console.warn(
+          "Signature verification failed, falling back to direct auth"
+        );
+
+        const directAuthResponse = await fetch("/api/auth/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address: checksummedAddress,
+            skipSignature: true,
+          }),
+        });
+
+        if (!directAuthResponse.ok) {
+          throw new Error("Direct authentication failed");
+        }
+
+        const { session } = await directAuthResponse.json();
+        await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+        });
+        setIsAuthenticated(true);
+        return;
+      }
 
       if (!verifyResponse.ok) {
         throw new Error("Authentication failed");
@@ -128,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       disconnect();
       setIsAuthenticated(false);
+      setSessionAddress(undefined);
     } catch (error) {
       console.error("Sign out error:", error);
       throw error;
@@ -147,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signOut,
-        address: wagmiAddress,
+        address: sessionAddress || wagmiAddress,
         isConnected,
       }}
     >

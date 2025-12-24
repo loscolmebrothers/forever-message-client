@@ -127,6 +127,10 @@ export function CreateBottleModal({
 
       if (!response.ok) {
         const data = await response.json();
+        if (response.status === 429) {
+          // Rate limit reached
+          throw new Error(data.message || "Daily limit reached");
+        }
         throw new Error(data.details || "Failed to create bottle");
       }
 
@@ -155,7 +159,7 @@ export function CreateBottleModal({
       setLoading(false);
       setAnimationPhase("idle");
     }
-  }, [message, loading, onClose, onSuccess]);
+  }, [message, loading, onClose, onSuccess, isAuthenticated, signIn]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
