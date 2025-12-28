@@ -7,6 +7,7 @@ import {
   formatTimeUntilReset,
   type DailyLimitStatus,
 } from "@/hooks/useDailyLimit";
+import { useGlobalBottleCount } from "@/hooks/useGlobalBottleCount";
 
 interface CreateBottleButtonProps {
   onClick: () => void;
@@ -21,6 +22,7 @@ export function CreateBottleButton({
 }: CreateBottleButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const { isConnected } = useAccount();
+  const { isLimitReached: globalLimitReached } = useGlobalBottleCount();
 
   return (
     <div className="relative">
@@ -33,17 +35,28 @@ export function CreateBottleButton({
         onMouseLeave={() => {
           setShowTooltip(false);
         }}
-        className="fixed bottom-8 right-8 z-50"
+        className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-2"
       >
         <button
           onClick={
-            isConnected && limitStatus && !limitStatus.isLimitReached
+            isConnected &&
+            limitStatus &&
+            !limitStatus.isLimitReached &&
+            !globalLimitReached
               ? onClick
               : undefined
           }
-          disabled={!isConnected || !limitStatus || limitStatus.isLimitReached}
+          disabled={
+            !isConnected ||
+            !limitStatus ||
+            limitStatus.isLimitReached ||
+            globalLimitReached
+          }
           className={`glass-surface rounded-full w-20 h-20 flex items-center justify-center p-2 transition-all duration-300 ease-out ${
-            isConnected && limitStatus && !limitStatus.isLimitReached
+            isConnected &&
+            limitStatus &&
+            !limitStatus.isLimitReached &&
+            !globalLimitReached
               ? "cursor-pointer opacity-100 hover:scale-105 active:scale-100"
               : "cursor-not-allowed opacity-60"
           }`}
@@ -99,12 +112,16 @@ export function CreateBottleButton({
           </div>
         </button>
 
-        {isConnected && limitStatus && (
-          <div className="flex justify-center mt-2">
-            <div className="glass-surface shadow-glass text-glass px-3 py-1.5 text-xs whitespace-nowrap rounded-lg text-center">
-              You have {limitStatus.bottlesRemaining} bottle
-              {limitStatus.bottlesRemaining !== 1 ? "s" : ""} left
-            </div>
+        {isConnected && limitStatus && !globalLimitReached && (
+          <div className="glass-surface shadow-glass text-glass px-3 py-1.5 text-xs whitespace-nowrap rounded-lg text-center">
+            {limitStatus.bottlesRemaining} bottle
+            {limitStatus.bottlesRemaining !== 1 ? "s" : ""} left today
+          </div>
+        )}
+
+        {globalLimitReached && (
+          <div className="glass-surface shadow-glass text-amber-200 px-3 py-1.5 text-xs rounded-lg text-center whitespace-nowrap">
+            Beta complete — All bottles created
           </div>
         )}
       </div>

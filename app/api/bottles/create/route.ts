@@ -131,6 +131,23 @@ export const POST = withAuth(async (request: NextRequest, user) => {
       );
     }
 
+    // Check global bottle limit
+    const { count: totalBottles } = await supabaseAdmin
+      .from("bottles")
+      .select("*", { count: "exact", head: true });
+
+    const MAX_GLOBAL_BOTTLES = 3000;
+
+    if (totalBottles !== null && totalBottles >= MAX_GLOBAL_BOTTLES) {
+      return NextResponse.json(
+        {
+          error: "Global bottle limit reached",
+          details: `Maximum ${MAX_GLOBAL_BOTTLES} bottles have been created. Testing phase complete.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const { data: queueItem, error: queueError } = await supabaseAdmin
       .from("bottles_queue")
       .insert({

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { NotificationProvider } from "@/lib/notifications/NotificationStore";
 import Sidebar from "@/components/Sidebar";
+import { TestnetWarning } from "@/components/TestnetWarning";
+import { GlobalBottleCounter } from "@/components/Bottle/GlobalBottleCounter";
 
 import { Providers } from "./providers";
 import "./globals.css";
@@ -28,6 +30,8 @@ export default async function RootLayout({
       />
       <body>
         <Providers cookies={cookies}>
+          <TestnetWarning />
+          <GlobalBottleCounter />
           <NotificationProvider>
             {children}
             <Sidebar />

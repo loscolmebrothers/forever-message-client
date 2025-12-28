@@ -118,21 +118,26 @@ export async function POST(request: NextRequest) {
     console.log(`[Process ${queueId}] Waiting for confirmation...`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // Insert into bottles table
+    // Insert into bottles table (use upsert to handle retries/duplicates)
     console.log(`[Process ${queueId}] Syncing to bottles table...`);
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    const { error: insertError } = await supabaseAdmin.from("bottles").insert({
-      id: bottleId,
-      creator: creatorAddress, // Authenticated user's wallet address
-      ipfs_hash: uploadResult.cid,
-      message: message,
-      user_id: creatorAddress, // Same as creator (wallet address)
-      created_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString(),
-      is_forever: false,
-      blockchain_status: "confirmed",
-    });
+    const { error: insertError } = await supabaseAdmin.from("bottles").upsert(
+      {
+        id: bottleId,
+        creator: creatorAddress, // Authenticated user's wallet address
+        ipfs_hash: uploadResult.cid,
+        message: message,
+        user_id: creatorAddress, // Same as creator (wallet address)
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+        is_forever: false,
+        blockchain_status: "confirmed",
+      },
+      {
+        onConflict: "id", // On duplicate ID, update instead of error
+      }
+    );
 
     if (insertError) {
       console.error(

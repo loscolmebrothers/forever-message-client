@@ -12,9 +12,10 @@ const queryClient = new QueryClient();
 const metadata = {
   name: "Forever Message",
   description: "Messages in bottles floating in a digital ocean",
-  // url: "http://localhost:3000",
-  url: "https://forever-dev.loscolmebrothers.com",
-  icons: ["https://assets.loscolmebrothers.com/logo.png"],
+  url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  icons: [
+    `${process.env.NEXT_PUBLIC_ASSETS_URL || "https://assets.loscolmebrothers.com"}/logo.png`,
+  ],
 };
 
 const modal = createAppKit({
