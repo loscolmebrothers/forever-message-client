@@ -105,7 +105,7 @@ export default function Sidebar() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-12 glass-surface-dark rounded-r-lg cursor-pointer flex items-center justify-center text-xl z-[1000] transition-all duration-300 ease-out hover:w-14 hover:scale-105 active:scale-100"
+          className="fixed left-0 top-1/2 -translate-y-1/2 sm:top-1/2 w-12 h-12 glass-surface-dark rounded-r-lg cursor-pointer flex items-center justify-center text-xl z-[1000] transition-all duration-300 ease-out hover:w-14 hover:scale-105 active:scale-100"
           style={{
             animation:
               toastCount > 0 ? "tabPulse 2s ease-in-out infinite" : "none",

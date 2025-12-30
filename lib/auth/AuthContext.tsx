@@ -89,14 +89,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Store address early - wallet might disconnect after signing
+    const checksummedAddress = getAddress(wagmiAddress);
+
     try {
       signingInProgress.current = true;
       setIsLoading(true);
 
       const nonceResponse = await fetch("/api/auth/nonce");
       const { nonce } = await nonceResponse.json();
-
-      const checksummedAddress = getAddress(wagmiAddress);
 
       const message = new SiweMessage({
         domain: window.location.host,
@@ -114,6 +115,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           message: message.prepareMessage(),
         });
       } catch (signError: any) {
+        // Handle WalletConnect session errors (e.g., wallet disconnected after signing)
+        if (
+          signError?.message?.includes("session topic") ||
+          signError?.message?.includes("No matching key")
+        ) {
+          console.warn(
+            "[Auth] WalletConnect session error (likely wallet disconnected), attempting direct auth:",
+            signError
+          );
+
+          const directAuthResponse = await fetch("/api/auth/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              address: checksummedAddress,
+              skipSignature: true,
+            }),
+          });
+
+          if (!directAuthResponse.ok) {
+            throw new Error("Direct authentication failed after session error");
+          }
+
+          const { session } = await directAuthResponse.json();
+          await supabase.auth.setSession({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+          });
+
+          setIsAuthenticated(true);
+          if (session?.user?.user_metadata?.wallet_address) {
+            setSessionAddress(
+              session.user.user_metadata.wallet_address as `0x${string}`
+            );
+          }
+          return;
+        }
         // If signing fails (e.g., email/social connector), try to authenticate directly
         console.warn(
           "Message signing failed, attempting direct auth:",
@@ -139,7 +177,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           access_token: session.access_token,
           refresh_token: session.refresh_token,
         });
+
+        // Manually update state to ensure immediate UI update
         setIsAuthenticated(true);
+        if (session?.user?.user_metadata?.wallet_address) {
+          setSessionAddress(
+            session.user.user_metadata.wallet_address as `0x${string}`
+          );
+        }
         return;
       }
 
@@ -176,7 +221,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           access_token: session.access_token,
           refresh_token: session.refresh_token,
         });
+
+        // Manually update state to ensure immediate UI update
         setIsAuthenticated(true);
+        if (session?.user?.user_metadata?.wallet_address) {
+          setSessionAddress(
+            session.user.user_metadata.wallet_address as `0x${string}`
+          );
+        }
         return;
       }
 
@@ -191,7 +243,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refresh_token: session.refresh_token,
       });
 
+      // Manually update state to ensure immediate UI update
       setIsAuthenticated(true);
+      if (session?.user?.user_metadata?.wallet_address) {
+        setSessionAddress(
+          session.user.user_metadata.wallet_address as `0x${string}`
+        );
+      }
     } catch (error) {
       console.error("Sign in error:", error);
       throw error;
@@ -215,8 +273,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [disconnect]);
 
   useEffect(() => {
-    if (!isConnected && isAuthenticated) {
-      signOut();
+    // Only auto-signout if not in the middle of signing in
+    // This prevents disconnection during mobile wallet auth from triggering signout
+    if (!isConnected && isAuthenticated && !signingInProgress.current) {
+      // Add a small delay to prevent race conditions with auth completion
+      const timeoutId = setTimeout(() => {
+        if (!signingInProgress.current) {
+          signOut();
+        }
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [isConnected, isAuthenticated, signOut]);
 

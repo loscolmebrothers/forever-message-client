@@ -113,14 +113,14 @@ export function CreateBottleButton({
         </button>
 
         {isConnected && limitStatus && !globalLimitReached && (
-          <div className="glass-surface shadow-glass text-glass px-3 py-1.5 text-xs whitespace-nowrap rounded-lg text-center">
+          <div className="backdrop-blur-sm bg-white/10 border border-white/20 px-3 py-1.5 text-xs whitespace-nowrap rounded-lg text-center text-white/80 pointer-events-none select-none">
             {limitStatus.bottlesRemaining} bottle
             {limitStatus.bottlesRemaining !== 1 ? "s" : ""} left today
           </div>
         )}
 
         {globalLimitReached && (
-          <div className="glass-surface shadow-glass text-amber-200 px-3 py-1.5 text-xs rounded-lg text-center whitespace-nowrap">
+          <div className="backdrop-blur-sm bg-white/10 border border-white/20 px-3 py-1.5 text-xs rounded-lg text-center whitespace-nowrap text-white/80 pointer-events-none select-none">
             Beta complete — All bottles created
           </div>
         )}

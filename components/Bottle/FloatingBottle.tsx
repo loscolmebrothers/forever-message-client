@@ -16,6 +16,7 @@ interface FloatingBottleProps {
   oceanHeight: number;
   onClick: (bottle: Bottle) => void;
   animationDelay?: number;
+  isExiting?: boolean;
 }
 
 export function FloatingBottle({
@@ -26,6 +27,7 @@ export function FloatingBottle({
   oceanHeight,
   onClick,
   animationDelay = 0,
+  isExiting = false,
 }: FloatingBottleProps) {
   const [opacity, setOpacity] = useState(0);
   const [entranceScale, setEntranceScale] = useState(0.8);
@@ -56,6 +58,7 @@ export function FloatingBottle({
     bottleWidth: scaledWidth,
   });
 
+  // Entrance animation
   useEffect(() => {
     const timer = setTimeout(() => {
       let currentOpacity = 0;
@@ -85,6 +88,36 @@ export function FloatingBottle({
 
     return () => clearTimeout(timer);
   }, [animationDelay]);
+
+  // Exit animation (reverse of entrance)
+  useEffect(() => {
+    if (!isExiting) return;
+
+    let currentOpacity = opacity;
+    let currentExitScale = entranceScale;
+    const duration = 300;
+    const steps = 20;
+    const opacityStep = currentOpacity / steps;
+    const scaleStep = (currentExitScale - 0.8) / steps;
+    const interval = duration / steps;
+
+    const animationInterval = setInterval(() => {
+      currentOpacity -= opacityStep;
+      currentExitScale -= scaleStep;
+
+      if (currentOpacity <= 0) {
+        setOpacity(0);
+        setEntranceScale(0.8);
+        clearInterval(animationInterval);
+      } else {
+        setOpacity(currentOpacity);
+        setEntranceScale(currentExitScale);
+      }
+    }, interval);
+
+    return () => clearInterval(animationInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExiting]); // Intentionally capture opacity/entranceScale at moment of exit
 
   const handleClick = () => {
     onClick(bottle);

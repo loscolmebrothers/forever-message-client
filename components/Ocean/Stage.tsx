@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { Stage, Layer, Rect } from "react-konva";
 import { useWindowSize } from "usehooks-ts";
 import type { Bottle } from "@loscolmebrothers/forever-message-types";
@@ -30,12 +30,18 @@ interface BottleWithPosition extends BottleWithQueue {
 
 export function OceanStage() {
   const { width, height } = useWindowSize();
-  const { bottles, isLoading, error, mutate } = useBottles();
+  const { bottles, isLoading, error, mutate, loadMore, loadingProgress } =
+    useBottles();
   const [selectedBottle, setSelectedBottle] = useState<Bottle | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
+  const loadMoreTriggeredRef = useRef(false);
+  const [exitingBottles, setExitingBottles] = useState<Set<number | string>>(
+    new Set()
+  );
+  const previousVisibleIdsRef = useRef<Set<number | string>>(new Set());
 
   const { address } = useAuth();
   const userId = address || null;
@@ -90,6 +96,53 @@ export function OceanStage() {
       );
     });
   }, [bottlesWithPositions, stagePos, width, height]);
+
+  // Auto-load more bottles when user has explored most of the loaded area
+  useEffect(() => {
+    if (
+      !loadingProgress.isFullyLoaded &&
+      !loadingProgress.isFetchingMore &&
+      visibleBottles.length < 10 && // Few bottles visible
+      bottles.length > 0 && // Not initial load
+      !loadMoreTriggeredRef.current
+    ) {
+      loadMoreTriggeredRef.current = true;
+      loadMore().finally(() => {
+        loadMoreTriggeredRef.current = false;
+      });
+    }
+  }, [visibleBottles.length, bottles.length, loadingProgress, loadMore]);
+
+  // Track bottles exiting viewport and trigger fade-out animation
+  useEffect(() => {
+    const currentVisibleIds = new Set(
+      visibleBottles.map((b) => b.queueId || b.id)
+    );
+
+    // Find bottles that were visible but are no longer visible
+    const exitingIds = Array.from(previousVisibleIdsRef.current).filter(
+      (id) => !currentVisibleIds.has(id)
+    );
+
+    if (exitingIds.length > 0) {
+      setExitingBottles((prev) => {
+        const newSet = new Set(prev);
+        exitingIds.forEach((id) => newSet.add(id));
+        return newSet;
+      });
+
+      // Remove from exiting set after animation completes (300ms)
+      setTimeout(() => {
+        setExitingBottles((prev) => {
+          const newSet = new Set(prev);
+          exitingIds.forEach((id) => newSet.delete(id));
+          return newSet;
+        });
+      }, 300);
+    }
+
+    previousVisibleIdsRef.current = currentVisibleIds;
+  }, [visibleBottles]);
 
   const handleBottleClick = (bottle: Bottle) => {
     setSelectedBottle(bottle);
@@ -204,47 +257,41 @@ export function OceanStage() {
             <OceanBackground width={oceanWidth} height={oceanHeight} />
           </Layer>
 
-          {/* Bottles layer - only render visible bottles */}
+          {/* Bottles layer - render visible + exiting bottles */}
           <Layer>
-            {visibleBottles.map((bottleData) => (
-              <FloatingBottle
-                key={bottleData.queueId || bottleData.id}
-                bottle={bottleData}
-                initialX={bottleData.position.x}
-                initialY={bottleData.position.y}
-                oceanWidth={oceanWidth}
-                oceanHeight={oceanHeight}
-                onClick={handleBottleClick}
-                animationDelay={bottleData.animationDelay}
-              />
-            ))}
-          </Layer>
+            {bottlesWithPositions.map((bottleData) => {
+              const bottleId = bottleData.queueId || bottleData.id;
+              const isVisible = visibleBottles.some(
+                (vb) => (vb.queueId || vb.id) === bottleId
+              );
+              const isExiting = exitingBottles.has(bottleId);
 
-          {/* Atmospheric depth overlay - follows viewport */}
-          <Layer listening={false}>
-            <Rect
-              x={-stagePos.x}
-              y={-stagePos.y}
-              width={width}
-              height={height}
-              fillRadialGradientStartPoint={{ x: width / 2, y: height / 2 }}
-              fillRadialGradientStartRadius={0}
-              fillRadialGradientEndPoint={{ x: width / 2, y: height / 2 }}
-              fillRadialGradientEndRadius={Math.max(width, height) * 0.8}
-              fillRadialGradientColorStops={[
-                0,
-                "rgba(0, 0, 0, 0)",
-                0.7,
-                "rgba(0, 30, 50, 0.15)",
-                1,
-                "rgba(0, 20, 40, 0.35)",
-              ]}
-            />
+              // Only render if visible or currently exiting
+              if (!isVisible && !isExiting) return null;
+
+              return (
+                <FloatingBottle
+                  key={bottleId}
+                  bottle={bottleData}
+                  initialX={bottleData.position.x}
+                  initialY={bottleData.position.y}
+                  oceanWidth={oceanWidth}
+                  oceanHeight={oceanHeight}
+                  onClick={handleBottleClick}
+                  animationDelay={bottleData.animationDelay}
+                  isExiting={isExiting}
+                />
+              );
+            })}
           </Layer>
         </Stage>
       </div>
 
-      <BottleModal bottle={selectedBottle} onClose={handleCloseModal} />
+      <BottleModal
+        bottle={selectedBottle}
+        onClose={handleCloseModal}
+        onBottleBecameForever={mutate}
+      />
 
       <CreateBottleButton
         onClick={() => setIsCreateModalOpen(true)}

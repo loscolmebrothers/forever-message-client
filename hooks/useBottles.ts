@@ -4,8 +4,9 @@ import { useBottleQueue, BottleWithQueue } from "./useBottleQueue";
 import { useAccount } from "wagmi";
 
 const PROGRESSIVE_LOADING = {
-  BATCH_SIZE: 20,
-  BATCH_DELAY: 1500,
+  BATCH_SIZE: 100, // Batch size for loading more
+  INITIAL_LOAD: 300, // Load first 300 bottles initially
+  MAX_LOADED: 800, // Maximum bottles to keep in memory (prevents lag)
 } as const;
 
 interface FetchBottlesResponse {
@@ -44,28 +45,47 @@ export function useBottles() {
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [loadedRange, setLoadedRange] = useState({ start: 0, end: 0 }); // Track what we've loaded
   const { address } = useAccount();
   const lowercaseAddress = address ? address.toLowerCase() : "";
   const { queueItems, pendingCount } = useBottleQueue(lowercaseAddress);
 
-  const fetchBatch = useCallback(async (offset: number) => {
-    try {
-      const {
-        bottles: newBottles,
-        total: totalCount,
-        hasMore: moreAvailable,
-      } = await fetchBottlesBatch(PROGRESSIVE_LOADING.BATCH_SIZE, offset);
+  const fetchBatch = useCallback(
+    async (offset: number) => {
+      try {
+        const {
+          bottles: newBottles,
+          total: totalCount,
+          hasMore: moreAvailable,
+        } = await fetchBottlesBatch(PROGRESSIVE_LOADING.BATCH_SIZE, offset);
 
-      setBottles((prev) => [...prev, ...newBottles]);
-      setTotal(totalCount);
-      setHasMore(moreAvailable);
+        setBottles((prev) => {
+          const combined = [...prev, ...newBottles];
 
-      return { newBottles, hasMore: moreAvailable };
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unknown error"));
-      throw err;
-    }
-  }, []);
+          // Implement sliding window: keep only the most recent MAX_LOADED bottles
+          if (combined.length > PROGRESSIVE_LOADING.MAX_LOADED) {
+            const excess = combined.length - PROGRESSIVE_LOADING.MAX_LOADED;
+            return combined.slice(excess); // Remove oldest bottles
+          }
+
+          return combined;
+        });
+
+        setTotal(totalCount);
+        setHasMore(moreAvailable);
+        setLoadedRange((prev) => ({
+          start: prev.start,
+          end: offset + newBottles.length,
+        }));
+
+        return { newBottles, hasMore: moreAvailable };
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Unknown error"));
+        throw err;
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -73,10 +93,23 @@ export function useBottles() {
     const loadInitialBatch = async () => {
       try {
         setIsLoading(true);
-        await fetchBatch(0);
+        // Load initial batch (300 bottles)
+        const {
+          bottles: newBottles,
+          total: totalCount,
+          hasMore: moreAvailable,
+        } = await fetchBottlesBatch(PROGRESSIVE_LOADING.INITIAL_LOAD, 0);
+
+        if (mounted) {
+          setBottles(newBottles);
+          setTotal(totalCount);
+          setHasMore(moreAvailable);
+          setLoadedRange({ start: 0, end: newBottles.length });
+        }
       } catch (err) {
         if (mounted) {
           console.error("[useBottles] Error loading initial batch:", err);
+          setError(err instanceof Error ? err : new Error("Unknown error"));
         }
       } finally {
         if (mounted) {
@@ -90,24 +123,21 @@ export function useBottles() {
     return () => {
       mounted = false;
     };
-  }, [fetchBatch]);
+  }, []);
 
-  useEffect(() => {
+  // Manual load more function (call this instead of automatic loading)
+  const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || isFetchingMore) return;
 
-    const timer = setTimeout(async () => {
-      setIsFetchingMore(true);
-      try {
-        const currentOffset = bottles.length;
-        await fetchBatch(currentOffset);
-      } catch (err) {
-        console.error("[useBottles] Error fetching more bottles:", err);
-      } finally {
-        setIsFetchingMore(false);
-      }
-    }, PROGRESSIVE_LOADING.BATCH_DELAY);
-
-    return () => clearTimeout(timer);
+    setIsFetchingMore(true);
+    try {
+      const currentOffset = bottles.length;
+      await fetchBatch(currentOffset);
+    } catch (err) {
+      console.error("[useBottles] Error fetching more bottles:", err);
+    } finally {
+      setIsFetchingMore(false);
+    }
   }, [bottles.length, isLoading, hasMore, isFetchingMore, fetchBatch]);
 
   const mutate = useCallback(async () => {
@@ -164,6 +194,7 @@ export function useBottles() {
     error,
     isEmpty: !isLoading && !error && allBottles.length === 0,
     mutate,
+    loadMore, // Manual load more function
     loadingProgress: {
       loaded: bottles.length,
       total,

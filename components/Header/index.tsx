@@ -41,7 +41,7 @@ export default function Header() {
   }, [isConnected, isAuthenticated, isLoading, address, signIn]);
 
   return (
-    <header className="fixed top-5 right-5 z-[100]">
+    <header className="fixed top-3 right-3 sm:top-5 sm:right-5 z-[100]">
       <LoginButton />
     </header>
   );

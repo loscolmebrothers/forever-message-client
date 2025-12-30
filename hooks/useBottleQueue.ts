@@ -50,7 +50,8 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { addLoadingToast, removeLoadingToast, addCompletionNotification } = useNotifications();
+  const { addLoadingToast, removeLoadingToast, addCompletionNotification } =
+    useNotifications();
 
   const fetchQueueItems = useCallback(async () => {
     try {
@@ -111,7 +112,7 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
               addCompletionNotification({
                 id: updatedItem.id,
                 message: updatedItem.blockchain_id
-                  ? `Bottle #${updatedItem.blockchain_id} has been cast into the ocean!`
+                  ? `Bottle has been cast into the ocean!`
                   : "Your bottle has been cast into the ocean!",
                 bottleId: updatedItem.blockchain_id,
                 ipfsCid: updatedItem.ipfs_cid,
@@ -154,7 +155,13 @@ export function useBottleQueue(userId: string): UseBottleQueueResult {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchQueueItems, addLoadingToast, removeLoadingToast, addCompletionNotification]);
+  }, [
+    userId,
+    fetchQueueItems,
+    addLoadingToast,
+    removeLoadingToast,
+    addCompletionNotification,
+  ]);
 
   const pendingCount = queueItems.filter((item) =>
     ["queued", "uploading", "minting", "confirming"].includes(item.status)

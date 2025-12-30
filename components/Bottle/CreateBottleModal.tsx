@@ -85,19 +85,17 @@ export function CreateBottleModal({
   }, [isOpen]);
 
   const handleSubmit = useCallback(async () => {
-    if (!message.trim() || loading || !modalRef.current || !sealRef.current)
-      return;
+    if (!message.trim() || loading) return;
 
     setLoading(true);
     setError(null);
 
-    setAnimationPhase("bottle-filling");
-
+    // Animate seal spinning while loading
     if (sealRef.current) {
       anime(sealRef.current, {
-        scale: [1, 1.1, 1],
+        rotate: [0, 360],
         duration: 1000,
-        ease: "inOut(sine)",
+        ease: "linear",
         loop: true,
       });
     }
@@ -128,26 +126,9 @@ export function CreateBottleModal({
       if (!response.ok) {
         const data = await response.json();
         if (response.status === 429) {
-          // Rate limit reached
           throw new Error(data.message || "Daily limit reached");
         }
         throw new Error(data.details || "Failed to create bottle");
-      }
-
-      setAnimationPhase("flying");
-
-      const modalTargets = [modalRef.current, sealRef.current].filter(Boolean);
-
-      if (modalTargets.length > 0) {
-        await new Promise<void>((resolve) => {
-          anime(modalTargets, {
-            opacity: 0,
-            scale: 0.95,
-            duration: 300,
-            ease: "out(quad)",
-            complete: () => resolve(),
-          });
-        });
       }
 
       onClose();
@@ -157,7 +138,6 @@ export function CreateBottleModal({
         err instanceof Error ? err.message : "Failed to create bottle";
       setError(errorMessage);
       setLoading(false);
-      setAnimationPhase("idle");
     }
   }, [message, loading, onClose, onSuccess, isAuthenticated, signIn]);
 

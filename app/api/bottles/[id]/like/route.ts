@@ -17,6 +17,14 @@ export const POST = withAuth(
         );
       }
 
+      // Bottle #0 is special and cannot be liked
+      if (bottleId === 0) {
+        return NextResponse.json(
+          { error: "This special bottle cannot be liked" },
+          { status: 403 }
+        );
+      }
+
       const userId = user.wallet_address;
 
       const { data: existingLike, error: checkError } = await supabaseAdmin
@@ -145,14 +153,136 @@ export const POST = withAuth(
           console.error("[API] Error getting like count:", countError);
         }
 
-        console.log(`[API] User ${userId} liked bottle ${bottleId}`);
+        const likeCount = count || 0;
+
+        // Track if bottle becomes forever as a result of this like
+        let becameForever = false;
+        let isForever = false;
+
+        try {
+          const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
+          const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+          const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
+          console.log("[API] FOREVER CHECK - Environment vars check:", {
+            hasRpcUrl: !!rpcUrl,
+            hasPrivateKey: !!privateKey,
+            hasContractAddress: !!contractAddress,
+            contractAddress,
+          });
+
+          if (rpcUrl && privateKey && contractAddress) {
+            console.log(
+              `[API] FOREVER CHECK - Initializing contract for bottle ${bottleId} with ${likeCount} likes`
+            );
+
+            const provider = new ethers.JsonRpcProvider(rpcUrl);
+            const wallet = new ethers.Wallet(privateKey, provider);
+            const contract = new BottleContract({
+              contractAddress,
+              contractABI: FOREVER_MESSAGE_ABI,
+              signer: wallet,
+            });
+
+            // Get bottle state BEFORE checking forever
+            const bottleDataBefore = await contract.getBottle(bottleId);
+            const wasForeverBefore = bottleDataBefore.isForever;
+
+            console.log(
+              `[API] FOREVER CHECK - About to call checkIsForever(${bottleId}, ${likeCount})`
+            );
+            await contract.checkIsForever(bottleId, likeCount);
+            console.log(
+              `[API] FOREVER CHECK - checkIsForever completed successfully`
+            );
+
+            console.log(
+              `[API] FOREVER CHECK - About to call getBottle(${bottleId})`
+            );
+            const bottleData = await contract.getBottle(bottleId);
+            isForever = bottleData.isForever;
+
+            console.log(`[API] FOREVER CHECK - getBottle result:`, {
+              wasForeverBefore,
+              isForeverNow: isForever,
+              bottleId,
+              likeCount,
+              fullBottleData: bottleData,
+            });
+
+            // Bottle became forever if it wasn't before but is now
+            becameForever = !wasForeverBefore && isForever;
+
+            if (isForever) {
+              console.log(
+                `[API] FOREVER CHECK - Bottle ${bottleId} IS FOREVER! ${becameForever ? "(JUST BECAME FOREVER!)" : "(Already was forever)"} Updating database...`
+              );
+              const { data: updateData, error: updateError } =
+                await supabaseAdmin
+                  .from("bottles")
+                  .update({ is_forever: true })
+                  .eq("id", bottleId)
+                  .select();
+
+              if (updateError) {
+                console.error(
+                  `[API] FOREVER CHECK - Database update FAILED:`,
+                  updateError
+                );
+              } else {
+                console.log(
+                  `[API] FOREVER CHECK - Database updated successfully:`,
+                  updateData
+                );
+              }
+            } else {
+              console.log(
+                `[API] FOREVER CHECK - Bottle ${bottleId} is NOT forever yet (likes: ${likeCount})`
+              );
+            }
+          } else {
+            console.error(
+              "[API] FOREVER CHECK - Missing environment variables!",
+              {
+                hasRpcUrl: !!rpcUrl,
+                hasPrivateKey: !!privateKey,
+                hasContractAddress: !!contractAddress,
+              }
+            );
+          }
+        } catch (foreverCheckError) {
+          console.error(
+            "[API] FOREVER CHECK FAILED - Error details:",
+            foreverCheckError
+          );
+          console.error("[API] FOREVER CHECK FAILED - Error stack:", {
+            name:
+              foreverCheckError instanceof Error
+                ? foreverCheckError.name
+                : "Unknown",
+            message:
+              foreverCheckError instanceof Error
+                ? foreverCheckError.message
+                : String(foreverCheckError),
+            stack:
+              foreverCheckError instanceof Error
+                ? foreverCheckError.stack
+                : undefined,
+          });
+        }
+
+        console.log(
+          `[API] User ${userId} liked bottle ${bottleId}${becameForever ? " - BOTTLE BECAME FOREVER!" : ""}`
+        );
 
         return NextResponse.json({
           success: true,
           liked: true,
-          likeCount: count || 0,
+          likeCount,
           bottleId,
           userId,
+          becameForever,
+          isForever,
         });
       }
     } catch (error) {

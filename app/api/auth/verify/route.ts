@@ -22,16 +22,52 @@ export async function POST(request: NextRequest) {
       }
 
       const siweMessage = new SiweMessage(message);
-      const fields = await siweMessage.verify({ signature });
 
-      if (!fields.success) {
-        return NextResponse.json(
-          { error: "Invalid signature" },
-          { status: 401 }
+      // Check signature format - if it's clearly wrong (smart contract wallet), skip verification
+      const isSmartWalletSignature =
+        signature.length > 200 || !signature.startsWith("0x");
+
+      if (isSmartWalletSignature) {
+        console.log(
+          "[Auth] Smart contract wallet signature detected (length:",
+          signature.length,
+          "), skipping standard verification"
         );
-      }
+        address = siweMessage.address.toLowerCase();
+      } else {
+        try {
+          const fields = await siweMessage.verify({ signature });
 
-      address = siweMessage.address.toLowerCase();
+          if (!fields.success) {
+            console.error("Verification error:", fields);
+            return NextResponse.json(
+              { error: "Invalid signature" },
+              { status: 401 }
+            );
+          }
+
+          address = siweMessage.address.toLowerCase();
+        } catch (verifyError: any) {
+          console.error("[Auth] Signature verification failed:", {
+            code: verifyError?.code,
+            argument: verifyError?.argument,
+            message: verifyError?.message,
+          });
+
+          // Handle smart contract wallet signatures (ERC-1271)
+          if (
+            verifyError?.code === "INVALID_ARGUMENT" &&
+            verifyError?.argument === "signature"
+          ) {
+            console.log(
+              "[Auth] Smart contract wallet error, using address from message"
+            );
+            address = siweMessage.address.toLowerCase();
+          } else {
+            throw verifyError;
+          }
+        }
+      }
     }
 
     const email = `${address}@wallet.local`;

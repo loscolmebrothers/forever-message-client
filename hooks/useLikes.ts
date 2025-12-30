@@ -16,6 +16,8 @@ interface LikeResponse {
   likeCount: number;
   bottleId: number;
   userId: string;
+  becameForever?: boolean;
+  isForever?: boolean;
 }
 
 const createAuthenticatedFetcher = async (url: string): Promise<LikeInfo> => {
@@ -95,6 +97,11 @@ export function useLikes(bottleId: number) {
       }
 
       const result: LikeResponse = await response.json();
+
+      console.log("[useLikes] API response:", result);
+      if (result.becameForever) {
+        console.log("[useLikes] BOTTLE BECAME FOREVER! becameForever=true");
+      }
 
       await mutate({
         bottleId: result.bottleId,

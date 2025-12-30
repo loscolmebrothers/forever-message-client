@@ -40,7 +40,11 @@ export function useDailyLimit(userId: string | null): UseDailyLimitResult {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error("Not authenticated");
+        // Not authenticated yet - this is normal during initial connection
+        setStatus(null);
+        setTimeUntilReset(null);
+        setIsLoading(false);
+        return;
       }
 
       const response = await fetch("/api/bottles/daily-limit", {
@@ -73,6 +77,22 @@ export function useDailyLimit(userId: string | null): UseDailyLimitResult {
   // Initial fetch
   useEffect(() => {
     fetchStatus();
+  }, [fetchStatus]);
+
+  // Listen for auth state changes and refetch when user signs in
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        // User just signed in, refetch the limit status
+        fetchStatus();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [fetchStatus]);
 
   // Client-side countdown timer (updates every minute)

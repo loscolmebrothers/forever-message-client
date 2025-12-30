@@ -10,6 +10,7 @@ import { animate as anime } from "animejs";
 interface BottleModalProps {
   bottle: Bottle | null;
   onClose: () => void;
+  onBottleBecameForever?: () => void;
 }
 
 const formatRelativeTime = (timestamp: number) => {
@@ -26,7 +27,11 @@ const formatRelativeTime = (timestamp: number) => {
   return "just now";
 };
 
-export function BottleModal({ bottle, onClose }: BottleModalProps) {
+export function BottleModal({
+  bottle,
+  onClose,
+  onBottleBecameForever,
+}: BottleModalProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -37,6 +42,8 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
   const heartRef = useRef<HTMLButtonElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
+
+  const isSpecialZero = bottle?.id === 0;
 
   const handleClose = useCallback(async () => {
     if (isClosing) return;
@@ -107,27 +114,76 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
       });
     }
 
-    if (heartRef.current) {
-      anime(heartRef.current, {
-        scale: [1, 1.05],
-        duration: 2500,
-        ease: "inOut(sine)",
-        loop: true,
-        direction: "alternate",
-      });
+    if (heartRef.current && bottle) {
+      if (bottle.isForever || isSpecialZero) {
+        // Faster, more prominent beating for special bottles
+        anime(heartRef.current, {
+          scale: [1, 1.2, 1],
+          duration: 1200,
+          ease: "inOut(sine)",
+          loop: true,
+        });
+      } else {
+        anime(heartRef.current, {
+          scale: [1, 1.05],
+          duration: 2500,
+          ease: "inOut(sine)",
+          loop: true,
+          direction: "alternate",
+        });
+      }
     }
-  }, [bottle]);
+  }, [bottle, isSpecialZero]);
 
   if (!bottle) {
     return null;
   }
 
   const handleLikeClick = async () => {
-    if (!isAuthenticated || isToggling) return;
+    if (!isAuthenticated || isToggling || bottle.isForever || isSpecialZero)
+      return;
     try {
-      await toggleLike();
+      const result = await toggleLike();
       if (heartRef.current) {
         heartRef.current.style.transform = "";
+      }
+
+      // Celebrate when bottle becomes forever!
+      if (result?.becameForever) {
+        console.log(
+          "[BottleModal] BOTTLE BECAME FOREVER! Triggering celebration animation"
+        );
+        // Trigger celebration animation
+        if (modalContentRef.current) {
+          // Flash pink/purple effect on the entire modal
+          anime(modalContentRef.current, {
+            boxShadow: [
+              "0 0 0 1px rgba(139, 69, 19, 0.2), 0 8px 24px rgba(139, 69, 19, 0.25), 0 0 40px rgba(255, 223, 186, 0.3)",
+              "0 0 0 2px rgba(219, 39, 119, 0.8), 0 12px 48px rgba(219, 39, 119, 0.6), 0 0 80px rgba(168, 85, 247, 0.8)",
+              "0 0 0 1px rgba(139, 69, 19, 0.2), 0 8px 24px rgba(139, 69, 19, 0.25), 0 0 40px rgba(255, 223, 186, 0.3)",
+            ],
+            duration: 1500,
+            ease: "inOut(quad)",
+          });
+        }
+
+        // Pulse the heart with gold glow
+        if (heartRef.current) {
+          anime(heartRef.current, {
+            scale: [1, 1.5, 1.2, 1],
+            duration: 1000,
+            ease: "out(elastic)",
+          });
+        }
+
+        // Update the bottle object to reflect it's now forever
+        // This will trigger re-render with new styling
+        bottle.isForever = true;
+
+        // Notify parent to refresh bottle list so ocean updates the sprite
+        if (onBottleBecameForever) {
+          onBottleBecameForever();
+        }
       }
     } catch (error) {
       console.error("Failed to toggle like:", error);
@@ -243,72 +299,124 @@ export function BottleModal({ bottle, onClose }: BottleModalProps) {
               {formatRelativeTime(bottle.timestamp)}
             </div>
             <div className="font-apfel text-xs text-ink/50 text-center mt-2">
-              #{bottle.id}
+              <div className="flex flex-col items-center gap-1">
+                {isSpecialZero && (
+                  <span className="text-[10px] px-2 py-0.5 bg-blue-500/15 border border-blue-400/30 rounded-full text-blue-600/80">
+                    First bottle
+                  </span>
+                )}
+                {bottle.isForever && !isSpecialZero && (
+                  <span className="text-[10px] px-2 py-0.5 bg-amber-500/15 border border-amber-400/30 rounded-full text-amber-600/80">
+                    Forever bottle
+                  </span>
+                )}
+                <span>#{bottle.id}</span>
+              </div>
+            </div>
+            <div className="font-apfel text-[10px] text-ink/40 text-center mt-3">
+              <a
+                href={`mailto:forever@loscolmebrothers.com?subject=Report%20Bottle%20%23${bottle.id}&body=Hello%2C%0A%0AI%20would%20like%20to%20report%20Bottle%20%23${bottle.id}%20for%20review.%0A%0AReason%3A%20This%20bottle%20contains%20inappropriate%20or%20illegal%20content.%0A%0APlease%20review%20and%20take%20appropriate%20action.%0A%0AThank%20you.`}
+                className="hover:text-ink/60 transition-colors duration-200 underline decoration-ink/20 hover:decoration-ink/40"
+                style={{
+                  textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
+                }}
+              >
+                Report this message to the tide keepers
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Like button with badge */}
+        {/* Like button and count */}
         {isAuthenticated && (
-          <button
-            ref={heartRef}
-            onClick={handleLikeClick}
-            disabled={isToggling}
-            className={`absolute top-[11px] right-12 w-7 h-7 flex items-center justify-center transition-all duration-300 z-10 ${
-              isToggling ? "cursor-wait" : "cursor-pointer"
-            }`}
-            style={{
-              filter: isToggling
-                ? "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.2))"
-                : "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))",
-            }}
-            onMouseEnter={(e) => {
-              if (!isToggling) {
-                e.currentTarget.style.transform = "scale(1.15) rotate(-5deg)";
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
+          <div className="absolute top-[11px] right-12 flex flex-col items-center gap-1 z-10">
+            <button
+              ref={heartRef}
+              onClick={handleLikeClick}
+              disabled={isToggling || bottle.isForever || isSpecialZero}
+              className={`w-7 h-7 flex items-center justify-center transition-all duration-300 ${
+                isToggling
+                  ? "cursor-wait"
+                  : bottle.isForever || isSpecialZero
+                    ? "cursor-default"
+                    : "cursor-pointer"
+              }`}
+              style={{
+                filter:
+                  isToggling || bottle.isForever
+                    ? "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.2))"
+                    : "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))",
+              }}
+              onMouseEnter={(e) => {
+                if (!isToggling && !bottle.isForever && !isSpecialZero) {
+                  e.currentTarget.style.transform = "scale(1.15) rotate(-5deg)";
+                  e.currentTarget.style.filter =
+                    "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isToggling && !bottle.isForever && !isSpecialZero) {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.filter =
+                    "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))";
+                }
+              }}
+              onMouseDown={(e) => {
+                if (!isToggling && !bottle.isForever && !isSpecialZero) {
+                  e.currentTarget.style.transform = "scale(1.05) rotate(-3deg)";
+                  e.currentTarget.style.filter =
+                    "drop-shadow(0 6px 12px rgba(139, 69, 19, 0.5)) drop-shadow(0 0 16px rgba(255, 223, 186, 0.8))";
+                }
+              }}
+              onMouseUp={(e) => {
+                if (!isToggling && !bottle.isForever && !isSpecialZero) {
+                  e.currentTarget.style.transform = "scale(1.15) rotate(-5deg)";
+                  e.currentTarget.style.filter =
+                    "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
+                }
+              }}
+              aria-label={
+                bottle.isForever
+                  ? "Forever bottle"
+                  : hasLiked
+                    ? "Unlike this bottle"
+                    : "Like this bottle"
               }
-            }}
-            onMouseLeave={(e) => {
-              if (!isToggling) {
-                e.currentTarget.style.transform = "";
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3))";
-              }
-            }}
-            onMouseDown={(e) => {
-              if (!isToggling) {
-                e.currentTarget.style.transform = "scale(1.05) rotate(-3deg)";
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 6px 12px rgba(139, 69, 19, 0.5)) drop-shadow(0 0 16px rgba(255, 223, 186, 0.8))";
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!isToggling) {
-                e.currentTarget.style.transform = "scale(1.15) rotate(-5deg)";
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4)) drop-shadow(0 0 12px rgba(255, 223, 186, 0.6))";
-              }
-            }}
-            aria-label={hasLiked ? "Unlike this bottle" : "Like this bottle"}
-          >
-            <div className="relative w-7 h-7">
-              <NextImage
-                src="/assets/like-heart.png"
-                alt="Like"
-                width={28}
-                height={28}
-                className={`w-7 h-7 transition-all duration-200 ${
-                  hasLiked ? "" : "grayscale brightness-50"
-                } ${isToggling ? "opacity-50 scale-90" : "opacity-100"}`}
-              />
-            </div>
-            {likeCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-apfel font-bold shadow-md">
-                {likeCount > 9 ? "9+" : likeCount}
+            >
+              <div className="relative w-7 h-7">
+                <NextImage
+                  src="/assets/like-heart.png"
+                  alt="Like"
+                  width={28}
+                  height={28}
+                  className={`w-7 h-7 transition-all duration-200 ${
+                    bottle.isForever || isSpecialZero
+                      ? ""
+                      : hasLiked
+                        ? ""
+                        : "grayscale brightness-50"
+                  } ${isToggling ? "opacity-50 scale-90" : "opacity-100"}`}
+                  style={{
+                    filter: bottle.isForever
+                      ? "hue-rotate(290deg) saturate(1.5) drop-shadow(0 0 8px rgba(219, 39, 119, 0.8)) drop-shadow(0 0 12px rgba(168, 85, 247, 0.6))"
+                      : isSpecialZero
+                        ? "brightness(2) saturate(0) drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.7))"
+                        : undefined,
+                  }}
+                />
+              </div>
+            </button>
+            {!isSpecialZero && !bottle.isForever && likeCount > 0 && (
+              <span
+                className="font-apfel text-sm text-ink/80 leading-none pointer-events-none"
+                style={{
+                  textShadow: "0 1px 2px rgba(255, 255, 255, 0.9)",
+                }}
+              >
+                {likeCount}
               </span>
             )}
-          </button>
+          </div>
         )}
       </div>
     </div>
