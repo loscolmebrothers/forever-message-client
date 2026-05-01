@@ -227,14 +227,30 @@ export default function Introduction({ onComplete }: IntroductionProps) {
             </div>
           </div>
 
-          <button
+          {/* Maintenance notice — Storacha (IPFS provider) is shutting down */}
+          <div
+            ref={buttonRef}
+            className="text-center max-w-md mx-auto"
+            style={{ opacity: 0 }}
+          >
+            <p
+              className="text-glass-text text-sm font-light leading-relaxed"
+              style={{ fontFamily: "ApfelGrotezk, sans-serif" }}
+            >
+              🐚 We&apos;re updating our storage tools and will be back soon.
+              <br />
+              Thanks for your patience!
+            </p>
+          </div>
+
+          {/* <button
             ref={buttonRef}
             onClick={handleDiveIn}
             className="glass-button"
             style={{ opacity: 0 }}
           >
             Dive in
-          </button>
+          </button> */}
 
           <div
             ref={socialsRef}
