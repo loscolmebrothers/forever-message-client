@@ -10,7 +10,7 @@ interface IntroductionProps {
 
 export default function Introduction({ onComplete }: IntroductionProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
   const socialsRef = useRef<HTMLDivElement>(null);
 
   const text1Ref = useRef<HTMLSpanElement>(null);
