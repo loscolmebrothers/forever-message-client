@@ -6,8 +6,6 @@ import {
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import fs from "fs";
-import path from "path";
 
 export const maxDuration = 60; // Allow up to 60 seconds for processing
 
@@ -41,21 +39,14 @@ export async function POST(request: NextRequest) {
     // Upload to IPFS
     console.log(`[Process ${queueId}] Uploading to IPFS...`);
 
-    if (!process.env.STORACHA_PRINCIPAL_KEY) {
-      throw new Error("Missing Storacha credentials");
+    if (!process.env.LIGHTHOUSE_API_KEY) {
+      throw new Error("Missing Lighthouse API key. Set LIGHTHOUSE_API_KEY env var.");
     }
 
-    const proofPath = path.join(
-      process.cwd(),
-      "storacha-forever-message-proof.txt"
-    );
-    const proof = fs.readFileSync(proofPath, "utf-8").trim();
-
     const ipfs = await getIPFSService({
-      principalKey: process.env.STORACHA_PRINCIPAL_KEY,
-      proof,
+      apiKey: process.env.LIGHTHOUSE_API_KEY,
       gatewayUrl:
-        process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs",
+        process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.lighthouse.storage/ipfs",
     });
 
     const uploadResult = await ipfs.uploadBottle(message, userId);

@@ -6,7 +6,7 @@ import type { IPFSBottle } from "@loscolmebrothers/forever-message-types";
  */
 
 const IPFS_GATEWAY =
-  process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs";
+  process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.lighthouse.storage/ipfs";
 
 /**
  * Fetch bottle content from IPFS by CID
@@ -46,14 +46,4 @@ export async function fetchBottleContent(
     console.error(`Error fetching IPFS content ${cid}:`, error);
     return null;
   }
-}
-
-/**
- * Fetch multiple bottle contents in parallel
- */
-export async function fetchMultipleBottleContents(
-  cids: string[]
-): Promise<(IPFSBottle | null)[]> {
-  const promises = cids.map((cid) => fetchBottleContent(cid));
-  return Promise.all(promises);
 }
