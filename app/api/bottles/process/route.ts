@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getIPFSService,
   BottleContract,
+  FilebaseConfig,
 } from "@loscolmebrothers/forever-message-ipfs";
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
@@ -36,18 +37,21 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", queueId);
 
-    // Upload to IPFS
+    // Upload to IPFS via Filebase
     console.log(`[Process ${queueId}] Uploading to IPFS...`);
 
-    if (!process.env.LIGHTHOUSE_API_KEY) {
-      throw new Error("Missing Lighthouse API key. Set LIGHTHOUSE_API_KEY env var.");
+    if (!process.env.FILEBASE_ACCESS_KEY_ID || !process.env.FILEBASE_SECRET_ACCESS_KEY || !process.env.FILEBASE_BUCKET_NAME) {
+      throw new Error("Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and FILEBASE_BUCKET_NAME env vars.");
     }
 
-    const ipfs = await getIPFSService({
-      apiKey: process.env.LIGHTHOUSE_API_KEY,
-      gatewayUrl:
-        process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.lighthouse.storage/ipfs",
-    });
+    const config: FilebaseConfig = {
+      accessKeyId: process.env.FILEBASE_ACCESS_KEY_ID,
+      secretAccessKey: process.env.FILEBASE_SECRET_ACCESS_KEY,
+      bucketName: process.env.FILEBASE_BUCKET_NAME,
+      gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
+    };
+
+    const ipfs = await getIPFSService(config);
 
     const uploadResult = await ipfs.uploadBottle(message, userId);
     console.log(
