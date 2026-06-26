@@ -43,17 +43,17 @@ export async function POST(request: NextRequest) {
     if (
       !process.env.FILEBASE_ACCESS_KEY_ID ||
       !process.env.FILEBASE_SECRET_ACCESS_KEY ||
-      !process.env.FILEBASE_BUCKET_NAME
+      !process.env.IPFS_BUCKET_NAME
     ) {
       throw new Error(
-        "Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and FILEBASE_BUCKET_NAME env vars."
+        "Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and IPFS_BUCKET_NAME env vars."
       );
     }
 
     const config: FilebaseConfig = {
       accessKeyId: process.env.FILEBASE_ACCESS_KEY_ID,
       secretAccessKey: process.env.FILEBASE_SECRET_ACCESS_KEY,
-      bucketName: process.env.FILEBASE_BUCKET_NAME,
+      bucketName: process.env.IPFS_BUCKET_NAME,
       gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
     };
 
