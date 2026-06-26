@@ -48,3 +48,13 @@ export async function fetchBottleContent(
     return null;
   }
 }
+
+/**
+ * Fetch multiple bottle contents in parallel
+ */
+export async function fetchMultipleBottleContents(
+  cids: string[]
+): Promise<(IPFSBottle | null)[]> {
+  const promises = cids.map((cid) => fetchBottleContent(cid));
+  return Promise.all(promises);
+}
