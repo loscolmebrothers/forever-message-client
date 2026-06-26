@@ -40,8 +40,14 @@ export async function POST(request: NextRequest) {
     // Upload to IPFS via Filebase
     console.log(`[Process ${queueId}] Uploading to IPFS...`);
 
-    if (!process.env.FILEBASE_ACCESS_KEY_ID || !process.env.FILEBASE_SECRET_ACCESS_KEY || !process.env.FILEBASE_BUCKET_NAME) {
-      throw new Error("Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and FILEBASE_BUCKET_NAME env vars.");
+    if (
+      !process.env.FILEBASE_ACCESS_KEY_ID ||
+      !process.env.FILEBASE_SECRET_ACCESS_KEY ||
+      !process.env.FILEBASE_BUCKET_NAME
+    ) {
+      throw new Error(
+        "Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and FILEBASE_BUCKET_NAME env vars."
+      );
     }
 
     const config: FilebaseConfig = {

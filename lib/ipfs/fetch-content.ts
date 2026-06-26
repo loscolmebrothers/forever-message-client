@@ -6,7 +6,8 @@ import type { IPFSBottle } from "@loscolmebrothers/forever-message-types";
  */
 
 const IPFS_GATEWAY =
-  process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://gateway.lighthouse.storage/ipfs";
+  process.env.NEXT_PUBLIC_IPFS_GATEWAY ||
+  "https://gateway.lighthouse.storage/ipfs";
 
 /**
  * Fetch bottle content from IPFS by CID
