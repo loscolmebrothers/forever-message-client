@@ -50,19 +50,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // DIAGNOSTIC: Log config (masked) to verify env vars
-    console.log(`[Process ${queueId}] === DIAGNOSTIC ===`);
-    console.log(
-      `[Process ${queueId}] Access Key: ${process.env.FILEBASE_ACCESS_KEY_ID?.substring(0, 6)}...${process.env.FILEBASE_ACCESS_KEY_ID?.slice(-4)}`
-    );
-    console.log(
-      `[Process ${queueId}] Secret Key: ${process.env.FILEBASE_SECRET_ACCESS_KEY ? "***" + process.env.FILEBASE_SECRET_ACCESS_KEY.slice(-4) : "MISSING"}`
-    );
-    console.log(`[Process ${queueId}] Bucket: ${process.env.IPFS_BUCKET_NAME}`);
-    console.log(
-      `[Process ${queueId}] Gateway: ${process.env.NEXT_PUBLIC_IPFS_GATEWAY}`
-    );
-
     const config: FilebaseConfig = {
       accessKeyId: process.env.FILEBASE_ACCESS_KEY_ID,
       secretAccessKey: process.env.FILEBASE_SECRET_ACCESS_KEY,
@@ -70,12 +57,17 @@ export async function POST(request: NextRequest) {
       gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
     };
 
-    // DIAGNOSTIC: Try presigned URL approach (bypasses SDK middleware entirely)
+    // DIAGNOSTIC: Deep Filebase S3 analysis from Lambda environment
     try {
-      const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+      const {
+        S3Client,
+        PutObjectCommand,
+        GetObjectCommand,
+        ListObjectsV2Command,
+      } = await import("@aws-sdk/client-s3");
       const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
 
-      const presignS3 = new S3Client({
+      const diagS3 = new S3Client({
         endpoint: "https://s3.filebase.io",
         region: "us-east-1",
         credentials: {
@@ -85,52 +77,87 @@ export async function POST(request: NextRequest) {
         forcePathStyle: true,
       });
 
-      const presignKey = `presign-${Date.now()}`;
+      // Test 1: GET (read) via presigned URL
+      const getUrl = await getSignedUrl(
+        diagS3,
+        new GetObjectCommand({
+          Bucket: config.bucketName,
+          Key: `diag-read-${Date.now()}`,
+        }),
+        { expiresIn: 60 }
+      );
       console.log(
-        `[Process ${queueId}] DIAG: Generating presigned URL for "${presignKey}"...`
+        `[Process ${queueId}] DIAG-GET: Trying read via presigned URL...`
+      );
+      const getRes = await fetch(getUrl);
+      console.log(`[Process ${queueId}] DIAG-GET: HTTP ${getRes.status}`);
+      console.log(
+        `[Process ${queueId}] DIAG-GET: Headers:`,
+        JSON.stringify(Object.fromEntries(getRes.headers.entries()))
       );
 
-      const presignedUrl = await getSignedUrl(
-        presignS3,
+      // Test 2: PUT (write) via presigned URL
+      const putUrl = await getSignedUrl(
+        diagS3,
         new PutObjectCommand({
           Bucket: config.bucketName,
-          Key: presignKey,
+          Key: `diag-write-${Date.now()}`,
           ContentType: "application/json",
         }),
         { expiresIn: 60 }
       );
-
       console.log(
-        `[Process ${queueId}] DIAG: Presigned URL generated (${presignedUrl.substring(0, 80)}...)`
+        `[Process ${queueId}] DIAG-PUT: Trying write via presigned URL...`
       );
-
-      const uploadRes = await fetch(presignedUrl, {
+      const putRes = await fetch(putUrl, {
         method: "PUT",
-        body: JSON.stringify({ test: true, source: "presigned" }),
+        body: JSON.stringify({ test: true }),
         headers: { "Content-Type": "application/json" },
       });
-
-      if (uploadRes.ok) {
-        console.log(
-          `[Process ${queueId}] DIAG: ✅ Presigned upload SUCCESS (HTTP ${uploadRes.status})`
-        );
-        console.log(
-          `[Process ${queueId}] DIAG: ETag: ${uploadRes.headers.get("etag")}`
-        );
-      } else {
-        const errBody = await uploadRes.text();
-        console.error(
-          `[Process ${queueId}] DIAG: ❌ Presigned upload FAILED (HTTP ${uploadRes.status})`
-        );
-        console.error(
-          `[Process ${queueId}] DIAG: Response body: ${errBody.substring(0, 500)}`
-        );
-      }
-    } catch (presignError: any) {
-      console.error(
-        `[Process ${queueId}] DIAG: Presigned approach error:`,
-        presignError.message
+      console.log(`[Process ${queueId}] DIAG-PUT: HTTP ${putRes.status}`);
+      console.log(
+        `[Process ${queueId}] DIAG-PUT: Headers:`,
+        JSON.stringify(Object.fromEntries(putRes.headers.entries()))
       );
+      const putBody = await putRes.text();
+      console.log(
+        `[Process ${queueId}] DIAG-PUT: Body: ${putBody.substring(0, 500)}`
+      );
+
+      // Test 3: List objects via presigned URL
+      const listUrl = await getSignedUrl(
+        diagS3,
+        new ListObjectsV2Command({
+          Bucket: config.bucketName,
+          MaxKeys: 1,
+        }),
+        { expiresIn: 60 }
+      );
+      console.log(
+        `[Process ${queueId}] DIAG-LIST: Trying list via presigned URL...`
+      );
+      const listRes = await fetch(listUrl);
+      console.log(`[Process ${queueId}] DIAG-LIST: HTTP ${listRes.status}`);
+      console.log(
+        `[Process ${queueId}] DIAG-LIST: Headers:`,
+        JSON.stringify(Object.fromEntries(listRes.headers.entries()))
+      );
+      const listBody = await listRes.text();
+      console.log(
+        `[Process ${queueId}] DIAG-LIST: Body: ${listBody.substring(0, 500)}`
+      );
+
+      // Test 4: Check our external IP from Lambda
+      console.log(
+        `[Process ${queueId}] DIAG-IP: Checking Lambda external IP...`
+      );
+      const ipRes = await fetch("https://api.ipify.org?format=json");
+      const ipData = await ipRes.json();
+      console.log(
+        `[Process ${queueId}] DIAG-IP: Lambda external IP: ${ipData.ip}`
+      );
+    } catch (diagError: any) {
+      console.error(`[Process ${queueId}] DIAG: Error:`, diagError.message);
     }
 
     const ipfs = await getIPFSService(config);
@@ -165,8 +192,6 @@ export async function POST(request: NextRequest) {
       signer: wallet,
     });
 
-    // Use the authenticated user's wallet address as the creator
-    // (deployer wallet pays gas, but user's address is the creator)
     const creatorAddress = userId;
 
     console.log(
@@ -195,24 +220,24 @@ export async function POST(request: NextRequest) {
     console.log(`[Process ${queueId}] Waiting for confirmation...`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // Insert into bottles table (use upsert to handle retries/duplicates)
+    // Insert into bottles table
     console.log(`[Process ${queueId}] Syncing to bottles table...`);
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     const { error: insertError } = await supabaseAdmin.from("bottles").upsert(
       {
         id: bottleId,
-        creator: creatorAddress, // Authenticated user's wallet address
+        creator: creatorAddress,
         ipfs_hash: uploadResult.cid,
         message: message,
-        user_id: creatorAddress, // Same as creator (wallet address)
+        user_id: creatorAddress,
         created_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
         is_forever: false,
         blockchain_status: "confirmed",
       },
       {
-        onConflict: "id", // On duplicate ID, update instead of error
+        onConflict: "id",
       }
     );
 
@@ -244,7 +269,6 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("[Process] Error:", error);
 
-    // Try to update queue status if we have queueId
     if (queueId) {
       try {
         await supabaseAdmin
