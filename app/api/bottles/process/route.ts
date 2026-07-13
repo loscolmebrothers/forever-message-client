@@ -70,12 +70,12 @@ export async function POST(request: NextRequest) {
       gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
     };
 
-    // DIAGNOSTIC: Try raw S3 upload first to isolate the issue
+    // DIAGNOSTIC: Try presigned URL approach (bypasses SDK middleware entirely)
     try {
-      const { S3Client, PutObjectCommand, ListBucketsCommand } = await import(
-        "@aws-sdk/client-s3"
-      );
-      const diagS3 = new S3Client({
+      const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+      const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+
+      const presignS3 = new S3Client({
         endpoint: "https://s3.filebase.io",
         region: "us-east-1",
         credentials: {
@@ -83,47 +83,53 @@ export async function POST(request: NextRequest) {
           secretAccessKey: config.secretAccessKey,
         },
         forcePathStyle: true,
-        requestChecksumCalculation: "WHEN_REQUIRED" as const,
-        responseChecksumValidation: "WHEN_REQUIRED" as const,
       });
 
-      // Test 1: List buckets
-      console.log(`[Process ${queueId}] DIAG: Listing buckets...`);
-      const listRes = await diagS3.send(new ListBucketsCommand({}));
-      const bucketNames = listRes.Buckets?.map((b) => b.Name) || [];
+      const presignKey = `presign-${Date.now()}`;
       console.log(
-        `[Process ${queueId}] DIAG: Buckets found: ${JSON.stringify(bucketNames)}`
+        `[Process ${queueId}] DIAG: Generating presigned URL for "${presignKey}"...`
       );
 
-      // Test 2: Direct upload
-      const diagKey = `diag-${Date.now()}`;
-      console.log(
-        `[Process ${queueId}] DIAG: Uploading test object "${diagKey}" to bucket "${config.bucketName}"...`
-      );
-      const putRes = await diagS3.send(
+      const presignedUrl = await getSignedUrl(
+        presignS3,
         new PutObjectCommand({
           Bucket: config.bucketName,
-          Key: diagKey,
-          Body: JSON.stringify({ test: true }),
+          Key: presignKey,
           ContentType: "application/json",
-        })
+        }),
+        { expiresIn: 60 }
       );
+
       console.log(
-        `[Process ${queueId}] DIAG: Direct upload SUCCESS (HTTP ${putRes.$metadata.httpStatusCode})`
+        `[Process ${queueId}] DIAG: Presigned URL generated (${presignedUrl.substring(0, 80)}...)`
       );
-    } catch (diagError: any) {
+
+      const uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        body: JSON.stringify({ test: true, source: "presigned" }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (uploadRes.ok) {
+        console.log(
+          `[Process ${queueId}] DIAG: ✅ Presigned upload SUCCESS (HTTP ${uploadRes.status})`
+        );
+        console.log(
+          `[Process ${queueId}] DIAG: ETag: ${uploadRes.headers.get("etag")}`
+        );
+      } else {
+        const errBody = await uploadRes.text();
+        console.error(
+          `[Process ${queueId}] DIAG: ❌ Presigned upload FAILED (HTTP ${uploadRes.status})`
+        );
+        console.error(
+          `[Process ${queueId}] DIAG: Response body: ${errBody.substring(0, 500)}`
+        );
+      }
+    } catch (presignError: any) {
       console.error(
-        `[Process ${queueId}] DIAG: Direct upload FAILED:`,
-        diagError.Code || diagError.name,
-        "-",
-        diagError.message
-      );
-      console.error(
-        `[Process ${queueId}] DIAG: HTTP ${diagError.$metadata?.httpStatusCode}`
-      );
-      console.error(
-        `[Process ${queueId}] DIAG: Full error:`,
-        JSON.stringify(diagError, null, 2)
+        `[Process ${queueId}] DIAG: Presigned approach error:`,
+        presignError.message
       );
     }
 
