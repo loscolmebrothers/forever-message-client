@@ -50,12 +50,82 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // DIAGNOSTIC: Log config (masked) to verify env vars
+    console.log(`[Process ${queueId}] === DIAGNOSTIC ===`);
+    console.log(
+      `[Process ${queueId}] Access Key: ${process.env.FILEBASE_ACCESS_KEY_ID?.substring(0, 6)}...${process.env.FILEBASE_ACCESS_KEY_ID?.slice(-4)}`
+    );
+    console.log(
+      `[Process ${queueId}] Secret Key: ${process.env.FILEBASE_SECRET_ACCESS_KEY ? "***" + process.env.FILEBASE_SECRET_ACCESS_KEY.slice(-4) : "MISSING"}`
+    );
+    console.log(`[Process ${queueId}] Bucket: ${process.env.IPFS_BUCKET_NAME}`);
+    console.log(
+      `[Process ${queueId}] Gateway: ${process.env.NEXT_PUBLIC_IPFS_GATEWAY}`
+    );
+
     const config: FilebaseConfig = {
       accessKeyId: process.env.FILEBASE_ACCESS_KEY_ID,
       secretAccessKey: process.env.FILEBASE_SECRET_ACCESS_KEY,
       bucketName: process.env.IPFS_BUCKET_NAME,
       gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
     };
+
+    // DIAGNOSTIC: Try raw S3 upload first to isolate the issue
+    try {
+      const { S3Client, PutObjectCommand, ListBucketsCommand } = await import(
+        "@aws-sdk/client-s3"
+      );
+      const diagS3 = new S3Client({
+        endpoint: "https://s3.filebase.io",
+        region: "us-east-1",
+        credentials: {
+          accessKeyId: config.accessKeyId,
+          secretAccessKey: config.secretAccessKey,
+        },
+        forcePathStyle: true,
+        requestChecksumCalculation: "WHEN_REQUIRED" as const,
+        responseChecksumValidation: "WHEN_REQUIRED" as const,
+      });
+
+      // Test 1: List buckets
+      console.log(`[Process ${queueId}] DIAG: Listing buckets...`);
+      const listRes = await diagS3.send(new ListBucketsCommand({}));
+      const bucketNames = listRes.Buckets?.map((b) => b.Name) || [];
+      console.log(
+        `[Process ${queueId}] DIAG: Buckets found: ${JSON.stringify(bucketNames)}`
+      );
+
+      // Test 2: Direct upload
+      const diagKey = `diag-${Date.now()}`;
+      console.log(
+        `[Process ${queueId}] DIAG: Uploading test object "${diagKey}" to bucket "${config.bucketName}"...`
+      );
+      const putRes = await diagS3.send(
+        new PutObjectCommand({
+          Bucket: config.bucketName,
+          Key: diagKey,
+          Body: JSON.stringify({ test: true }),
+          ContentType: "application/json",
+        })
+      );
+      console.log(
+        `[Process ${queueId}] DIAG: Direct upload SUCCESS (HTTP ${putRes.$metadata.httpStatusCode})`
+      );
+    } catch (diagError: any) {
+      console.error(
+        `[Process ${queueId}] DIAG: Direct upload FAILED:`,
+        diagError.Code || diagError.name,
+        "-",
+        diagError.message
+      );
+      console.error(
+        `[Process ${queueId}] DIAG: HTTP ${diagError.$metadata?.httpStatusCode}`
+      );
+      console.error(
+        `[Process ${queueId}] DIAG: Full error:`,
+        JSON.stringify(diagError, null, 2)
+      );
+    }
 
     const ipfs = await getIPFSService(config);
 
