@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getIPFSService,
-  BottleContract,
-  FilebaseConfig,
-} from "@loscolmebrothers/forever-message-ipfs";
+import { BottleContract } from "@loscolmebrothers/forever-message-ipfs";
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { supabaseAdmin } from "@/lib/supabase/server";
@@ -37,141 +33,39 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", queueId);
 
-    // Upload to IPFS via Filebase
-    console.log(`[Process ${queueId}] Uploading to IPFS...`);
+    // Upload bottle content to Supabase Storage
+    console.log(`[Process ${queueId}] Uploading to Supabase Storage...`);
 
-    if (
-      !process.env.FILEBASE_ACCESS_KEY_ID ||
-      !process.env.FILEBASE_SECRET_ACCESS_KEY ||
-      !process.env.IPFS_BUCKET_NAME
-    ) {
-      throw new Error(
-        "Missing Filebase credentials. Set FILEBASE_ACCESS_KEY_ID, FILEBASE_SECRET_ACCESS_KEY, and IPFS_BUCKET_NAME env vars."
-      );
-    }
-
-    const config: FilebaseConfig = {
-      accessKeyId: process.env.FILEBASE_ACCESS_KEY_ID,
-      secretAccessKey: process.env.FILEBASE_SECRET_ACCESS_KEY,
-      bucketName: process.env.IPFS_BUCKET_NAME,
-      gatewayUrl: process.env.NEXT_PUBLIC_IPFS_GATEWAY,
+    const bottleContent = {
+      message,
+      type: "bottle" as const,
+      userId,
+      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
     };
 
-    // DIAGNOSTIC: Deep Filebase S3 analysis from Lambda environment
-    try {
-      const {
-        S3Client,
-        PutObjectCommand,
-        GetObjectCommand,
-        ListObjectsV2Command,
-      } = await import("@aws-sdk/client-s3");
-      const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    const storagePath = `bottles/${queueId}.json`;
 
-      const diagS3 = new S3Client({
-        endpoint: "https://s3.filebase.io",
-        region: "us-east-1",
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: true,
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from("forever-message-bottles")
+      .upload(storagePath, JSON.stringify(bottleContent), {
+        contentType: "application/json",
       });
 
-      // Test 1: GET (read) via presigned URL
-      const getUrl = await getSignedUrl(
-        diagS3,
-        new GetObjectCommand({
-          Bucket: config.bucketName,
-          Key: `diag-read-${Date.now()}`,
-        }),
-        { expiresIn: 60 }
+    if (uploadError) {
+      throw new Error(
+        `Failed to upload to Supabase Storage: ${uploadError.message}`
       );
-      console.log(
-        `[Process ${queueId}] DIAG-GET: Trying read via presigned URL...`
-      );
-      const getRes = await fetch(getUrl);
-      console.log(`[Process ${queueId}] DIAG-GET: HTTP ${getRes.status}`);
-      console.log(
-        `[Process ${queueId}] DIAG-GET: Headers:`,
-        JSON.stringify(Object.fromEntries(getRes.headers.entries()))
-      );
-
-      // Test 2: PUT (write) via presigned URL
-      const putUrl = await getSignedUrl(
-        diagS3,
-        new PutObjectCommand({
-          Bucket: config.bucketName,
-          Key: `diag-write-${Date.now()}`,
-          ContentType: "application/json",
-        }),
-        { expiresIn: 60 }
-      );
-      console.log(
-        `[Process ${queueId}] DIAG-PUT: Trying write via presigned URL...`
-      );
-      const putRes = await fetch(putUrl, {
-        method: "PUT",
-        body: JSON.stringify({ test: true }),
-        headers: { "Content-Type": "application/json" },
-      });
-      console.log(`[Process ${queueId}] DIAG-PUT: HTTP ${putRes.status}`);
-      console.log(
-        `[Process ${queueId}] DIAG-PUT: Headers:`,
-        JSON.stringify(Object.fromEntries(putRes.headers.entries()))
-      );
-      const putBody = await putRes.text();
-      console.log(
-        `[Process ${queueId}] DIAG-PUT: Body: ${putBody.substring(0, 500)}`
-      );
-
-      // Test 3: List objects via presigned URL
-      const listUrl = await getSignedUrl(
-        diagS3,
-        new ListObjectsV2Command({
-          Bucket: config.bucketName,
-          MaxKeys: 1,
-        }),
-        { expiresIn: 60 }
-      );
-      console.log(
-        `[Process ${queueId}] DIAG-LIST: Trying list via presigned URL...`
-      );
-      const listRes = await fetch(listUrl);
-      console.log(`[Process ${queueId}] DIAG-LIST: HTTP ${listRes.status}`);
-      console.log(
-        `[Process ${queueId}] DIAG-LIST: Headers:`,
-        JSON.stringify(Object.fromEntries(listRes.headers.entries()))
-      );
-      const listBody = await listRes.text();
-      console.log(
-        `[Process ${queueId}] DIAG-LIST: Body: ${listBody.substring(0, 500)}`
-      );
-
-      // Test 4: Check our external IP from Lambda
-      console.log(
-        `[Process ${queueId}] DIAG-IP: Checking Lambda external IP...`
-      );
-      const ipRes = await fetch("https://api.ipify.org?format=json");
-      const ipData = await ipRes.json();
-      console.log(
-        `[Process ${queueId}] DIAG-IP: Lambda external IP: ${ipData.ip}`
-      );
-    } catch (diagError: any) {
-      console.error(`[Process ${queueId}] DIAG: Error:`, diagError.message);
     }
 
-    const ipfs = await getIPFSService(config);
-
-    const uploadResult = await ipfs.uploadBottle(message, userId);
     console.log(
-      `[Process ${queueId}] IPFS upload successful:`,
-      uploadResult.cid
+      `[Process ${queueId}] Storage upload successful: ${storagePath}`
     );
 
     // Update status to minting
     await supabaseAdmin
       .from("bottles_queue")
-      .update({ status: "minting", ipfs_cid: uploadResult.cid, progress: 40 })
+      .update({ status: "minting", ipfs_cid: storagePath, progress: 40 })
       .eq("id", queueId);
 
     // Create bottle on blockchain
@@ -199,7 +93,7 @@ export async function POST(request: NextRequest) {
       creatorAddress
     );
     const { bottleId, transactionHash } = await contract.createBottle(
-      uploadResult.cid,
+      storagePath,
       creatorAddress
     );
     console.log(`[Process ${queueId}] Bottle created with ID:`, bottleId);
@@ -228,7 +122,7 @@ export async function POST(request: NextRequest) {
       {
         id: bottleId,
         creator: creatorAddress,
-        ipfs_hash: uploadResult.cid,
+        ipfs_hash: storagePath,
         message: message,
         user_id: creatorAddress,
         created_at: new Date().toISOString(),
@@ -264,7 +158,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       bottleId,
-      cid: uploadResult.cid,
+      cid: storagePath,
     });
   } catch (error: any) {
     console.error("[Process] Error:", error);

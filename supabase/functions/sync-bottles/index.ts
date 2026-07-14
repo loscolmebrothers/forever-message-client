@@ -6,8 +6,6 @@ import { ethers } from "https://esm.sh/ethers@6.15.0";
 // Blockchain configuration - MUST be set via Supabase Edge Function secrets
 const CONTRACT_ADDRESS = Deno.env.get("CONTRACT_ADDRESS");
 const RPC_URL = Deno.env.get("BASE_SEPOLIA_RPC_URL");
-const IPFS_GATEWAY =
-  Deno.env.get("IPFS_GATEWAY") || "https://storacha.link/ipfs";
 
 // Validate required environment variables
 if (!CONTRACT_ADDRESS) {
@@ -47,18 +45,21 @@ async function fetchBottleFromBlockchain(
   }
 }
 
-// Fetch IPFS content
-async function fetchIPFSContent(cid: string) {
+// Fetch bottle content from Supabase Storage
+async function fetchBottleContent(supabase: any, contentPath: string) {
   try {
-    const response = await fetch(`${IPFS_GATEWAY}/${cid}`);
-    if (!response.ok) return null;
-    const data = await response.json();
+    const { data, error } = await supabase.storage
+      .from("forever-message-bottles")
+      .download(contentPath);
+    if (error || !data) return null;
+    const text = await data.text();
+    const json = JSON.parse(text);
     return {
-      message: data.message,
-      userId: data.userId,
+      message: json.message,
+      userId: json.userId,
     };
   } catch (error) {
-    console.error(`Error fetching IPFS ${cid}:`, error);
+    console.error(`Error fetching content ${contentPath}:`, error);
     return null;
   }
 }
@@ -207,7 +208,7 @@ Deno.serve(async (req) => {
     const bottlesToSync = [];
     for (let i = 0; i < bottles.length; i++) {
       const bottle = bottles[i];
-      const ipfsContent = await fetchIPFSContent(bottle.ipfsHash);
+      const ipfsContent = await fetchBottleContent(supabase, bottle.ipfsHash);
 
       bottlesToSync.push({
         id: bottle.id,

@@ -1,50 +1,34 @@
 import type { IPFSBottle } from "@loscolmebrothers/forever-message-types";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 /**
- * Fetch content from IPFS gateway
- * Uses simple HTTP fetch - works both client and server side
- */
-
-const IPFS_GATEWAY =
-  process.env.NEXT_PUBLIC_IPFS_GATEWAY ||
-  "https://gateway.lighthouse.storage/ipfs";
-
-/**
- * Fetch bottle content from IPFS by CID
+ * Fetch bottle content from Supabase Storage by storage path
+ * Server-side only (uses service role key)
  */
 export async function fetchBottleContent(
-  cid: string
+  contentPath: string
 ): Promise<IPFSBottle | null> {
   try {
-    const url = `${IPFS_GATEWAY}/${cid}`;
+    const { data, error } = await supabaseAdmin.storage
+      .from("forever-message-bottles")
+      .download(contentPath);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      // Add timeout for server-side fetches
-      signal: AbortSignal.timeout(10000), // 10 second timeout
-    });
-
-    if (!response.ok) {
-      console.error(
-        `IPFS fetch failed for ${cid}: ${response.status} ${response.statusText}`
-      );
+    if (error || !data) {
+      console.error(`Storage fetch failed for ${contentPath}:`, error?.message);
       return null;
     }
 
-    const data = await response.json();
+    const text = await data.text();
+    const parsed = JSON.parse(text);
 
-    // Validate that it's a bottle
-    if (data.type !== "bottle") {
-      console.error(`Invalid IPFS content type for ${cid}: ${data.type}`);
+    if (parsed.type !== "bottle") {
+      console.error(`Invalid content type for ${contentPath}: ${parsed.type}`);
       return null;
     }
 
-    return data as IPFSBottle;
+    return parsed as IPFSBottle;
   } catch (error) {
-    console.error(`Error fetching IPFS content ${cid}:`, error);
+    console.error(`Error fetching content ${contentPath}:`, error);
     return null;
   }
 }
@@ -53,8 +37,8 @@ export async function fetchBottleContent(
  * Fetch multiple bottle contents in parallel
  */
 export async function fetchMultipleBottleContents(
-  cids: string[]
+  contentPaths: string[]
 ): Promise<(IPFSBottle | null)[]> {
-  const promises = cids.map((cid) => fetchBottleContent(cid));
+  const promises = contentPaths.map((path) => fetchBottleContent(path));
   return Promise.all(promises);
 }

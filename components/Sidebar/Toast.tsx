@@ -62,10 +62,9 @@ export function CompletionToast({
     }, 300);
   };
 
-  const ipfsGateway =
-    process.env.NEXT_PUBLIC_IPFS_GATEWAY || "https://storacha.link/ipfs";
-  const ipfsUrl = notification.ipfsCid
-    ? `${ipfsGateway}/${notification.ipfsCid}`
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const contentUrl = notification.ipfsCid
+    ? `${supabaseUrl}/storage/v1/object/public/forever-message-bottles/${notification.ipfsCid}`
     : null;
   const blockchainUrl = notification.transactionHash
     ? `https://sepolia.basescan.org/tx/${notification.transactionHash}`
@@ -129,14 +128,14 @@ export function CompletionToast({
             animation: "expandIn 0.2s ease-out",
           }}
         >
-          {ipfsUrl && (
+          {contentUrl && (
             <a
-              href={ipfsUrl}
+              href={contentUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 px-3 py-2 bg-glass-tint border border-glass-border hover:bg-glass-tint-dark hover:border-glass-border-dark rounded-md font-apfel text-xs text-glass-text text-center no-underline transition-all duration-200 font-medium"
             >
-              IPFS
+              Content
             </a>
           )}
           {blockchainUrl && (
