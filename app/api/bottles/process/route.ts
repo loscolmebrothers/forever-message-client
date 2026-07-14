@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BottleContract } from "@loscolmebrothers/forever-message-ipfs";
+import { BottleContract } from "@/lib/blockchain/bottle-contract";
 import { ethers } from "ethers";
 import { FOREVER_MESSAGE_ABI } from "@/lib/blockchain/contract-abi";
 import { supabaseAdmin } from "@/lib/supabase/server";

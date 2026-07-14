@@ -6,7 +6,7 @@ import type {
 import {
   fetchBottleContent,
   fetchMultipleBottleContents,
-} from "@/lib/ipfs/fetch-content";
+} from "@/lib/storage/fetch-content";
 
 export async function combineBottleData(
   contractBottle: ContractBottle
