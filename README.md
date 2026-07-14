@@ -1,16 +1,16 @@
 # Forever Message - Client
 
-**Decentralized message-in-a-bottle application** built on Base blockchain with IPFS storage.
+**Decentralized message-in-a-bottle application** built on Base blockchain with Supabase Storage.
 
 ## Overview
 
-Forever Message is a Next.js 14 application that combines blockchain technology, IPFS storage, and modern web3 tools to create an immersive experience where users can cast messages into a shared digital ocean.
+Forever Message is a Next.js 14 application that combines blockchain technology, Supabase Storage, and modern web3 tools to create an immersive experience where users can cast messages into a shared digital ocean.
 
 ### Key Features
 
 - **Interactive Ocean Canvas**: 2D bottle visualization with Konva
 - **Web3 Authentication**: Sign-in with Ethereum (SIWE) via Reown AppKit
-- **Decentralized Storage**: Messages stored on IPFS (Storacha)
+- **Message Storage**: Messages stored on Supabase Storage (bucket: `forever-message-bottles`)
 - **Blockchain Immutability**: Bottles minted as NFTs on Base Sepolia
 - **Real-time Updates**: Queue-based async processing with live notifications
 - **Professional Animations**: anime.js timeline orchestration
@@ -23,7 +23,7 @@ Forever Message is a Next.js 14 application that combines blockchain technology,
 - Konva (2D canvas)
 - Reown AppKit + wagmi + viem
 - Supabase (PostgreSQL + Real-time)
-- Storacha (IPFS)
+- Supabase Storage (message media)
 - Tailwind CSS + anime.js
 
 ## Quick Start
